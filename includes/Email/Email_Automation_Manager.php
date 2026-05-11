@@ -88,6 +88,7 @@ class Email_Automation_Manager {
 				'automation_id' => (int) $rule['id'],
 				'booking_id'    => (int) $booking['id'],
 				'customer_id'   => (int) ( $customer['id'] ?? 0 ),
+				'booking'       => $booking,
 			]
 		);
 	}

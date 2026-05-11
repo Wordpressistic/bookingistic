@@ -25,7 +25,19 @@ class Email_Sender {
 			sprintf( 'Reply-To: %s', $reply ),
 		];
 
-		$sent = wp_mail( $to, $subject, $body, $headers );
+		$attachments = [];
+		if ( ! empty( $context['booking'] ) && is_array( $context['booking'] ) ) {
+			/**
+			 * Filter the attachments for a booking email. Integrations may add
+			 * .ics files or other booking-related documents.
+			 *
+			 * @param string[] $attachments Absolute paths.
+			 * @param array    $booking
+			 */
+			$attachments = apply_filters( 'bookingistic_email_attachments', $attachments, $context['booking'] );
+		}
+
+		$sent = wp_mail( $to, $subject, $body, $headers, $attachments );
 
 		Email_Log_Repository::record(
 			[

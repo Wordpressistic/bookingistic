@@ -14,6 +14,7 @@ use Bookingistic\Booking\Reschedule_Manager;
 use Bookingistic\Email\Email_Automation_Manager;
 use Bookingistic\Frontend\Assets as Frontend_Assets;
 use Bookingistic\Frontend\Shortcode;
+use Bookingistic\Integrations\Integrations_Manager;
 use Bookingistic\REST\REST_Controller;
 
 defined( 'ABSPATH' ) || exit;
@@ -60,5 +61,8 @@ final class Plugin {
 		// Cancel / reschedule public endpoints.
 		Cancellation_Manager::register();
 		Reschedule_Manager::register();
+
+		// Integrations (WooCommerce, calendar feeds, Messageistic, CRMistic).
+		Integrations_Manager::register();
 	}
 }
