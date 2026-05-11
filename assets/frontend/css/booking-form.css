@@ -82,6 +82,36 @@
 .bookingistic-form__hint { color: var(--bk-muted); font-size: 13px; margin: 0; }
 .bookingistic-form__summary { color: var(--bk-muted); font-size: 13px; margin: 0; }
 
+.bookingistic-form__staff {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin: 0 0 16px;
+}
+.bookingistic-form__staff-label {
+	color: var(--bk-muted);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-right: 4px;
+}
+.bookingistic-form__staff-option {
+	background: var(--bk-panel-2);
+	color: var(--bk-text);
+	border: 1px solid var(--bk-border);
+	border-radius: 999px;
+	padding: 6px 12px;
+	font-size: 12px;
+	cursor: pointer;
+}
+.bookingistic-form__staff-option:hover { border-color: var(--bk-accent); }
+.bookingistic-form__staff-option[aria-pressed="true"] {
+	background: var(--bk-accent);
+	border-color: var(--bk-accent);
+	color: #fff;
+}
+
 .bookingistic-form__calendar-wrap {
 	display: grid;
 	grid-template-columns: minmax(260px, 1fr) minmax(180px, 1fr);

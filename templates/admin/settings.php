@@ -93,6 +93,34 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				</td></tr>
 		</table>
 
+		<h2><?php esc_html_e( 'Holidays', 'bookingistic' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Dates the whole business is closed. Availability returns zero slots on any date in these ranges, regardless of staff.', 'bookingistic' ); ?></p>
+		<table class="widefat" style="max-width:620px" data-bookingistic-daterange="holidays">
+			<thead><tr>
+				<th><?php esc_html_e( 'From', 'bookingistic' ); ?></th>
+				<th><?php esc_html_e( 'To', 'bookingistic' ); ?></th>
+				<th></th>
+			</tr></thead>
+			<tbody data-bookingistic-daterange-rows>
+				<?php
+				$holiday_rows = $settings['holidays'] ?? [];
+				if ( empty( $holiday_rows ) ) {
+					$holiday_rows[] = [ 'from' => '', 'to' => '' ];
+				}
+				foreach ( $holiday_rows as $i => $entry ) :
+					$from = is_array( $entry ) ? ( $entry['from'] ?? '' ) : $entry;
+					$to   = is_array( $entry ) ? ( $entry['to'] ?? '' ) : $entry;
+					?>
+					<tr>
+						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][from]" value="<?php echo esc_attr( $from ); ?>"></td>
+						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][to]"   value="<?php echo esc_attr( $to ); ?>"></td>
+						<td><button type="button" class="button-link-delete" data-bookingistic-daterange-remove>×</button></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+			<tfoot><tr><td colspan="3"><button type="button" class="button" data-bookingistic-daterange-add><?php esc_html_e( 'Add date range', 'bookingistic' ); ?></button></td></tr></tfoot>
+		</table>
+
 		<h2><?php esc_html_e( 'White label & branding', 'bookingistic' ); ?></h2>
 		<?php
 		$has_license = ! empty( $settings['premium_license_active'] );

@@ -251,3 +251,20 @@
 }
 .bookingistic-var:hover { background: #dbeafe; border-color: #93c5fd; }
 .bookingistic-var code { font-size: 11px; background: transparent; }
+
+/* ===== Staff editor ===== */
+.bookingistic-staff-services {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 6px;
+	max-width: 720px;
+	padding: 10px 14px;
+	background: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+}
+.bookingistic-staff-services label { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+.bookingistic-wh-table th, .bookingistic-wh-table td { padding: 6px 10px; }
+.bookingistic-wh-table input[type="time"] { width: 110px; }
+.bookingistic-daysoff-table th, .bookingistic-daysoff-table td { padding: 6px 10px; }
+.button-link-delete { color: #b91c1c; }

@@ -52,5 +52,6 @@ class Admin_Menu {
 		Settings_Page::maybe_save();
 		Bookings_Page::maybe_act();
 		Email_Automations_Page::maybe_save();
+		Staff_Page::maybe_save();
 	}
 }

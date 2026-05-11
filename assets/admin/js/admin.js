@@ -322,6 +322,75 @@
 		});
 	}
 
+	/* ===== Repeatable date-range rows (staff days off, settings holidays) ===== */
+	function bindDateRangeRepeaters() {
+		document.querySelectorAll('[data-bookingistic-daterange]').forEach(table => {
+			const fieldName = table.dataset.bookingisticDaterange; // e.g. "days_off" or "holidays"
+			const rowsHost  = table.querySelector('[data-bookingistic-daterange-rows]');
+			if (!rowsHost) return;
+
+			function attachRowHandlers(row) {
+				const removeBtn = row.querySelector('[data-bookingistic-daterange-remove]');
+				if (removeBtn) {
+					removeBtn.addEventListener('click', () => {
+						const allRows = rowsHost.querySelectorAll('tr');
+						if (allRows.length > 1) {
+							row.remove();
+						} else {
+							row.querySelectorAll('input').forEach(i => { i.value = ''; });
+						}
+					});
+				}
+			}
+
+			rowsHost.querySelectorAll('tr').forEach(attachRowHandlers);
+
+			const addBtn = table.querySelector('[data-bookingistic-daterange-add]');
+			if (addBtn) {
+				addBtn.addEventListener('click', () => {
+					const idx = rowsHost.querySelectorAll('tr').length;
+					const tr = document.createElement('tr');
+					tr.innerHTML = `
+						<td><input type="date" name="${fieldName}[${idx}][from]" value=""></td>
+						<td><input type="date" name="${fieldName}[${idx}][to]" value=""></td>
+						<td><button type="button" class="button-link-delete" data-bookingistic-daterange-remove>×</button></td>
+					`;
+					rowsHost.appendChild(tr);
+					attachRowHandlers(tr);
+				});
+			}
+		});
+
+		// Legacy support for the staff days-off table that uses the older attribute names.
+		document.querySelectorAll('[data-bookingistic-daysoff]').forEach(table => {
+			const rowsHost = table.querySelector('[data-bookingistic-daysoff-rows]');
+			if (!rowsHost) return;
+			function attach(row) {
+				const remove = row.querySelector('[data-bookingistic-daysoff-remove]');
+				if (!remove) return;
+				remove.addEventListener('click', () => {
+					const all = rowsHost.querySelectorAll('tr');
+					if (all.length > 1) row.remove(); else row.querySelectorAll('input').forEach(i => { i.value = ''; });
+				});
+			}
+			rowsHost.querySelectorAll('tr').forEach(attach);
+			const addBtn = table.querySelector('[data-bookingistic-daysoff-add]');
+			if (addBtn) {
+				addBtn.addEventListener('click', () => {
+					const idx = rowsHost.querySelectorAll('tr').length;
+					const tr = document.createElement('tr');
+					tr.innerHTML = `
+						<td><input type="date" name="days_off[${idx}][from]"></td>
+						<td><input type="date" name="days_off[${idx}][to]"></td>
+						<td><button type="button" class="button-link-delete" data-bookingistic-daysoff-remove>×</button></td>
+					`;
+					rowsHost.appendChild(tr);
+					attach(tr);
+				});
+			}
+		});
+	}
+
 	/* ===== Email automation builder ===== */
 	function bindAutomationEditor() {
 		const body = document.getElementById('bookingistic-automation-body');
@@ -369,8 +438,8 @@
 	}
 
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); });
+		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters(); });
 	} else {
-		bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor();
+		bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters();
 	}
 })();
