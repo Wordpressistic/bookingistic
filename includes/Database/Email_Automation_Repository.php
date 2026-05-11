@@ -41,6 +41,35 @@ class Email_Automation_Repository {
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
+	public static function create( array $data ) {
+		global $wpdb;
+		$now    = current_time( 'mysql', true );
+		$insert = [
+			'name'             => sanitize_text_field( $data['name'] ?? __( 'Untitled automation', 'bookingistic' ) ),
+			'trigger_event'    => sanitize_key( $data['trigger_event'] ?? 'booking_confirmed' ),
+			'recipient_type'   => sanitize_key( $data['recipient_type'] ?? 'customer' ),
+			'recipient_custom' => sanitize_email( $data['recipient_custom'] ?? '' ),
+			'delay_amount'     => max( 0, (int) ( $data['delay_amount'] ?? 0 ) ),
+			'delay_unit'       => sanitize_key( $data['delay_unit'] ?? 'minutes' ),
+			'subject'          => sanitize_text_field( $data['subject'] ?? '' ),
+			'body'             => wp_kses_post( $data['body'] ?? '' ),
+			'service_id'       => (int) ( $data['service_id'] ?? 0 ),
+			'status'           => sanitize_key( $data['status'] ?? 'active' ),
+			'created_at'       => $now,
+			'updated_at'       => $now,
+		];
+		$ok = $wpdb->insert( self::table(), $insert );
+		if ( false === $ok ) {
+			return new \WP_Error( 'automation_insert_failed', __( 'Could not create automation.', 'bookingistic' ) );
+		}
+		return self::find( (int) $wpdb->insert_id );
+	}
+
+	public static function delete( int $id ): bool {
+		global $wpdb;
+		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+	}
+
 	public static function update( int $id, array $data ) {
 		global $wpdb;
 		$now    = current_time( 'mysql', true );

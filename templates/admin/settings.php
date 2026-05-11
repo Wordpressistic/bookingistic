@@ -93,6 +93,69 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				</td></tr>
 		</table>
 
+		<h2><?php esc_html_e( 'Holidays', 'bookingistic' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Dates the whole business is closed. Availability returns zero slots on any date in these ranges, regardless of staff.', 'bookingistic' ); ?></p>
+		<table class="widefat" style="max-width:620px" data-bookingistic-daterange="holidays">
+			<thead><tr>
+				<th><?php esc_html_e( 'From', 'bookingistic' ); ?></th>
+				<th><?php esc_html_e( 'To', 'bookingistic' ); ?></th>
+				<th></th>
+			</tr></thead>
+			<tbody data-bookingistic-daterange-rows>
+				<?php
+				$holiday_rows = $settings['holidays'] ?? [];
+				if ( empty( $holiday_rows ) ) {
+					$holiday_rows[] = [ 'from' => '', 'to' => '' ];
+				}
+				foreach ( $holiday_rows as $i => $entry ) :
+					$from = is_array( $entry ) ? ( $entry['from'] ?? '' ) : $entry;
+					$to   = is_array( $entry ) ? ( $entry['to'] ?? '' ) : $entry;
+					?>
+					<tr>
+						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][from]" value="<?php echo esc_attr( $from ); ?>"></td>
+						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][to]"   value="<?php echo esc_attr( $to ); ?>"></td>
+						<td><button type="button" class="button-link-delete" data-bookingistic-daterange-remove>×</button></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+			<tfoot><tr><td colspan="3"><button type="button" class="button" data-bookingistic-daterange-add><?php esc_html_e( 'Add date range', 'bookingistic' ); ?></button></td></tr></tfoot>
+		</table>
+
+		<h2><?php esc_html_e( 'White label & branding', 'bookingistic' ); ?></h2>
+		<?php
+		$has_license = ! empty( $settings['premium_license_active'] );
+		$opted_in    = ! empty( $settings['remove_branding'] );
+		$can_remove  = \Bookingistic\Email\Branding_Manager::can_remove_branding();
+		?>
+		<table class="form-table">
+			<tr>
+				<th><label><?php esc_html_e( 'Premium license active', 'bookingistic' ); ?></label></th>
+				<td>
+					<label>
+						<input type="checkbox" name="premium_license_active" value="1" <?php checked( $has_license ); ?>>
+						<?php esc_html_e( 'Mark this site as premium-licensed.', 'bookingistic' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Wire your real license check via the bookingistic_can_remove_branding filter for production. This checkbox is the manual fallback.', 'bookingistic' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th><label><?php esc_html_e( 'Remove WordPressistic branding footer', 'bookingistic' ); ?></label></th>
+				<td>
+					<label>
+						<input type="checkbox" name="remove_branding" value="1" <?php checked( $opted_in ); ?> <?php disabled( ! $has_license ); ?>>
+						<?php esc_html_e( 'Hide the "Powered by Bookingistic by WordPressistic" footer on every automated email.', 'bookingistic' ); ?>
+					</label>
+					<p class="description">
+						<?php if ( $can_remove ) : ?>
+							<span style="color:#065f46"><?php esc_html_e( 'Currently: WordPressistic branding is removed from automated emails.', 'bookingistic' ); ?></span>
+						<?php else : ?>
+							<span style="color:#92400e"><?php esc_html_e( 'Currently: WordPressistic branding is included on every automated email.', 'bookingistic' ); ?></span>
+						<?php endif; ?>
+					</p>
+				</td>
+			</tr>
+		</table>
+
 		<p class="submit">
 			<button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'bookingistic' ); ?></button>
 		</p>

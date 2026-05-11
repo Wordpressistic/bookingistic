@@ -17,6 +17,7 @@
 namespace Bookingistic\Frontend;
 
 use Bookingistic\Database\Service_Repository;
+use Bookingistic\Database\Staff_Repository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,6 +62,9 @@ class Shortcode {
 		$booking_form_id   = 'bookingistic-form-' . wp_unique_id();
 		$reschedule_id     = (int) $atts['reschedule_id'];
 		$reschedule_token  = sanitize_text_field( $atts['reschedule_token'] );
+
+		// Staff that can fulfil this service. Only show the picker when more than one.
+		$assignable_staff = Staff_Repository::for_service( (int) $service['id'] );
 
 		ob_start();
 		include BOOKINGISTIC_DIR . 'templates/frontend/booking-form.php';

@@ -53,6 +53,20 @@ $is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 					<h3><?php esc_html_e( 'Choose a date & time', 'bookingistic' ); ?></h3>
 					<p class="bookingistic-form__hint" data-bookingistic-tz></p>
 				</header>
+
+				<?php if ( count( $assignable_staff ) > 1 ) : ?>
+					<div class="bookingistic-form__staff" data-bookingistic-staff-picker>
+						<span class="bookingistic-form__staff-label"><?php esc_html_e( 'Host', 'bookingistic' ); ?></span>
+						<button type="button" class="bookingistic-form__staff-option" data-staff-id="0" aria-pressed="true"><?php esc_html_e( 'Any', 'bookingistic' ); ?></button>
+						<?php foreach ( $assignable_staff as $staff_row ) : ?>
+							<button type="button" class="bookingistic-form__staff-option"
+								data-staff-id="<?php echo (int) $staff_row['id']; ?>"
+								aria-pressed="false">
+								<?php echo esc_html( $staff_row['name'] ); ?>
+							</button>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 				<div class="bookingistic-form__calendar-wrap">
 					<div class="bookingistic-form__calendar" data-bookingistic-calendar></div>
 					<div class="bookingistic-form__slots">

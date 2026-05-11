@@ -74,6 +74,7 @@
 	function setupForm(root) {
 		const state = {
 			serviceId: parseInt(root.dataset.serviceId, 10),
+			staffId: 0,
 			rescheduleId: parseInt(root.dataset.rescheduleId || '0', 10),
 			rescheduleToken: root.dataset.rescheduleToken || '',
 			tz: detectTz(),
@@ -97,6 +98,18 @@
 		const form = root.querySelector('[data-bookingistic-fields]');
 
 		if (tzNode && state.tz) tzNode.textContent = `Times shown in ${state.tz}`;
+
+		const staffPicker = root.querySelector('[data-bookingistic-staff-picker]');
+		if (staffPicker) {
+			staffPicker.querySelectorAll('.bookingistic-form__staff-option').forEach(btn => {
+				btn.addEventListener('click', () => {
+					staffPicker.querySelectorAll('.bookingistic-form__staff-option').forEach(b => b.setAttribute('aria-pressed','false'));
+					btn.setAttribute('aria-pressed','true');
+					state.staffId = parseInt(btn.dataset.staffId, 10) || 0;
+					if (state.selectedDate) loadAvailability(state.selectedDate);
+				});
+			});
+		}
 
 		function showError(msg) {
 			errorBox.textContent = msg;
@@ -124,6 +137,7 @@
 				date,
 				tz: state.tz,
 			});
+			if (state.staffId) params.set('staff_id', String(state.staffId));
 			try {
 				const res = await fetch(`${cfg.restUrl}availability?${params}`, {
 					headers: { 'X-WP-Nonce': cfg.nonce },
@@ -191,6 +205,7 @@
 			const fd = new FormData(form);
 			const payload = {
 				service_id: state.serviceId,
+				staff_id: state.staffId || 0,
 				start_utc: state.selectedSlot.start_utc,
 				timezone: state.tz,
 				name: fd.get('name'),

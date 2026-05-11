@@ -16,10 +16,20 @@ defined( 'ABSPATH' ) || exit;
 class Branding_Manager {
 
 	public static function can_remove_branding(): bool {
+		$settings = get_option( 'bookingistic_settings', [] );
+		$has_license = ! empty( $settings['premium_license_active'] );
+		$opted_in    = ! empty( $settings['remove_branding'] );
+
 		/**
-		 * Premium plugins / license layers can return true here.
+		 * Premium plugins / license layers can return true here regardless of stored settings.
+		 *
+		 * Default: only allow removal when both a premium license is active AND
+		 * the site owner has opted in via Settings → White label.
 		 */
-		return (bool) apply_filters( 'bookingistic_can_remove_branding', false );
+		return (bool) apply_filters(
+			'bookingistic_can_remove_branding',
+			$has_license && $opted_in
+		);
 	}
 
 	public static function footer_html(): string {

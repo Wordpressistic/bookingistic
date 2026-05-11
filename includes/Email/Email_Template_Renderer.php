@@ -19,6 +19,47 @@ defined( 'ABSPATH' ) || exit;
 
 class Email_Template_Renderer {
 
+	public const VARIABLE_KEYS = [
+		'customer_name', 'customer_first_name', 'customer_email', 'customer_phone',
+		'service_name', 'service_duration', 'service_price',
+		'staff_name', 'staff_email',
+		'booking_date', 'booking_time', 'booking_timezone', 'booking_status', 'booking_id',
+		'business_name', 'business_email', 'business_phone', 'business_address',
+		'cancel_link', 'reschedule_link', 'payment_link', 'meeting_link', 'website_url',
+	];
+
+	/**
+	 * Build a fake variable map (useful for test sends / preview).
+	 */
+	public static function sample_variables(): array {
+		$settings = get_option( 'bookingistic_settings', [] );
+		return [
+			'customer_name'       => 'Jane Sample',
+			'customer_first_name' => 'Jane',
+			'customer_email'      => 'jane@example.com',
+			'customer_phone'      => '+1 555 0100',
+			'service_name'        => __( 'Strategy Call', 'bookingistic' ),
+			'service_duration'    => '30 ' . __( 'minutes', 'bookingistic' ),
+			'service_price'       => __( 'Free', 'bookingistic' ),
+			'staff_name'          => '',
+			'staff_email'         => '',
+			'booking_date'        => date_i18n( get_option( 'date_format', 'F j, Y' ), strtotime( '+2 days' ) ),
+			'booking_time'        => '14:00',
+			'booking_timezone'    => $settings['timezone'] ?? wp_timezone_string(),
+			'booking_status'      => 'confirmed',
+			'booking_id'          => '12345',
+			'business_name'       => $settings['business_name'] ?? get_bloginfo( 'name' ),
+			'business_email'      => $settings['business_email'] ?? get_option( 'admin_email' ),
+			'business_phone'      => $settings['business_phone'] ?? '',
+			'business_address'    => $settings['business_address'] ?? '',
+			'cancel_link'         => home_url( '/?bookingistic_action=cancel&id=0&t=sample' ),
+			'reschedule_link'     => home_url( '/?bookingistic_action=reschedule&id=0&t=sample' ),
+			'payment_link'        => '',
+			'meeting_link'        => '',
+			'website_url'         => home_url( '/' ),
+		];
+	}
+
 	/**
 	 * Build the {var} replacement map for a booking.
 	 */

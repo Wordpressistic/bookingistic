@@ -46,6 +46,21 @@ class Settings_Page {
 		$settings['working_days']          = array_map( 'intval', (array) ( $raw['working_days'] ?? [] ) );
 		$settings['timezone']              = sanitize_text_field( $raw['timezone'] ?? wp_timezone_string() );
 
+		// Holidays.
+		$holidays = [];
+		foreach ( (array) ( $raw['holidays'] ?? [] ) as $entry ) {
+			$from = \Bookingistic\Helpers\Sanitizer::iso_date( $entry['from'] ?? '' );
+			$to   = \Bookingistic\Helpers\Sanitizer::iso_date( $entry['to'] ?? $from );
+			if ( $from ) {
+				$holidays[] = [ 'from' => $from, 'to' => $to ?: $from ];
+			}
+		}
+		$settings['holidays'] = $holidays;
+
+		// White-label.
+		$settings['premium_license_active'] = ! empty( $raw['premium_license_active'] );
+		$settings['remove_branding']        = ! empty( $raw['remove_branding'] );
+
 		update_option( 'bookingistic_settings', $settings );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-settings&saved=1' ) );

@@ -140,6 +140,10 @@ class Booking_Repository {
 			$where[] = 'status = %s';
 			$prep[]  = $args['status'];
 		}
+		if ( ! empty( $args['payment_status'] ) ) {
+			$where[] = 'payment_status = %s';
+			$prep[]  = $args['payment_status'];
+		}
 		if ( ! empty( $args['service_id'] ) ) {
 			$where[] = 'service_id = %d';
 			$prep[]  = (int) $args['service_id'];
@@ -205,6 +209,20 @@ class Booking_Repository {
 			ARRAY_A
 		);
 		return $rows ?: [];
+	}
+
+	/**
+	 * Count active bookings for a staff member on a given UTC date range (used for
+	 * the daily booking limit). Counts pending, confirmed and rescheduled bookings.
+	 */
+	public static function count_for_staff_day( int $staff_id, string $start_utc, string $end_utc ): int {
+		global $wpdb;
+		$sql = "SELECT COUNT(*) FROM " . self::table() . "
+			WHERE staff_id = %d
+			AND status IN ('pending','confirmed','rescheduled')
+			AND start_datetime >= %s
+			AND start_datetime < %s";
+		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $staff_id, $start_utc, $end_utc ) ); // phpcs:ignore
 	}
 
 	public static function due_reminders( int $hours_before = 24, int $limit = 50 ): array {
