@@ -322,9 +322,55 @@
 		});
 	}
 
+	/* ===== Email automation builder ===== */
+	function bindAutomationEditor() {
+		const body = document.getElementById('bookingistic-automation-body');
+		if (body) {
+			document.querySelectorAll('[data-bookingistic-var]').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const token = btn.dataset.bookingisticVar;
+					const start = body.selectionStart ?? body.value.length;
+					const end = body.selectionEnd ?? body.value.length;
+					body.value = body.value.slice(0, start) + token + body.value.slice(end);
+					const caret = start + token.length;
+					body.focus();
+					body.setSelectionRange(caret, caret);
+				});
+			});
+		}
+
+		const testBtn = document.querySelector('[data-bookingistic-test-send]');
+		if (testBtn) {
+			testBtn.addEventListener('click', async () => {
+				const id = testBtn.dataset.automationId;
+				const to = prompt('Send test email to:', '');
+				if (to === null) return;
+				testBtn.disabled = true;
+				const original = testBtn.textContent;
+				testBtn.textContent = i18n.loading || 'Sending…';
+				try {
+					const res = await fetch(`${cfg.restUrl}email-automations/${id}/test`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
+						body: JSON.stringify({ to }),
+					});
+					const data = await res.json();
+					if (!res.ok || data.code) throw new Error(data.message || i18n.errorGeneric);
+					alert(data.sent
+						? `Test email sent to ${data.to}.`
+						: `Could not send. Check Email Logs for details.`);
+				} catch (e) {
+					alert(e.message || i18n.errorGeneric);
+				}
+				testBtn.disabled = false;
+				testBtn.textContent = original;
+			});
+		}
+	}
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); });
+		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); });
 	} else {
-		bindCalendar(); bindModal(); bindManualBookingForm();
+		bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor();
 	}
 })();

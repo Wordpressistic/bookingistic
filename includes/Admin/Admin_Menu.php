@@ -39,6 +39,7 @@ class Admin_Menu {
 		add_submenu_page( self::SLUG, __( 'Staff', 'bookingistic' ), __( 'Staff', 'bookingistic' ), $cap, self::SLUG . '-staff', [ Staff_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Customers', 'bookingistic' ), __( 'Customers', 'bookingistic' ), $cap, self::SLUG . '-customers', [ Customers_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Email Automations', 'bookingistic' ), __( 'Email Automations', 'bookingistic' ), $cap, self::SLUG . '-emails', [ Email_Automations_Page::class, 'render' ] );
+		add_submenu_page( self::SLUG, __( 'Email Logs', 'bookingistic' ), __( 'Email Logs', 'bookingistic' ), $cap, self::SLUG . '-email-logs', [ Email_Logs_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Reports', 'bookingistic' ), __( 'Reports', 'bookingistic' ), $cap, self::SLUG . '-reports', [ Reports_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Settings', 'bookingistic' ), __( 'Settings', 'bookingistic' ), $cap, self::SLUG . '-settings', [ Settings_Page::class, 'render' ] );
 	}
@@ -50,5 +51,6 @@ class Admin_Menu {
 		Services_Page::maybe_save();
 		Settings_Page::maybe_save();
 		Bookings_Page::maybe_act();
+		Email_Automations_Page::maybe_save();
 	}
 }

@@ -46,6 +46,10 @@ class Settings_Page {
 		$settings['working_days']          = array_map( 'intval', (array) ( $raw['working_days'] ?? [] ) );
 		$settings['timezone']              = sanitize_text_field( $raw['timezone'] ?? wp_timezone_string() );
 
+		// White-label.
+		$settings['premium_license_active'] = ! empty( $raw['premium_license_active'] );
+		$settings['remove_branding']        = ! empty( $raw['remove_branding'] );
+
 		update_option( 'bookingistic_settings', $settings );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-settings&saved=1' ) );

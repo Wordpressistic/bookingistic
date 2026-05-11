@@ -230,3 +230,24 @@
 @media (max-width: 900px) {
 	.bookingistic-detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== Variable picker ===== */
+.bookingistic-var-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 6px;
+	max-height: 360px;
+	overflow: auto;
+	padding: 4px;
+}
+.bookingistic-var {
+	background: #f3f4f6;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	padding: 6px 8px;
+	font-size: 11px;
+	text-align: left;
+	cursor: pointer;
+}
+.bookingistic-var:hover { background: #dbeafe; border-color: #93c5fd; }
+.bookingistic-var code { font-size: 11px; background: transparent; }
