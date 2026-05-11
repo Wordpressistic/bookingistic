@@ -64,5 +64,8 @@ final class Plugin {
 
 		// Integrations (WooCommerce, calendar feeds, Messageistic, CRMistic).
 		Integrations_Manager::register();
+
+		// Premium license manager + daily revalidation cron.
+		License_Manager::register();
 	}
 }

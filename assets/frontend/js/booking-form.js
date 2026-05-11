@@ -171,6 +171,12 @@
 				btn.setAttribute('aria-pressed', 'false');
 				const local = new Date(slot.start_utc.replace(' ', 'T') + 'Z');
 				btn.textContent = local.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+				if (typeof slot.seats_left === 'number') {
+					const seats = document.createElement('span');
+					seats.className = 'bookingistic-form__slot-seats';
+					seats.textContent = `${slot.seats_left} left`;
+					btn.appendChild(seats);
+				}
 				btn.dataset.startUtc = slot.start_utc;
 				btn.addEventListener('click', () => {
 					slotsList.querySelectorAll('.bookingistic-form__slot').forEach(b => b.setAttribute('aria-pressed','false'));

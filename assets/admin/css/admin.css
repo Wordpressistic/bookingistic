@@ -268,3 +268,18 @@
 .bookingistic-wh-table input[type="time"] { width: 110px; }
 .bookingistic-daysoff-table th, .bookingistic-daysoff-table td { padding: 6px 10px; }
 .button-link-delete { color: #b91c1c; }
+
+/* ===== Reports ===== */
+.bookingistic-report-bar {
+	background: #f3f4f6;
+	border-radius: 4px;
+	height: 8px;
+	min-width: 80px;
+	overflow: hidden;
+}
+.bookingistic-report-bar span {
+	display: block;
+	height: 100%;
+	background: linear-gradient(90deg, #4F8DFF, #5EA1FF);
+	border-radius: 4px;
+}

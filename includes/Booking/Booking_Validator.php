@@ -45,8 +45,28 @@ class Booking_Validator {
 			return new \WP_Error( 'too_far', __( 'Slot is beyond the maximum-advance window.', 'bookingistic' ), [ 'status' => 422 ] );
 		}
 
-		// Double-booking guard.
-		if ( Booking_Repository::has_overlap( $service_id, $staff_id, gmdate( 'Y-m-d H:i:s', $start_ts ), $end_utc, $exclude_id ) ) {
+		$start_str = gmdate( 'Y-m-d H:i:s', $start_ts );
+
+		// Group bookings: allow up to max_attendees to share an identical slot.
+		$is_group = $service['booking_type'] === 'group' && (int) $service['max_attendees'] > 1;
+		if ( $is_group ) {
+			$existing = Booking_Repository::in_range( $service_id, $staff_id, $start_str, $end_utc );
+			$same_slot = 0;
+			foreach ( $existing as $b ) {
+				if ( (int) $b['id'] === $exclude_id ) {
+					continue;
+				}
+				if ( $b['start_datetime'] === $start_str && $b['end_datetime'] === $end_utc ) {
+					$same_slot++;
+				} else {
+					// Any other overlap inside the window is a different group slot — block.
+					return new \WP_Error( 'slot_taken', __( 'That slot is no longer available. Please pick another time.', 'bookingistic' ), [ 'status' => 409 ] );
+				}
+			}
+			if ( $same_slot >= (int) $service['max_attendees'] ) {
+				return new \WP_Error( 'slot_full', __( 'Sorry, this session is full.', 'bookingistic' ), [ 'status' => 409 ] );
+			}
+		} elseif ( Booking_Repository::has_overlap( $service_id, $staff_id, $start_str, $end_utc, $exclude_id ) ) {
 			return new \WP_Error( 'slot_taken', __( 'That slot is no longer available. Please pick another time.', 'bookingistic' ), [ 'status' => 409 ] );
 		}
 

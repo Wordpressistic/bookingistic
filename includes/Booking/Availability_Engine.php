@@ -114,11 +114,15 @@ class Availability_Engine {
 		$range_end   = end( $candidates )['end_utc'];
 		$existing    = Booking_Repository::in_range( $service_id, $staff_id, $range_start, $range_end );
 
+		$is_group  = $service['booking_type'] === 'group' && (int) $service['max_attendees'] > 1;
+		$capacity  = max( 1, (int) $service['max_attendees'] );
+
 		$available = [];
 		foreach ( $candidates as $slot ) {
 			$slot_start = strtotime( $slot['start_utc'] . ' UTC' );
 			$slot_end   = strtotime( $slot['end_utc'] . ' UTC' );
-			$conflict   = false;
+			$overlap_count = 0;
+			$slot_taken = false;
 			foreach ( $existing as $b ) {
 				$b_start = strtotime( $b['start_datetime'] . ' UTC' );
 				$b_end   = strtotime( $b['end_datetime'] . ' UTC' );
@@ -126,13 +130,33 @@ class Availability_Engine {
 					continue;
 				}
 				if ( $slot_start < $b_end && $slot_end > $b_start ) {
-					$conflict = true;
-					break;
+					if ( ! $is_group ) {
+						$slot_taken = true;
+						break;
+					}
+					// Group: only count overlaps that share THIS exact slot.
+					if ( $b_start === $slot_start && $b_end === $slot_end ) {
+						$overlap_count++;
+					} else {
+						// Different start/end inside the window means it's a different
+						// group slot — still blocks because it crosses our window.
+						$slot_taken = true;
+						break;
+					}
 				}
 			}
-			if ( ! $conflict ) {
-				$available[] = $slot;
+			if ( $slot_taken ) {
+				continue;
 			}
+			if ( $is_group ) {
+				$slot['capacity']  = $capacity;
+				$slot['booked']    = $overlap_count;
+				$slot['seats_left'] = max( 0, $capacity - $overlap_count );
+				if ( $slot['seats_left'] === 0 ) {
+					continue;
+				}
+			}
+			$available[] = $slot;
 		}
 
 		return [

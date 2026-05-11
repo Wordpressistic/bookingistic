@@ -101,7 +101,7 @@ bookingistic/
 | 3 — Email automations            | ✅ shipped | Visual builder (CRUD), test send, service-specific overrides, email logs viewer, white-label controls |
 | 4 — Advanced availability        | ✅ shipped | Staff CRUD with per-day working hours, days off, site holidays, daily booking limit, optional frontend host picker |
 | 5 — Integrations                 | ✅ shipped | Integration_Base + Manager architecture; WooCommerce orders (real), Google + Outlook calendar (.ics + deep links), Messageistic SMS + CRMistic signed webhooks. Memberistic ships in Phase 6 alongside premium product features. |
-| 6 — Premium product              | ⏳        | Payments, group bookings, advanced reports, licensing, white-label rollout |
+| 6 — Premium product              | ✅ shipped | License_Manager + activation page wired to wordpressistic.com/account, Stripe Checkout (license-gated, signature-verified webhook), group bookings with seat capacity, real Reports page (bookings/services/staff/revenue/source/email analytics) |
 
 ## Security checklist (status)
 

@@ -16,9 +16,10 @@ defined( 'ABSPATH' ) || exit;
 class Branding_Manager {
 
 	public static function can_remove_branding(): bool {
-		$settings = get_option( 'bookingistic_settings', [] );
-		$has_license = ! empty( $settings['premium_license_active'] );
+		$settings    = get_option( 'bookingistic_settings', [] );
 		$opted_in    = ! empty( $settings['remove_branding'] );
+		$has_license = \Bookingistic\Core\License_Manager::is_active()
+			|| ! empty( $settings['premium_license_active'] ); // manual fallback when no License_Manager activation has run yet
 
 		/**
 		 * Premium plugins / license layers can return true here regardless of stored settings.

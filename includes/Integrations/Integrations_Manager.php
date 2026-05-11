@@ -11,6 +11,7 @@ use Bookingistic\Integrations\CRMistic\CRMistic_Integration;
 use Bookingistic\Integrations\Google_Calendar\Google_Calendar_Integration;
 use Bookingistic\Integrations\Messageistic\Messageistic_Integration;
 use Bookingistic\Integrations\Outlook\Outlook_Integration;
+use Bookingistic\Integrations\Stripe\Stripe_Integration;
 use Bookingistic\Integrations\WooCommerce\WooCommerce_Integration;
 
 defined( 'ABSPATH' ) || exit;
@@ -62,6 +63,7 @@ class Integrations_Manager {
 	private static function default_integrations(): array {
 		return [
 			new WooCommerce_Integration(),
+			new Stripe_Integration(),
 			new Google_Calendar_Integration(),
 			new Outlook_Integration(),
 			new Messageistic_Integration(),

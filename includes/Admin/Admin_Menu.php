@@ -43,6 +43,7 @@ class Admin_Menu {
 		add_submenu_page( self::SLUG, __( 'Reports', 'bookingistic' ), __( 'Reports', 'bookingistic' ), $cap, self::SLUG . '-reports', [ Reports_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Integrations', 'bookingistic' ), __( 'Integrations', 'bookingistic' ), $cap, self::SLUG . '-integrations', [ Integrations_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Settings', 'bookingistic' ), __( 'Settings', 'bookingistic' ), $cap, self::SLUG . '-settings', [ Settings_Page::class, 'render' ] );
+		add_submenu_page( self::SLUG, __( 'License', 'bookingistic' ), __( 'License', 'bookingistic' ), $cap, self::SLUG . '-license', [ License_Page::class, 'render' ] );
 	}
 
 	public static function handle_post_actions(): void {
@@ -55,5 +56,6 @@ class Admin_Menu {
 		Email_Automations_Page::maybe_save();
 		Staff_Page::maybe_save();
 		Integrations_Page::maybe_save();
+		License_Page::maybe_save();
 	}
 }

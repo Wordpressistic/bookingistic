@@ -164,6 +164,13 @@
 }
 .bookingistic-form__slot:hover { border-color: var(--bk-accent); }
 .bookingistic-form__slot[aria-pressed="true"] { background: var(--bk-accent); border-color: var(--bk-accent); color: #fff; }
+.bookingistic-form__slot-seats {
+	display: block;
+	font-size: 10px;
+	color: var(--bk-muted);
+	margin-top: 2px;
+}
+.bookingistic-form__slot[aria-pressed="true"] .bookingistic-form__slot-seats { color: rgba(255,255,255,0.85); }
 
 .bookingistic-form__actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
