@@ -140,6 +140,10 @@ class Booking_Repository {
 			$where[] = 'status = %s';
 			$prep[]  = $args['status'];
 		}
+		if ( ! empty( $args['payment_status'] ) ) {
+			$where[] = 'payment_status = %s';
+			$prep[]  = $args['payment_status'];
+		}
 		if ( ! empty( $args['service_id'] ) ) {
 			$where[] = 'service_id = %d';
 			$prep[]  = (int) $args['service_id'];

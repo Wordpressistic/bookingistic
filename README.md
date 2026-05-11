@@ -97,7 +97,7 @@ bookingistic/
 | Phase | Status | Scope |
 |---|---|---|
 | 1 — Core foundation              | ✅ shipped | DB, availability, booking form, REST, customer + admin emails, branding helper |
-| 2 — Admin calendar + bookings    | ⏳ next   | Month/week/day calendar, manual booking, status quick-edit, customer drilldown |
+| 2 — Admin calendar + bookings    | ✅ shipped | Month/week/day/list calendar, manual booking, in-admin reschedule + cancel, customer drilldown w/ revenue |
 | 3 — Email automations            | ⏳        | Visual builder, test send, service-specific overrides, white-label controls |
 | 4 — Advanced availability        | ⏳        | Staff working hours / days off / holidays / per-staff overrides |
 | 5 — Integrations                 | ⏳        | WooCommerce, Google Calendar, Outlook, Messageistic SMS, CRMistic, Memberistic |
