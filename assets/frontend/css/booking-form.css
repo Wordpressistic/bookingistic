@@ -1,0 +1,190 @@
+/**
+ * Bookingistic — frontend booking form styles.
+ */
+
+.bookingistic-form {
+	--bk-bg: #0B0E16;
+	--bk-panel: #121724;
+	--bk-panel-2: #1A2032;
+	--bk-border: rgba(255,255,255,0.08);
+	--bk-text: #F5F7FF;
+	--bk-muted: #8B92A9;
+	--bk-accent: #4F8DFF;
+	--bk-accent-2: #5EA1FF;
+	--bk-danger: #FF6B6B;
+
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+	gap: 24px;
+	background: var(--bk-bg);
+	color: var(--bk-text);
+	border-radius: 20px;
+	padding: 28px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
+}
+
+@media (max-width: 860px) {
+	.bookingistic-form { grid-template-columns: 1fr; padding: 20px; }
+}
+
+.bookingistic-form__panel {
+	background: var(--bk-panel);
+	border: 1px solid var(--bk-border);
+	border-radius: 16px;
+	padding: 28px;
+}
+
+.bookingistic-form__service-meta {
+	display: inline-flex;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.bookingistic-form__service-duration,
+.bookingistic-form__service-price {
+	display: inline-block;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: rgba(79,141,255,0.12);
+	color: var(--bk-accent-2);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.bookingistic-form__service-name {
+	margin: 0 0 8px;
+	font-size: 26px;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+}
+
+.bookingistic-form__service-tagline { color: var(--bk-muted); margin: 0 0 18px; }
+.bookingistic-form__service-description { color: var(--bk-muted); margin: 0 0 22px; font-size: 14px; line-height: 1.6; }
+.bookingistic-form__service-description p { margin: 0 0 12px; }
+
+.bookingistic-form__trust { list-style: none; padding: 0; margin: 0; }
+.bookingistic-form__trust li { color: var(--bk-text); font-size: 13px; padding: 6px 0; padding-left: 22px; position: relative; }
+.bookingistic-form__trust li::before {
+	content: "";
+	position: absolute;
+	left: 0; top: 11px;
+	width: 12px; height: 12px;
+	background: var(--bk-accent);
+	border-radius: 50%;
+	box-shadow: 0 0 0 4px rgba(79,141,255,0.15);
+}
+
+.bookingistic-form__step-header { margin-bottom: 18px; }
+.bookingistic-form__step-header h3 { margin: 0 0 6px; font-size: 18px; }
+.bookingistic-form__hint { color: var(--bk-muted); font-size: 13px; margin: 0; }
+.bookingistic-form__summary { color: var(--bk-muted); font-size: 13px; margin: 0; }
+
+.bookingistic-form__calendar-wrap {
+	display: grid;
+	grid-template-columns: minmax(260px, 1fr) minmax(180px, 1fr);
+	gap: 20px;
+}
+@media (max-width: 720px) {
+	.bookingistic-form__calendar-wrap { grid-template-columns: 1fr; }
+}
+
+.bookingistic-form__calendar { background: var(--bk-panel-2); border-radius: 12px; padding: 14px; }
+.bookingistic-form__calendar header {
+	display: flex; align-items: center; justify-content: space-between;
+	margin-bottom: 10px;
+}
+.bookingistic-form__calendar header button {
+	background: transparent; border: 1px solid var(--bk-border);
+	color: var(--bk-text); width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+	font-size: 14px;
+}
+.bookingistic-form__calendar header button:hover { border-color: var(--bk-accent); }
+.bookingistic-form__calendar-title { font-weight: 600; font-size: 14px; }
+.bookingistic-form__calendar-grid {
+	display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+}
+.bookingistic-form__calendar-dow { text-align: center; color: var(--bk-muted); font-size: 11px; padding: 6px 0; text-transform: uppercase; letter-spacing: 0.06em; }
+.bookingistic-form__calendar-day {
+	background: transparent; border: 1px solid transparent;
+	color: var(--bk-text); font-size: 13px;
+	border-radius: 8px; aspect-ratio: 1 / 1; cursor: pointer;
+	display: flex; align-items: center; justify-content: center;
+}
+.bookingistic-form__calendar-day:hover { border-color: var(--bk-accent); }
+.bookingistic-form__calendar-day[disabled] { color: rgba(139,146,169,0.4); cursor: not-allowed; }
+.bookingistic-form__calendar-day[data-other-month] { color: rgba(139,146,169,0.3); }
+.bookingistic-form__calendar-day[aria-pressed="true"] { background: var(--bk-accent); border-color: var(--bk-accent); color: #fff; }
+
+.bookingistic-form__slots-empty { color: var(--bk-muted); font-size: 13px; }
+.bookingistic-form__slot-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; max-height: 320px; overflow: auto; }
+.bookingistic-form__slot-list li { flex: 1 1 calc(50% - 4px); }
+.bookingistic-form__slot {
+	width: 100%;
+	padding: 10px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--bk-border);
+	background: transparent;
+	color: var(--bk-text);
+	font-size: 13px;
+	cursor: pointer;
+	transition: border-color .15s, background .15s;
+}
+.bookingistic-form__slot:hover { border-color: var(--bk-accent); }
+.bookingistic-form__slot[aria-pressed="true"] { background: var(--bk-accent); border-color: var(--bk-accent); color: #fff; }
+
+.bookingistic-form__actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+.bookingistic-form__btn {
+	border-radius: 10px;
+	border: 1px solid transparent;
+	padding: 11px 18px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+}
+.bookingistic-form__btn--primary { background: var(--bk-accent); color: #fff; }
+.bookingistic-form__btn--primary:hover { background: var(--bk-accent-2); }
+.bookingistic-form__btn--primary[disabled] { opacity: .5; cursor: not-allowed; }
+.bookingistic-form__btn--ghost { background: transparent; color: var(--bk-text); border-color: var(--bk-border); }
+.bookingistic-form__btn--ghost:hover { border-color: var(--bk-accent); }
+
+.bookingistic-form__fields { display: grid; gap: 14px; }
+.bookingistic-form__fields label { display: grid; gap: 6px; font-size: 13px; color: var(--bk-muted); }
+.bookingistic-form__fields input,
+.bookingistic-form__fields textarea {
+	width: 100%;
+	background: var(--bk-panel-2);
+	border: 1px solid var(--bk-border);
+	border-radius: 10px;
+	color: var(--bk-text);
+	padding: 11px 12px;
+	font: inherit;
+}
+.bookingistic-form__fields input:focus,
+.bookingistic-form__fields textarea:focus { outline: none; border-color: var(--bk-accent); }
+
+.bookingistic-form__error {
+	margin-top: 14px;
+	padding: 10px 14px;
+	border-radius: 10px;
+	background: rgba(255,107,107,0.12);
+	border: 1px solid rgba(255,107,107,0.4);
+	color: #ffb0b0;
+	font-size: 13px;
+}
+
+.bookingistic-form__step[hidden] { display: none; }
+
+/* Light theme override */
+.bookingistic-form--light {
+	--bk-bg: #FFFFFF;
+	--bk-panel: #F7F8FC;
+	--bk-panel-2: #FFFFFF;
+	--bk-text: #111827;
+	--bk-muted: #6B7280;
+	--bk-border: rgba(17,24,39,0.08);
+	box-shadow: 0 30px 60px -30px rgba(17,24,39,0.15);
+}
