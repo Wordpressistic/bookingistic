@@ -100,7 +100,7 @@ bookingistic/
 | 2 — Admin calendar + bookings    | ✅ shipped | Month/week/day/list calendar, manual booking, in-admin reschedule + cancel, customer drilldown w/ revenue |
 | 3 — Email automations            | ✅ shipped | Visual builder (CRUD), test send, service-specific overrides, email logs viewer, white-label controls |
 | 4 — Advanced availability        | ✅ shipped | Staff CRUD with per-day working hours, days off, site holidays, daily booking limit, optional frontend host picker |
-| 5 — Integrations                 | ⏳        | WooCommerce, Google Calendar, Outlook, Messageistic SMS, CRMistic, Memberistic |
+| 5 — Integrations                 | ✅ shipped | Integration_Base + Manager architecture; WooCommerce orders (real), Google + Outlook calendar (.ics + deep links), Messageistic SMS + CRMistic signed webhooks. Memberistic ships in Phase 6 alongside premium product features. |
 | 6 — Premium product              | ⏳        | Payments, group bookings, advanced reports, licensing, white-label rollout |
 
 ## Security checklist (status)

@@ -82,7 +82,7 @@ class Email_Template_Renderer {
 			$time_str = Date_Time::format_time( $booking['start_datetime'], $tz );
 		}
 
-		return [
+		$vars = [
 			'customer_name'       => $customer['full_name'] ?? '',
 			'customer_first_name' => $customer['first_name'] ?? '',
 			'customer_email'      => $customer['email'] ?? '',
@@ -107,6 +107,16 @@ class Email_Template_Renderer {
 			'meeting_link'        => '',
 			'website_url'         => home_url( '/' ),
 		];
+
+		/**
+		 * Filter the template-variable map for a booking.
+		 *
+		 * @param array       $vars     The variable map.
+		 * @param array       $booking  The booking row.
+		 * @param array|null  $customer The customer row.
+		 * @param array|null  $service  The service row.
+		 */
+		return apply_filters( 'bookingistic_booking_email_vars', $vars, $booking, $customer, $service );
 	}
 
 	/**
