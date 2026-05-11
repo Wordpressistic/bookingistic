@@ -1,0 +1,70 @@
+/**
+ * Bookingistic — admin styles.
+ */
+
+.bookingistic-wrap { max-width: 1200px; }
+
+.bookingistic-header {
+	padding: 20px 0 8px;
+}
+.bookingistic-header h1 { margin: 0; font-size: 22px; }
+.bookingistic-header__tagline { color: #6b7280; margin: 4px 0 0; font-size: 13px; }
+
+.bookingistic-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+	gap: 12px;
+	margin: 18px 0 24px;
+}
+.bookingistic-stat {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	padding: 16px 18px;
+	display: grid;
+	gap: 4px;
+}
+.bookingistic-stat__label { color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.bookingistic-stat__value { font-size: 24px; font-weight: 600; color: #111827; }
+
+.bookingistic-grid { display: grid; gap: 16px; }
+.bookingistic-grid--two { grid-template-columns: 1fr 1fr; }
+@media (max-width: 980px) { .bookingistic-grid--two { grid-template-columns: 1fr; } }
+
+.bookingistic-card {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	padding: 18px 20px;
+}
+.bookingistic-card h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+.bookingistic-card--muted { background: #f9fafb; }
+
+.bookingistic-muted { color: #6b7280; font-size: 13px; }
+
+.bookingistic-activity { list-style: none; padding: 0; margin: 0; }
+.bookingistic-activity li { padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+.bookingistic-activity li:last-child { border-bottom: 0; }
+.bookingistic-activity li strong { display: block; font-size: 13px; }
+.bookingistic-activity .bookingistic-muted { font-size: 12px; }
+
+.bookingistic-pill {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.bookingistic-pill--pending     { background: #fef3c7; color: #92400e; }
+.bookingistic-pill--confirmed   { background: #d1fae5; color: #065f46; }
+.bookingistic-pill--rescheduled { background: #dbeafe; color: #1e3a8a; }
+.bookingistic-pill--completed   { background: #e5e7eb; color: #374151; }
+.bookingistic-pill--cancelled   { background: #fee2e2; color: #991b1b; }
+.bookingistic-pill--no_show     { background: #fde68a; color: #78350f; }
+
+.bookingistic-filters { margin: 10px 0 16px; }
+.bookingistic-filters li::after { content: " | "; color: #d1d5db; }
+.bookingistic-filters li:last-child::after { content: ""; }
+.bookingistic-filters .current { font-weight: 600; }
