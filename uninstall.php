@@ -18,8 +18,11 @@ require_once __DIR__ . '/includes/Database/Tables.php';
 
 delete_option( 'bookingistic_settings' );
 delete_option( 'bookingistic_db_version' );
+delete_option( 'bookingistic_appearance' );
+delete_option( 'bookingistic_integrations' );
 
 wp_clear_scheduled_hook( 'bookingistic_send_reminders' );
+wp_clear_scheduled_hook( 'bookingistic_gcal_sync' );
 
 // Capabilities cleanup.
 $role = get_role( 'administrator' );

@@ -114,6 +114,9 @@ class Availability_Engine {
 		$range_end   = end( $candidates )['end_utc'];
 		$existing    = Booking_Repository::in_range( $service_id, $staff_id, $range_start, $range_end );
 
+		// External calendar busy blocks (e.g. Google Calendar freebusy) merge in here.
+		$existing = apply_filters( 'bookingistic_external_busy_intervals', $existing, $staff_id );
+
 		$available = [];
 		foreach ( $candidates as $slot ) {
 			$slot_start = strtotime( $slot['start_utc'] . ' UTC' );

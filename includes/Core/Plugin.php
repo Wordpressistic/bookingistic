@@ -9,11 +9,13 @@ namespace Bookingistic\Core;
 
 use Bookingistic\Admin\Admin_Assets;
 use Bookingistic\Admin\Admin_Menu;
+use Bookingistic\Admin\Appearance_Page;
 use Bookingistic\Booking\Cancellation_Manager;
 use Bookingistic\Booking\Reschedule_Manager;
 use Bookingistic\Email\Email_Automation_Manager;
 use Bookingistic\Frontend\Assets as Frontend_Assets;
 use Bookingistic\Frontend\Shortcode;
+use Bookingistic\Integrations\Elementor\Elementor_Module;
 use Bookingistic\Integrations\Integrations_Manager;
 use Bookingistic\REST\REST_Controller;
 
@@ -33,6 +35,20 @@ final class Plugin {
 	private function __construct() {}
 
 	public function boot(): void {
+		// Custom cron interval for calendar sync.
+		add_filter(
+			'cron_schedules',
+			static function ( $schedules ) {
+				if ( ! isset( $schedules['fifteen_minutes'] ) ) {
+					$schedules['fifteen_minutes'] = [
+						'interval' => 15 * MINUTE_IN_SECONDS,
+						'display'  => __( 'Every 15 minutes', 'bookingistic' ),
+					];
+				}
+				return $schedules;
+			}
+		);
+
 		// Database upgrade check.
 		add_action( 'init', [ Installer::class, 'maybe_upgrade' ], 1 );
 
@@ -61,6 +77,12 @@ final class Plugin {
 		// Cancel / reschedule public endpoints.
 		Cancellation_Manager::register();
 		Reschedule_Manager::register();
+
+		// Appearance (form templates, calendar views, industry presets).
+		Appearance_Page::register();
+
+		// Elementor widgets (no-op unless Elementor is installed).
+		Elementor_Module::register();
 
 		// Integrations (WooCommerce, calendar feeds, Messageistic, CRMistic).
 		Integrations_Manager::register();

@@ -50,12 +50,24 @@ class Assets {
 			[
 				'restUrl' => esc_url_raw( rest_url( BOOKINGISTIC_REST_NAMESPACE . '/' ) ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'appearance' => Template_Loader::appearance(),
 				'i18n'    => [
 					'pickDate'   => __( 'Pick a date to see available times', 'bookingistic' ),
 					'loading'    => __( 'Loading…', 'bookingistic' ),
 					'noSlots'    => __( 'No times available on this date.', 'bookingistic' ),
 					'submitting' => __( 'Submitting…', 'bookingistic' ),
 					'errorGeneric' => __( 'Something went wrong. Please try again.', 'bookingistic' ),
+					'timesIn'    => __( 'Times shown in', 'bookingistic' ),
+					'today'      => __( 'Today', 'bookingistic' ),
+					'tomorrow'   => __( 'Tomorrow', 'bookingistic' ),
+					'prevMonth'  => __( 'Previous month', 'bookingistic' ),
+					'nextMonth'  => __( 'Next month', 'bookingistic' ),
+					'bookingConfirmed'   => __( 'Booking confirmed', 'bookingistic' ),
+					'bookingReceived'    => __( 'Booking received', 'bookingistic' ),
+					'rescheduleConfirmed' => __( 'Reschedule confirmed', 'bookingistic' ),
+					'confirmBooking'     => __( 'Confirm booking', 'bookingistic' ),
+					'confirmReschedule'  => __( 'Confirm reschedule', 'bookingistic' ),
+					'checkInbox' => __( 'Check your inbox for the details.', 'bookingistic' ),
 				],
 			]
 		);

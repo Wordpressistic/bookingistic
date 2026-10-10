@@ -3,13 +3,16 @@
  * `[bookingistic]` shortcode.
  *
  * Attributes:
- *   service    Service slug (preferred)
- *   service_id Numeric ID (fallback)
- *   type       Booking type filter (future)
- *   staff      Staff slug/email (future filter)
- *   category   Service category (future filter)
- *   reschedule_id   Internal — passed by Reschedule_Manager
- *   reschedule_token Internal — token tied to that booking
+ *   service        Service slug (preferred)
+ *   service_id     Numeric ID (fallback)
+ *   template       Form template: classic | modern | split | minimal (overrides Appearance)
+ *   calendar_view  Calendar view: month | pills | list (overrides Appearance)
+ *   calendar       Alias of calendar_view
+ *   type           Booking type filter (future)
+ *   staff          Staff slug/email (future filter)
+ *   category       Service category (future filter)
+ *   reschedule_id     Internal — passed by Reschedule_Manager
+ *   reschedule_token  Internal — token tied to that booking
  *
  * @package Bookingistic
  */
@@ -17,7 +20,6 @@
 namespace Bookingistic\Frontend;
 
 use Bookingistic\Database\Service_Repository;
-use Bookingistic\Database\Staff_Repository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,6 +34,9 @@ class Shortcode {
 			[
 				'service'           => '',
 				'service_id'        => 0,
+				'template'          => '',
+				'calendar_view'     => '',
+				'calendar'          => '',
 				'type'              => '',
 				'staff'             => '',
 				'category'          => '',
@@ -57,17 +62,23 @@ class Shortcode {
 			return '<div class="bookingistic-error">' . esc_html__( 'No booking service is currently available.', 'bookingistic' ) . '</div>';
 		}
 
-		Assets::enqueue_frontend();
-
-		$booking_form_id   = 'bookingistic-form-' . wp_unique_id();
-		$reschedule_id     = (int) $atts['reschedule_id'];
-		$reschedule_token  = sanitize_text_field( $atts['reschedule_token'] );
+		$reschedule_id    = (int) $atts['reschedule_id'];
+		$reschedule_token = sanitize_text_field( $atts['reschedule_token'] );
 
 		// Staff that can fulfil this service. Only show the picker when more than one.
-		$assignable_staff = Staff_Repository::for_service( (int) $service['id'] );
+		$assignable_staff = \Bookingistic\Database\Staff_Repository::for_service( (int) $service['id'] );
 
-		ob_start();
-		include BOOKINGISTIC_DIR . 'templates/frontend/booking-form.php';
-		return (string) ob_get_clean();
+		$calendar_view = sanitize_key( $atts['calendar_view'] ?: $atts['calendar'] );
+
+		return Booking_Form::render(
+			$service,
+			$assignable_staff,
+			$reschedule_id,
+			$reschedule_token,
+			[
+				'template' => sanitize_key( $atts['template'] ),
+				'calendar' => $calendar_view,
+			]
+		);
 	}
 }

@@ -54,6 +54,7 @@ class Admin_Menu {
 		Bookings_Page::maybe_act();
 		Email_Automations_Page::maybe_save();
 		Staff_Page::maybe_save();
+		Staff_Page::maybe_gcal();
 		Integrations_Page::maybe_save();
 	}
 }

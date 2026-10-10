@@ -1,6 +1,9 @@
 /**
- * Bookingistic — frontend booking form.
+ * Bookingistic — frontend booking form controller.
  * No dependencies. Vanilla ES6.
+ *
+ * Drives ALL form templates (classic / modern / split / minimal) and all
+ * calendar views (month / pills / list) via the shared data-* DOM contract.
  */
 (function () {
 	'use strict';
@@ -11,34 +14,49 @@
 	const i18n = cfg.i18n || {};
 
 	function pad(n) { return String(n).padStart(2, '0'); }
-	function fmtIsoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+	function fmtIsoDate(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
 
 	function detectTz() {
 		try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }
 		catch (e) { return ''; }
 	}
 
-	function buildCalendar(root, state, onSelect) {
+	/* Apply appearance (accent color / radius) as CSS variables on the form root. */
+	function applyAppearance(root) {
+		const app = cfg.appearance || {};
+		if (app.accent) root.style.setProperty('--bk-accent', app.accent);
+		if (app.radius) root.style.setProperty('--bk-radius', parseInt(app.radius, 10) + 'px');
+	}
+
+	/* ================= Calendar renderers ================= */
+
+	function calendarRenderers() {
+		return {
+			month: renderMonthCalendar,
+			pills: renderPillsCalendar,
+			list: renderListCalendar
+		};
+	}
+
+	function renderMonthCalendar(root, state, onSelect) {
 		const today = new Date();
-		today.setHours(0,0,0,0);
+		today.setHours(0, 0, 0, 0);
 
 		const render = () => {
 			const y = state.cursor.getFullYear();
 			const m = state.cursor.getMonth();
 			const first = new Date(y, m, 1);
-			const startDow = (first.getDay() + 6) % 7; // make Mon=0
-			const daysInMonth = new Date(y, m+1, 0).getDate();
-			const monthLabel = state.cursor.toLocaleString(undefined, { month:'long', year:'numeric' });
+			const startDow = (first.getDay() + 6) % 7; // Mon=0
+			const daysInMonth = new Date(y, m + 1, 0).getDate();
+			const monthLabel = state.cursor.toLocaleString(undefined, { month: 'long', year: 'numeric' });
 
-			const dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-			let html = `<header>
-				<button type="button" data-cal-prev aria-label="Previous month">‹</button>
-				<span class="bookingistic-form__calendar-title">${monthLabel}</span>
-				<button type="button" data-cal-next aria-label="Next month">›</button>
-			</header><div class="bookingistic-form__calendar-grid">`;
-			for (const d of dows) html += `<div class="bookingistic-form__calendar-dow">${d}</div>`;
-
-			// leading blanks
+			const dows = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+			let html = `<header class="bk-cal__head">
+				<button type="button" class="bk-cal__nav" data-cal-prev aria-label="${i18n.prevMonth || 'Previous month'}">‹</button>
+				<span class="bk-cal__title">${monthLabel}</span>
+				<button type="button" class="bk-cal__nav" data-cal-next aria-label="${i18n.nextMonth || 'Next month'}">›</button>
+			</header><div class="bk-cal__grid">`;
+			for (const d of dows) html += `<div class="bk-cal__dow">${d}</div>`;
 			for (let i = 0; i < startDow; i++) html += `<div></div>`;
 
 			for (let day = 1; day <= daysInMonth; day++) {
@@ -46,32 +64,91 @@
 				const iso = fmtIsoDate(dt);
 				const past = dt < today;
 				const sel = state.selectedDate === iso;
-				html += `<button type="button" class="bookingistic-form__calendar-day"
+				html += `<button type="button" class="bk-cal__day${sel ? ' is-selected' : ''}"
 					data-cal-day="${iso}"
 					${past ? 'disabled' : ''}
 					aria-pressed="${sel}">${day}</button>`;
 			}
 			html += `</div>`;
 			root.innerHTML = html;
-
-			root.querySelector('[data-cal-prev]').addEventListener('click', () => {
-				state.cursor = new Date(y, m-1, 1); render();
-			});
-			root.querySelector('[data-cal-next]').addEventListener('click', () => {
-				state.cursor = new Date(y, m+1, 1); render();
-			});
-			root.querySelectorAll('[data-cal-day]').forEach(btn => {
-				btn.addEventListener('click', () => {
-					state.selectedDate = btn.dataset.calDay;
-					render();
-					onSelect(state.selectedDate);
-				});
-			});
+			bindNav(root, state, render, onSelect);
+			bindDays(root, state, onSelect);
 		};
 		render();
 	}
 
+	function renderPillsCalendar(root, state, onSelect) {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const days = 14;
+		let html = `<div class="bk-pills" role="listbox" aria-label="${i18n.pickDate || 'Pick a date'}">`;
+		for (let i = 0; i < days; i++) {
+			const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+			const iso = fmtIsoDate(dt);
+			const sel = state.selectedDate === iso;
+			const wd = dt.toLocaleDateString(undefined, { weekday: 'short' });
+			html += `<button type="button" role="option" class="bk-pill${sel ? ' is-selected' : ''}" data-cal-day="${iso}" aria-pressed="${sel}">
+				<span class="bk-pill__wd">${wd}</span>
+				<span class="bk-pill__day">${dt.getDate()}</span>
+			</button>`;
+		}
+		html += `</div>`;
+		root.innerHTML = html;
+		bindDays(root, state, onSelect);
+	}
+
+	function renderListCalendar(root, state, onSelect) {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const days = 14;
+		let html = `<div class="bk-list">`;
+		for (let i = 0; i < days; i++) {
+			const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+			const iso = fmtIsoDate(dt);
+			const sel = state.selectedDate === iso;
+			const label = dt.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+			const rel = i === 0 ? (i18n.today || 'Today') : (i === 1 ? (i18n.tomorrow || 'Tomorrow') : '');
+			html += `<button type="button" class="bk-list__row${sel ? ' is-selected' : ''}" data-cal-day="${iso}" aria-pressed="${sel}">
+				<span>${label}</span>
+				${rel ? `<em class="bk-list__rel">${rel}</em>` : ''}
+			</button>`;
+		}
+		html += `</div>`;
+		root.innerHTML = html;
+		bindDays(root, state, onSelect);
+	}
+
+	function bindNav(root, state, render, onSelect) {
+		const prev = root.querySelector('[data-cal-prev]');
+		const next = root.querySelector('[data-cal-next]');
+		if (prev) prev.addEventListener('click', () => {
+			state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - 1, 1);
+			render();
+		});
+		if (next) next.addEventListener('click', () => {
+			state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + 1, 1);
+			render();
+		});
+	}
+
+	function bindDays(root, state, onSelect) {
+		root.querySelectorAll('[data-cal-day]').forEach(btn => {
+			btn.addEventListener('click', () => {
+				state.selectedDate = btn.dataset.calDay;
+				root.querySelectorAll('[data-cal-day]').forEach(b => {
+					b.classList.toggle('is-selected', b === btn);
+					b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+				});
+				onSelect(state.selectedDate);
+			});
+		});
+	}
+
+	/* ================= Form controller ================= */
+
 	function setupForm(root) {
+		applyAppearance(root);
+
 		const state = {
 			serviceId: parseInt(root.dataset.serviceId, 10),
 			staffId: 0,
@@ -84,10 +161,10 @@
 			availability: [],
 		};
 
-		const tzNode  = root.querySelector('[data-bookingistic-tz]');
+		const tzNode = root.querySelector('[data-bookingistic-tz]');
 		const calNode = root.querySelector('[data-bookingistic-calendar]');
 		const slotsList = root.querySelector('[data-bookingistic-slots]');
-		const slotsEmpty = root.querySelector('.bookingistic-form__slots-empty');
+		const slotsEmpty = root.querySelector('.bookingistic-slots-empty, .bookingistic-form__slots-empty');
 		const nextBtn = root.querySelector('[data-action="next"]');
 		const backBtn = root.querySelector('[data-action="back"]');
 		const errorBox = root.querySelector('[data-bookingistic-error]');
@@ -97,14 +174,20 @@
 		const stepsRoot = root.querySelector('.bookingistic-form__steps');
 		const form = root.querySelector('[data-bookingistic-fields]');
 
-		if (tzNode && state.tz) tzNode.textContent = `Times shown in ${state.tz}`;
+		if (!calNode || !slotsList || !stepsRoot || !form || !nextBtn) return;
+
+		if (tzNode && state.tz) tzNode.textContent = (i18n.timesIn || 'Times shown in') + ' ' + state.tz;
 
 		const staffPicker = root.querySelector('[data-bookingistic-staff-picker]');
 		if (staffPicker) {
-			staffPicker.querySelectorAll('.bookingistic-form__staff-option').forEach(btn => {
+			staffPicker.querySelectorAll('.bookingistic-staff__option, .bookingistic-form__staff-option').forEach(btn => {
 				btn.addEventListener('click', () => {
-					staffPicker.querySelectorAll('.bookingistic-form__staff-option').forEach(b => b.setAttribute('aria-pressed','false'));
-					btn.setAttribute('aria-pressed','true');
+					staffPicker.querySelectorAll('.bookingistic-staff__option, .bookingistic-form__staff-option').forEach(b => {
+						b.setAttribute('aria-pressed', 'false');
+						b.classList.remove('is-selected');
+					});
+					btn.setAttribute('aria-pressed', 'true');
+					btn.classList.add('is-selected');
 					state.staffId = parseInt(btn.dataset.staffId, 10) || 0;
 					if (state.selectedDate) loadAvailability(state.selectedDate);
 				});
@@ -112,10 +195,15 @@
 		}
 
 		function showError(msg) {
+			if (!errorBox) return;
 			errorBox.textContent = msg;
 			errorBox.hidden = false;
 		}
-		function clearError() { errorBox.hidden = true; errorBox.textContent = ''; }
+		function clearError() {
+			if (!errorBox) return;
+			errorBox.hidden = true;
+			errorBox.textContent = '';
+		}
 
 		function setStep(n) {
 			stepsRoot.dataset.step = String(n);
@@ -156,7 +244,7 @@
 		function renderSlots() {
 			if (!state.availability.length) {
 				slotsEmpty.hidden = false;
-				slotsEmpty.textContent = i18n.noSlots || 'No times available.';
+				slotsEmpty.textContent = i18n.noSlots || 'No times available on this date.';
 				slotsList.hidden = true;
 				return;
 			}
@@ -167,14 +255,18 @@
 				const li = document.createElement('li');
 				const btn = document.createElement('button');
 				btn.type = 'button';
-				btn.className = 'bookingistic-form__slot';
+				btn.className = 'bookingistic-slot';
 				btn.setAttribute('aria-pressed', 'false');
 				const local = new Date(slot.start_utc.replace(' ', 'T') + 'Z');
 				btn.textContent = local.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 				btn.dataset.startUtc = slot.start_utc;
 				btn.addEventListener('click', () => {
-					slotsList.querySelectorAll('.bookingistic-form__slot').forEach(b => b.setAttribute('aria-pressed','false'));
-					btn.setAttribute('aria-pressed','true');
+					slotsList.querySelectorAll('.bookingistic-slot').forEach(b => {
+						b.setAttribute('aria-pressed', 'false');
+						b.classList.remove('is-selected');
+					});
+					btn.setAttribute('aria-pressed', 'true');
+					btn.classList.add('is-selected');
 					state.selectedSlot = slot;
 					nextBtn.disabled = false;
 				});
@@ -183,17 +275,18 @@
 			}
 		}
 
-		buildCalendar(calNode, state, loadAvailability);
+		const renderer = calendarRenderers()[root.dataset.calendarView] || renderMonthCalendar;
+		renderer(calNode, state, loadAvailability);
 
 		nextBtn.addEventListener('click', () => {
 			clearError();
 			if (!state.selectedSlot) return;
 			const local = new Date(state.selectedSlot.start_utc.replace(' ', 'T') + 'Z');
-			summaryNode.textContent = `${local.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' })} · ${local.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' })} (${state.tz})`;
+			summaryNode.textContent = `${local.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })} · ${local.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} (${state.tz})`;
 			setStep(2);
 		});
 
-		backBtn.addEventListener('click', () => setStep(1));
+		if (backBtn) backBtn.addEventListener('click', () => setStep(1));
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -237,13 +330,15 @@
 				if (data.silent) {
 					// honeypot triggered — pretend it worked
 				}
-				successTitle.textContent = isReschedule ? 'Reschedule confirmed' : (data.status === 'confirmed' ? 'Booking confirmed' : 'Booking received');
-				successBody.textContent  = data.message || 'Check your inbox for the details.';
+				successTitle.textContent = isReschedule
+					? (i18n.rescheduleConfirmed || 'Reschedule confirmed')
+					: (data.status === 'confirmed' ? (i18n.bookingConfirmed || 'Booking confirmed') : (i18n.bookingReceived || 'Booking received'));
+				successBody.textContent = data.message || (i18n.checkInbox || 'Check your inbox for the details.');
 				setStep(3);
 			} catch (err) {
 				showError(err.message || i18n.errorGeneric);
 				submitBtn.disabled = false;
-				submitBtn.textContent = isReschedule ? 'Confirm reschedule' : 'Confirm booking';
+				submitBtn.textContent = isReschedule ? (i18n.confirmReschedule || 'Confirm reschedule') : (i18n.confirmBooking || 'Confirm booking');
 			}
 		});
 	}

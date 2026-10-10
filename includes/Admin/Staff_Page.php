@@ -100,4 +100,46 @@ class Staff_Page {
 			exit;
 		}
 	}
+
+	/**
+	 * Google Calendar connect / disconnect per staff member.
+	 * Only renders an action link when OAuth client credentials are configured.
+	 */
+	public static function maybe_gcal(): void {
+		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
+
+		if ( $action === 'gcal_disconnect' ) {
+			check_admin_referer( 'bookingistic_admin_gcal' );
+			if ( ! current_user_can( \Bookingistic\Core\Capabilities::MANAGE ) ) {
+				return;
+			}
+			\Bookingistic\Integrations\Google_Calendar\GCal_Sync::disconnect( (int) ( $_POST['staff_id'] ?? 0 ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&edit=' . (int) ( $_POST['staff_id'] ?? 0 ) . '&gcal=disconnected' ) );
+			exit;
+		}
+
+		if ( $action === 'gcal_sync_now' ) {
+			check_admin_referer( 'bookingistic_admin_gcal' );
+			if ( ! current_user_can( \Bookingistic\Core\Capabilities::MANAGE ) ) {
+				return;
+			}
+			$staff_id = (int) ( $_POST['staff_id'] ?? 0 );
+			\Bookingistic\Integrations\Google_Calendar\GCal_Sync::refresh_busy_for_staff( $staff_id );
+			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&edit=' . $staff_id . '&gcal=synced' ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Connect URL for the staff editor (empty string when not configured).
+	 */
+	public static function gcal_connect_url( int $staff_id ): string {
+		if ( ! class_exists( \Bookingistic\Integrations\Google_Calendar\GCal_Sync::class ) ) {
+			return '';
+		}
+		if ( ! \Bookingistic\Integrations\Google_Calendar\GCal_Sync::is_configured() ) {
+			return '';
+		}
+		return \Bookingistic\Integrations\Google_Calendar\GCal_Sync::connect_url( $staff_id );
+	}
 }

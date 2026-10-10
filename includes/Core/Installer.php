@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 class Installer {
 
 	const DB_VERSION_OPTION = 'bookingistic_db_version';
-	const DB_VERSION        = '2.0.0';
+	const DB_VERSION        = '2.2.0';
 
 	public static function install(): void {
 		Tables::create_all();
@@ -25,6 +25,9 @@ class Installer {
 
 		if ( ! wp_next_scheduled( 'bookingistic_send_reminders' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'bookingistic_send_reminders' );
+		}
+		if ( ! wp_next_scheduled( 'bookingistic_gcal_sync' ) ) {
+			wp_schedule_event( time() + 600, 'fifteen_minutes', 'bookingistic_gcal_sync' );
 		}
 	}
 

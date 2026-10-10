@@ -107,6 +107,9 @@ class Staff_Controller {
 	}
 
 	private static function expose( array $row, bool $admin ): array {
+		// Calendar OAuth material is never exposed over REST — not even to admins via this route.
+		unset( $row['gcal_token'], $row['gcal_id'], $row['gcal_connected'] );
+
 		if ( ! $admin ) {
 			// Public response: drop internal scheduling data + contact info.
 			$row['services'] = Staff_Repository::services_for_staff( (int) $row['id'] );

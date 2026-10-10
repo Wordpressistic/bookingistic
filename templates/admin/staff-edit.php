@@ -90,6 +90,48 @@ if ( isset( $wh['start'], $wh['end'] ) ) {
 				</select></td></tr>
 		</table>
 
+		<h2><?php esc_html_e( 'Google Calendar', 'bookingistic' ); ?></h2>
+		<?php
+		$gcal_connected = ! $is_new && ! empty( $staff['gcal_connected'] );
+		$gcal_url       = $is_new ? '' : Staff_Page::gcal_connect_url( (int) $staff['id'] );
+		$gcal_notice    = sanitize_key( $_GET['gcal'] ?? '' );
+		if ( $gcal_notice ) : ?>
+			<div class="notice inline notice-success" style="margin:10px 0"><p>
+				<?php
+				echo esc_html(
+					match ( $gcal_notice ) {
+						'connected'    => __( 'Google Calendar connected.', 'bookingistic' ),
+						'disconnected' => __( 'Google Calendar disconnected.', 'bookingistic' ),
+						'synced'       => __( 'Google Calendar busy times refreshed.', 'bookingistic' ),
+						default        => __( 'Google Calendar action failed — check the OAuth settings under Integrations.', 'bookingistic' ),
+					}
+				);
+				?>
+			</p></div>
+		<?php endif; ?>
+		<?php if ( $is_new ) : ?>
+			<p class="description"><?php esc_html_e( 'Save this staff member first, then connect their Google Calendar.', 'bookingistic' ); ?></p>
+		<?php elseif ( $gcal_connected ) : ?>
+			<p style="color:green">✓ <?php esc_html_e( 'Connected — confirmed bookings sync to their Google Calendar and external events block booking slots.', 'bookingistic' ); ?></p>
+			<form method="post" style="display:inline">
+				<?php wp_nonce_field( 'bookingistic_admin_gcal' ); ?>
+				<input type="hidden" name="bookingistic_admin_action" value="gcal_sync_now">
+				<input type="hidden" name="staff_id" value="<?php echo (int) $staff['id']; ?>">
+				<button type="submit" class="button"><?php esc_html_e( 'Sync now', 'bookingistic' ); ?></button>
+			</form>
+			<form method="post" style="display:inline;margin-inline-start:8px">
+				<?php wp_nonce_field( 'bookingistic_admin_gcal' ); ?>
+				<input type="hidden" name="bookingistic_admin_action" value="gcal_disconnect">
+				<input type="hidden" name="staff_id" value="<?php echo (int) $staff['id']; ?>">
+				<button type="submit" class="button button-link-delete"><?php esc_html_e( 'Disconnect', 'bookingistic' ); ?></button>
+			</form>
+		<?php elseif ( $gcal_url ) : ?>
+			<a href="<?php echo esc_url( $gcal_url ); ?>" class="button button-secondary"><?php esc_html_e( 'Connect Google Calendar', 'bookingistic' ); ?></a>
+			<p class="description"><?php esc_html_e( 'Two-way sync: confirmed bookings appear in their calendar, and their external events automatically block booking slots. Refreshed every 15 minutes.', 'bookingistic' ); ?></p>
+		<?php else : ?>
+			<p class="description"><?php esc_html_e( 'To enable per-staff Google Calendar sync, add an OAuth Client ID + Secret under Bookingistic → Integrations → Google Calendar.', 'bookingistic' ); ?></p>
+		<?php endif; ?>
+
 		<h2><?php esc_html_e( 'Assigned services', 'bookingistic' ); ?></h2>
 		<?php if ( empty( $services ) ) : ?>
 			<p class="bookingistic-muted"><?php esc_html_e( 'No services yet.', 'bookingistic' ); ?></p>
