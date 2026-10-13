@@ -20,8 +20,9 @@ class Booking_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -32,8 +33,9 @@ class Booking_Repository {
 		if ( ! in_array( $field, [ 'cancel_token', 'reschedule_token' ], true ) ) {
 			return null;
 		}
+		$table = self::table();
 		$row = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM " . self::table() . " WHERE {$field} = %s", $token ), // phpcs:ignore
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE {$field} = %s", $token ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from Tables::bookings_table(), $field whitelist-checked above.
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;

@@ -17,9 +17,10 @@ class Calendar_Event_Repository {
 
 	public static function find_for_booking( int $booking_id, string $provider ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
+		$table = self::table();
+		$row   = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT * FROM ' . self::table() . ' WHERE booking_id = %d AND provider = %s LIMIT 1',
+				"SELECT * FROM {$table} WHERE booking_id = %d AND provider = %s LIMIT 1",
 				$booking_id,
 				$provider
 			),
@@ -65,7 +66,8 @@ class Calendar_Event_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ), ARRAY_A );
+		$table = self::table();
+		$row   = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
 		return $row ? self::normalize( $row ) : null;
 	}
 

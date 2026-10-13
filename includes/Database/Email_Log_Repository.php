@@ -37,8 +37,9 @@ class Email_Log_Repository {
 
 	public static function recent( int $limit = 50 ): array {
 		global $wpdb;
-		$rows = $wpdb->get_results(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' ORDER BY created_at DESC LIMIT %d', $limit ),
+		$table = self::table();
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d", $limit ),
 			ARRAY_A
 		);
 		return $rows ?: [];

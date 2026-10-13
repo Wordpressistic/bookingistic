@@ -27,8 +27,9 @@ class Service_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -36,8 +37,9 @@ class Service_Repository {
 
 	public static function find_by_slug( string $slug ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE slug = %s', $slug ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE slug = %s", $slug ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -124,10 +126,11 @@ class Service_Repository {
 		$base   = $slug ?: 'service';
 		$slug   = $base;
 		$suffix = 1;
+		$table  = self::table();
 		while ( true ) {
 			$query = $ignore_id
-				? $wpdb->prepare( 'SELECT id FROM ' . self::table() . ' WHERE slug = %s AND id <> %d', $slug, $ignore_id )
-				: $wpdb->prepare( 'SELECT id FROM ' . self::table() . ' WHERE slug = %s', $slug );
+				? $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s AND id <> %d", $slug, $ignore_id )
+				: $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s", $slug );
 			if ( ! $wpdb->get_var( $query ) ) {
 				return $slug;
 			}

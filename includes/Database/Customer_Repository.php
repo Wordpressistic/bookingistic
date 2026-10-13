@@ -17,8 +17,9 @@ class Customer_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -26,8 +27,9 @@ class Customer_Repository {
 
 	public static function find_by_email( string $email ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE email = %s', $email ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE email = %s", $email ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -96,11 +98,12 @@ class Customer_Repository {
 		$page     = max( 1, $page );
 		$per_page = max( 1, min( 100, $per_page ) );
 		$offset   = ( $page - 1 ) * $per_page;
+		$table    = self::table();
 		$rows     = $wpdb->get_results(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' ORDER BY created_at DESC LIMIT %d OFFSET %d', $per_page, $offset ),
+			$wpdb->prepare( "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d OFFSET %d", $per_page, $offset ),
 			ARRAY_A
 		);
-		$total    = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . self::table() );
+		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 		return [
 			'items' => array_map( [ self::class, 'normalize' ], $rows ?: [] ),
 			'total' => $total,

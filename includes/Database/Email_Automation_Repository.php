@@ -17,14 +17,16 @@ class Email_Automation_Repository {
 
 	public static function all(): array {
 		global $wpdb;
-		$rows = $wpdb->get_results( 'SELECT * FROM ' . self::table() . ' ORDER BY trigger_event ASC, name ASC', ARRAY_A );
+		$table = self::table();
+		$rows  = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY trigger_event ASC, name ASC", ARRAY_A );
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -32,7 +34,8 @@ class Email_Automation_Repository {
 
 	public static function for_trigger( string $event, int $service_id = 0 ): array {
 		global $wpdb;
-		$sql = "SELECT * FROM " . self::table() . "
+		$table = self::table();
+		$sql   = "SELECT * FROM {$table}
 			WHERE status = 'active'
 			AND trigger_event = %s
 			AND (service_id = 0 OR service_id = %d)

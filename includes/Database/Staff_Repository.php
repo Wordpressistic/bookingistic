@@ -35,8 +35,9 @@ class Staff_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ),
+		$table = self::table();
+		$row   = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -44,8 +45,10 @@ class Staff_Repository {
 
 	public static function for_service( int $service_id ): array {
 		global $wpdb;
-		$sql = "SELECT s.* FROM " . self::table() . " s
-			INNER JOIN " . Tables::staff_services_table() . " ss ON ss.staff_id = s.id
+		$table    = self::table();
+		$ss_table = Tables::staff_services_table();
+		$sql      = "SELECT s.* FROM {$table} s
+			INNER JOIN {$ss_table} ss ON ss.staff_id = s.id
 			WHERE ss.service_id = %d AND s.status = 'active'
 			ORDER BY s.name ASC";
 		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $service_id ), ARRAY_A ); // phpcs:ignore
