@@ -440,14 +440,13 @@
 	/* ===== Integrations: card grid configure-panel toggle (UI only) ===== */
 	function bindIntegrationPanels() {
 		document.querySelectorAll('[data-bookingistic-toggle-panel]').forEach(function (btn) {
+			var original = btn.textContent;
 			btn.addEventListener('click', function () {
 				var slug = btn.getAttribute('data-bookingistic-toggle-panel');
 				var panel = document.getElementById('bookingistic-panel-' + slug);
 				if (panel) {
 					panel.hidden = !panel.hidden;
-					btn.textContent = panel.hidden
-						? (btn.hasAttribute('data-bk-connect') ? btn.getAttribute('data-bk-connect') : btn.textContent)
-						: 'Close';
+					btn.textContent = panel.hidden ? original : 'Close';
 					if (!panel.hidden) {
 						var first = panel.querySelector('input:not([type=hidden]), textarea');
 						if (first) { first.focus(); }
