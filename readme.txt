@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,12 @@ Drag-and-drop the Bookingistic Form widget with live controls for service, templ
 
 Branded HTML confirmations, reminders (hourly cron), cancellation and reschedule notices. Automation rules fire on booking events; every send is logged. Free tier adds a small branding footer — removable with a filter.
 
+**Payments (bring your own gateway)**
+
+* Paid services collect payment through a WooCommerce order per booking — customers pay with any payment method WooCommerce already supports, and payment status flows back to the booking automatically (paid → booking confirmed).
+* Payment ledger: every attempt (pending, paid, refunded, failed) is logged under Bookingistic → Payments.
+* Developer gateways: plug additional providers into the `bookingistic_payment_gateways` filter — no core billing decision is hard-coded.
+
 **Developer-friendly**
 
 * REST API at `/wp-json/bookingistic/v1/` (services, staff, availability, bookings)
@@ -73,6 +79,8 @@ Branded HTML confirmations, reminders (hourly cron), cancellation and reschedule
 `GET  /wp-json/bookingistic/v1/availability?service_id=N&date=YYYY-MM-DD`
 `POST /wp-json/bookingistic/v1/bookings`
 `POST /wp-json/bookingistic/v1/bookings/{id}/reschedule`
+`GET  /wp-json/bookingistic/v1/payments`
+`GET  /wp-json/bookingistic/v1/payments/gateways`
 
 == Installation ==
 
@@ -88,7 +96,7 @@ Upgrading from 1.x? Your existing bookings and the legacy form keep working.
 
 = Does the free version include payments? =
 
-Payments via WooCommerce and Stripe/PayPal checkout are on the roadmap. Currently services can be priced (shown on the form and in emails); payment collection lands in an upcoming release.
+Yes — via WooCommerce. Turn on "WooCommerce Orders" under Bookingistic → Payments and every paid booking creates a WooCommerce order the customer can check out with (cards, PayPal, bank transfer — whatever your store supports). Payment status syncs back to the booking, and confirmed payment auto-confirms the booking. Direct Stripe/PayPal gateways without WooCommerce are on the roadmap.
 
 = Does Google Calendar sync need a paid service? =
 
@@ -110,6 +118,12 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 4. Admin dashboard — bookings, services, staff, email automations
 
 == Changelog ==
+
+= 2.3.0 =
+* New: Payments module — WooCommerce Orders gateway with enable/disable switch under Bookingistic → Payments
+* New: payment ledger — every payment attempt (pending/paid/refunded/failed) recorded per booking, with admin screen and REST endpoints (`/payments`, `/payments/gateways`)
+* New: `bookingistic_payment_gateways`, `bookingistic_payment_recorded`, `bookingistic_payment_currency` filters for custom gateways
+* New: paid bookings that receive payment are confirmed automatically (consistent with the WooCommerce integration flow)
 
 = 2.2.0 =
 * New: 4 booking form templates — Classic, Modern Card, Split Hero, Minimal Inline (Appearance page + shortcode/Elementor override)
@@ -135,6 +149,9 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 * Initial v1 Strategy Call lead-capture plugin.
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Adds the payments foundation: WooCommerce Orders gateway + payment ledger. No database changes — upgrades cleanly from 2.x.
 
 = 2.2.0 =
 New designs, calendar views, industry presets and Google Calendar sync. Database upgrades run automatically — back up before updating as with any release.

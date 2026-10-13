@@ -55,9 +55,19 @@ add_filter( 'bookingistic_external_busy_intervals', fn( $intervals, $staff_id ) 
 // Integrate with the booking lifecycle
 add_action( 'bookingistic_booking_confirmed', function ( $booking, $customer, $service ) { /* ... */ }, 10, 3 );
 
+// Add a payment gateway
+add_filter( 'bookingistic_payment_gateways', function ( array $gateways ) {
+	$gateways['my_gateway'] = new My_Gateway(); // implements Bookingistic\Payments\Payment_Gateway
+	return $gateways;
+} );
+
 // Premium white-label
 add_filter( 'bookingistic_can_remove_branding', fn() => true );
 ```
+
+## Payments
+
+Paid bookings collect payment through a **WooCommerce order per booking** (any payment method your store supports), with an admin ledger under Bookingistic → Payments and REST endpoints `/payments` + `/payments/gateways`. Additional gateways plug in via the `bookingistic_payment_gateways` filter — the free core ships no direct billing provider, so no billing decision is locked in.
 
 ## Roadmap
 

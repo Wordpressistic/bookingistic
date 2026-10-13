@@ -19,6 +19,7 @@ class REST_Controller {
 		Calendar_Controller::register_routes();
 		Email_Automations_Controller::register_routes();
 		ICS_Controller::register_routes();
+		Payments_Controller::register_routes();
 	}
 
 	public static function require_manage(): bool {

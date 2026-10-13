@@ -40,6 +40,7 @@ class Admin_Menu {
 		add_submenu_page( self::SLUG, __( 'Customers', 'bookingistic' ), __( 'Customers', 'bookingistic' ), $cap, self::SLUG . '-customers', [ Customers_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Email Automations', 'bookingistic' ), __( 'Email Automations', 'bookingistic' ), $cap, self::SLUG . '-emails', [ Email_Automations_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Email Logs', 'bookingistic' ), __( 'Email Logs', 'bookingistic' ), $cap, self::SLUG . '-email-logs', [ Email_Logs_Page::class, 'render' ] );
+		add_submenu_page( self::SLUG, __( 'Payments', 'bookingistic' ), __( 'Payments', 'bookingistic' ), $cap, self::SLUG . '-payments', [ Payments_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Reports', 'bookingistic' ), __( 'Reports', 'bookingistic' ), $cap, self::SLUG . '-reports', [ Reports_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Integrations', 'bookingistic' ), __( 'Integrations', 'bookingistic' ), $cap, self::SLUG . '-integrations', [ Integrations_Page::class, 'render' ] );
 		add_submenu_page( self::SLUG, __( 'Settings', 'bookingistic' ), __( 'Settings', 'bookingistic' ), $cap, self::SLUG . '-settings', [ Settings_Page::class, 'render' ] );
@@ -56,5 +57,6 @@ class Admin_Menu {
 		Staff_Page::maybe_save();
 		Staff_Page::maybe_gcal();
 		Integrations_Page::maybe_save();
+		Payments_Page::maybe_save();
 	}
 }

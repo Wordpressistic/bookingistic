@@ -17,6 +17,7 @@ use Bookingistic\Frontend\Assets as Frontend_Assets;
 use Bookingistic\Frontend\Shortcode;
 use Bookingistic\Integrations\Elementor\Elementor_Module;
 use Bookingistic\Integrations\Integrations_Manager;
+use Bookingistic\Payments\Payment_Manager;
 use Bookingistic\REST\REST_Controller;
 
 defined( 'ABSPATH' ) || exit;
@@ -86,5 +87,20 @@ final class Plugin {
 
 		// Integrations (WooCommerce, calendar feeds, Messageistic, CRMistic).
 		Integrations_Manager::register();
+
+		// Payments (gateway registry + WooCommerce Orders ledger adapter).
+		// Late priority: WooCommerce still defines its classes after plugins_loaded:5,
+		// so gateway discovery must wait for plugins to settle (same timing the
+		// integrations registry uses). Calling boot() twice is a no-op — WP dedupes
+		// identical hooks.
+		add_action(
+			'plugins_loaded',
+			static function (): void {
+				foreach ( Payment_Manager::gateways() as $gateway ) {
+					$gateway->boot();
+				}
+			},
+			20
+		);
 	}
 }
