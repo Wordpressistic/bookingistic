@@ -57,8 +57,9 @@ class Staff_Repository {
 
 	public static function services_for_staff( int $staff_id ): array {
 		global $wpdb;
-		$ids = $wpdb->get_col(
-			$wpdb->prepare( 'SELECT service_id FROM ' . Tables::staff_services_table() . ' WHERE staff_id = %d', $staff_id )
+		$ss_table = Tables::staff_services_table();
+		$ids      = $wpdb->get_col(
+			$wpdb->prepare( "SELECT service_id FROM {$ss_table} WHERE staff_id = %d", $staff_id )
 		);
 		return array_map( 'intval', $ids ?: [] );
 	}

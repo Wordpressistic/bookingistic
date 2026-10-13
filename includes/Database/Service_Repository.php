@@ -128,9 +128,11 @@ class Service_Repository {
 		$suffix = 1;
 		$table  = self::table();
 		while ( true ) {
-			$query = $ignore_id
-				? $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s AND id <> %d", $slug, $ignore_id )
-				: $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s", $slug );
+			if ( $ignore_id ) {
+				$query = $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s AND id <> %d", $slug, $ignore_id );
+			} else {
+				$query = $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s", $slug );
+			}
 			if ( ! $wpdb->get_var( $query ) ) {
 				return $slug;
 			}
