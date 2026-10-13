@@ -20,6 +20,7 @@ use Bookingistic\Database\Customer_Repository;
 use Bookingistic\Database\Service_Repository;
 use Bookingistic\Database\Tables;
 use Bookingistic\Integrations\Integration_Base;
+use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,13 +80,23 @@ class WooCommerce_Integration extends Integration_Base {
 			]
 		);
 
-		// Fee item — one line, named after the service.
+		// Fee item — one line, named after the service. With a deposit
+		// configured on the service, only the deposit percentage is charged
+		// now (the booking is marked deposit_paid once it settles).
+		$amount = Payment_Manager::amount_due( $booking );
+		if ( $amount <= 0 ) {
+			return;
+		}
 		$fee = new \WC_Order_Item_Fee();
 		$fee->set_name( $service['name'] . ' · #' . (int) $booking['id'] );
-		$fee->set_amount( (float) $service['price'] );
-		$fee->set_total( (float) $service['price'] );
+		$fee->set_amount( $amount );
+		$fee->set_total( $amount );
 		$fee->set_tax_status( 'none' );
 		$order->add_item( $fee );
+		$is_deposit = round( $amount, 2 ) < round( (float) $service['price'], 2 );
+		if ( $is_deposit ) {
+			$order->update_meta_data( '_bookingistic_deposit', 1 );
+		}
 
 		$order->set_address(
 			[

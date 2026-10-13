@@ -126,14 +126,18 @@ class Payment_Manager {
 		}
 
 		// Map ledger status → booking payment_status (keeps both in sync).
+		// A `paid` event that settles less than the full price is a deposit.
 		$booking_payment_status = in_array( $status, [ 'paid', 'refunded', 'failed' ], true ) ? $status : $booking['payment_status'];
+		if ( 'paid' === $booking_payment_status && round( $amount, 2 ) > 0 && round( $amount, 2 ) < round( (float) $booking['payment_amount'], 2 ) ) {
+			$booking_payment_status = 'deposit_paid';
+		}
 
 		$update = [];
 		if ( $booking_payment_status !== $booking['payment_status'] ) {
 			$update['payment_status'] = $booking_payment_status;
 		}
-		// First paid event on a still-pending booking confirms it (same rule the WC integration applies).
-		if ( 'paid' === $status && 'pending' === $booking['status'] ) {
+		// Any settled payment (deposit or full) on a still-pending booking confirms it.
+		if ( in_array( $booking_payment_status, [ 'paid', 'deposit_paid' ], true ) && 'pending' === $booking['status'] ) {
 			$update['status'] = 'confirmed';
 		}
 		if ( ! empty( $update ) ) {
