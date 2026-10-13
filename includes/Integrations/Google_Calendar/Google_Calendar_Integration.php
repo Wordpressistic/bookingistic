@@ -97,7 +97,7 @@ class Google_Calendar_Integration extends Integration_Base {
 			$result['ok'] ? [ 'gcal' => 'connected' ] : [ 'gcal' => 'error', 'gcal_msg' => rawurlencode( $result['message'] ) ],
 			$staff_page
 		);
-		if ( wp_redirect( $redirect ) ) {
+		if ( wp_safe_redirect( $redirect ) ) {
 			exit;
 		}
 		return new \WP_REST_Response( [ 'ok' => $result['ok'], 'message' => $result['message'] ] );
