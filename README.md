@@ -67,11 +67,34 @@ add_filter( 'bookingistic_can_remove_branding', fn() => true );
 
 ## Payments
 
-Paid bookings collect payment through a **WooCommerce order per booking** (any payment method your store supports), with an admin ledger under Bookingistic → Payments and REST endpoints `/payments` + `/payments/gateways`. Additional gateways plug in via the `bookingistic_payment_gateways` filter — the free core ships no direct billing provider, so no billing decision is locked in.
+Paid bookings collect payment through a **WooCommerce order per booking** (any payment method your store supports), with an admin ledger under Bookingistic → Payments and REST endpoints `/payments`, `/payments/gateways` and `/payments/status` (signed-token gated). Additional gateways plug in via the `bookingistic_payment_gateways` filter (alias `bookingistic_gateways`) — the free core ships no direct billing provider, so no billing decision is locked in.
+
+Included:
+
+- **Deposits** — set a per-service deposit percentage; only the deposit is charged upfront and the booking is marked `deposit_paid`.
+- **Signed pay links** — `?bookingistic_action=pay&id=N&t=TOKEN` (HMAC, 410 on bad token); embedded in emails via the `{payment_link}` merge tag and in the booking form success screen.
+- **`[bookingistic_payment id="123" email="guest@example.com"]`** — pay-now button / status block; email must match the booking customer.
+- **Manual actions** — Mark paid / Refund buttons on payment records for offline payments (nonce + capability checked).
+
+### Premium gateway seam (for developers)
+
+The free plugin is fully functional standalone. Direct billing gateways (Stripe, Paddle, Razorpay…) are **not** shipped in free core — wp.org guidelines prohibit requiring paid external services. A future premium add-on registers them through the same registry:
+
+```php
+// Premium add-on (not part of the free plugin):
+add_filter( 'bookingistic_gateways', function ( array $gateways ) {
+	if ( bookingistic_license_is_valid() ) {
+		$gateways['stripe'] = new Premium_Stripe_Gateway(); // extends Bookingistic\Payments\Abstract_Gateway
+	}
+	return $gateways;
+} );
+```
+
+Gateways extend `Bookingistic\Payments\Abstract_Gateway` (slug, label, description, `is_available()`, `boot()` hooks) and report transitions via `Bookingistic\Payments\Payment_Manager::record_event()`. The ledger, deposits, signed links and admin UI all work with any registered gateway.
 
 ## Roadmap
 
-- Native payments (Stripe/PayPal checkout, deposits) — `payment_records` schema is already in place
+- More payment gateways (Stripe/PayPal via the premium seam above)
 - Gutenberg block companion to the Elementor widget
 - More industry kits + multi-service cart booking
 

@@ -16,18 +16,16 @@ namespace Bookingistic\Payments\Gateways;
 use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Tables;
 use Bookingistic\Integrations\WooCommerce\WooCommerce_Integration;
-use Bookingistic\Payments\Payment_Gateway;
+use Bookingistic\Payments\Abstract_Gateway;
 use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
-class WooCommerce_Gateway implements Payment_Gateway {
+class WooCommerce_Gateway extends Abstract_Gateway {
+
+	protected string $slug = 'woocommerce';
 
 	private ?WooCommerce_Integration $integration = null;
-
-	public function slug(): string {
-		return 'woocommerce';
-	}
 
 	public function label(): string {
 		return __( 'WooCommerce Orders', 'bookingistic' );
@@ -39,10 +37,6 @@ class WooCommerce_Gateway implements Payment_Gateway {
 
 	public function is_available(): bool {
 		return class_exists( '\\WooCommerce' ) || function_exists( 'WC' );
-	}
-
-	public function is_enabled(): bool {
-		return Payment_Manager::is_gateway_enabled( $this->slug() );
 	}
 
 	public function boot(): void {
@@ -75,7 +69,7 @@ class WooCommerce_Gateway implements Payment_Gateway {
 			(int) $booking['id'],
 			$this->slug(),
 			'pending',
-			(float) $booking['payment_amount'],
+			Payment_Manager::amount_due( $booking ),
 			(string) $order_id,
 			[ 'wc_order_id' => $order_id ]
 		);
@@ -91,6 +85,22 @@ class WooCommerce_Gateway implements Payment_Gateway {
 
 	public function ledger_cancelled( int $order_id ): void {
 		$this->ledger_transition( $order_id, 'cancelled' );
+	}
+
+	/**
+	 * Hosted checkout URL for the booking's WC order (pay-now link).
+	 */
+	public function checkout_url( int $booking_id ): string {
+		$order_id = $this->order_id_for_booking( $booking_id );
+		if ( ! $order_id || ! function_exists( 'wc_get_order' ) ) {
+			return '';
+		}
+		$order = wc_get_order( $order_id );
+		if ( ! $order || in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
+			return '';
+		}
+		$url = method_exists( $order, 'get_checkout_payment_url' ) ? $order->get_checkout_payment_url() : '';
+		return esc_url_raw( $url );
 	}
 
 	/* ===== Helpers ===== */

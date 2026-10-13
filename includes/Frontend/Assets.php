@@ -68,6 +68,8 @@ class Assets {
 					'confirmBooking'     => __( 'Confirm booking', 'bookingistic' ),
 					'confirmReschedule'  => __( 'Confirm reschedule', 'bookingistic' ),
 					'checkInbox' => __( 'Check your inbox for the details.', 'bookingistic' ),
+					'payNow'     => __( 'Pay now', 'bookingistic' ),
+					'payLater'   => __( 'Payment is due — we will send you payment instructions.', 'bookingistic' ),
 				],
 			]
 		);

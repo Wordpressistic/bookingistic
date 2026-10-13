@@ -58,5 +58,6 @@ class Admin_Menu {
 		Staff_Page::maybe_gcal();
 		Integrations_Page::maybe_save();
 		Payments_Page::maybe_save();
+		Payments_Page::maybe_act();
 	}
 }

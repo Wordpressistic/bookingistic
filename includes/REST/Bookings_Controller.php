@@ -132,16 +132,30 @@ class Bookings_Controller {
 			return $result;
 		}
 
-		return rest_ensure_response(
-			[
-				'ok'      => true,
-				'id'      => $result['booking']['id'],
-				'status'  => $result['booking']['status'],
-				'message' => $result['booking']['status'] === 'confirmed'
-					? __( 'Booking confirmed. Check your inbox for the details.', 'bookingistic' )
-					: __( 'Booking received. We will confirm shortly.', 'bookingistic' ),
-			]
-		);
+		$booking = $result['booking'];
+		$amount  = \Bookingistic\Payments\Payment_Manager::amount_due( $booking );
+
+		$response = [
+			'ok'      => true,
+			'id'      => $booking['id'],
+			'status'  => $booking['status'],
+			'message' => $booking['status'] === 'confirmed'
+				? __( 'Booking confirmed. Check your inbox for the details.', 'bookingistic' )
+				: __( 'Booking received. We will confirm shortly.', 'bookingistic' ),
+		];
+
+		// Paid services: tell the form what (if anything) is due next.
+		if ( (float) $booking['payment_amount'] > 0 && 'free' !== $booking['payment_status'] ) {
+			$response['payment'] = [
+				'status'      => (string) $booking['payment_status'],
+				'amount_due'  => $amount,
+				'amount_full' => (float) $booking['payment_amount'],
+				'currency'    => \Bookingistic\Payments\Payment_Manager::currency(),
+				'pay_url'     => \Bookingistic\Helpers\Token::payment_url( (int) $booking['id'] ),
+			];
+		}
+
+		return rest_ensure_response( $response );
 	}
 
 	public static function index( \WP_REST_Request $req ) {

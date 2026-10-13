@@ -56,6 +56,7 @@ class Service_Repository {
 			'buffer_before'     => max( 0, (int) ( $data['buffer_before'] ?? 0 ) ),
 			'buffer_after'      => max( 0, (int) ( $data['buffer_after'] ?? 0 ) ),
 			'price'             => (float) ( $data['price'] ?? 0 ),
+			'deposit_percent'   => max( 0.0, min( 100.0, (float) ( $data['deposit_percent'] ?? 0 ) ) ),
 			'category'          => sanitize_text_field( $data['category'] ?? '' ),
 			'booking_type'      => sanitize_key( $data['booking_type'] ?? 'one_to_one' ),
 			'confirmation_mode' => sanitize_key( $data['confirmation_mode'] ?? 'auto' ),
@@ -102,6 +103,9 @@ class Service_Repository {
 		if ( array_key_exists( 'price', $data ) ) {
 			$update['price'] = (float) $data['price'];
 		}
+		if ( array_key_exists( 'deposit_percent', $data ) ) {
+			$update['deposit_percent'] = max( 0.0, min( 100.0, (float) $data['deposit_percent'] ) );
+		}
 		if ( array_key_exists( 'slug', $data ) && $data['slug'] !== $existing['slug'] ) {
 			$update['slug'] = self::unique_slug( sanitize_title( $data['slug'] ), $id );
 		}
@@ -138,6 +142,7 @@ class Service_Repository {
 		$row['buffer_before']    = (int) $row['buffer_before'];
 		$row['buffer_after']     = (int) $row['buffer_after'];
 		$row['price']            = (float) $row['price'];
+		$row['deposit_percent']  = isset( $row['deposit_percent'] ) ? (float) $row['deposit_percent'] : 0.0;
 		$row['max_attendees']    = (int) $row['max_attendees'];
 		$row['sort_order']       = (int) $row['sort_order'];
 		return $row;

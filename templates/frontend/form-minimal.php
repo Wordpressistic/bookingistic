@@ -101,6 +101,7 @@ $is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 		<section class="bookingistic-step" data-step-content="3" hidden>
 			<p><strong data-bookingistic-success-title><?php esc_html_e( 'Booking confirmed', 'bookingistic' ); ?></strong><br>
 			<span data-bookingistic-success-body><?php esc_html_e( 'Check your inbox for the details.', 'bookingistic' ); ?></span></p>
+			<div data-bookingistic-pay class="bookingistic-payment-box" hidden></div>
 		</section>
 
 		<div class="bookingistic-error" data-bookingistic-error role="alert" hidden></div>

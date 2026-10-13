@@ -11,9 +11,11 @@ use Bookingistic\Admin\Admin_Assets;
 use Bookingistic\Admin\Admin_Menu;
 use Bookingistic\Admin\Appearance_Page;
 use Bookingistic\Booking\Cancellation_Manager;
+use Bookingistic\Booking\Payment_Handler;
 use Bookingistic\Booking\Reschedule_Manager;
 use Bookingistic\Email\Email_Automation_Manager;
 use Bookingistic\Frontend\Assets as Frontend_Assets;
+use Bookingistic\Frontend\Payment_Shortcode;
 use Bookingistic\Frontend\Shortcode;
 use Bookingistic\Integrations\Elementor\Elementor_Module;
 use Bookingistic\Integrations\Integrations_Manager;
@@ -64,6 +66,7 @@ final class Plugin {
 
 		// Frontend.
 		Shortcode::register();
+		Payment_Shortcode::register();
 		Frontend_Assets::register();
 
 		// Admin.
@@ -75,9 +78,10 @@ final class Plugin {
 		// Email automations listen on booking action hooks.
 		Email_Automation_Manager::register();
 
-		// Cancel / reschedule public endpoints.
+		// Cancel / reschedule / pay public endpoints.
 		Cancellation_Manager::register();
 		Reschedule_Manager::register();
+		Payment_Handler::register();
 
 		// Appearance (form templates, calendar views, industry presets).
 		Appearance_Page::register();

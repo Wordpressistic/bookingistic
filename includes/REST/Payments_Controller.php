@@ -10,7 +10,10 @@
 
 namespace Bookingistic\REST;
 
+use Bookingistic\Booking\Payment_Handler;
+use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Payment_Repository;
+use Bookingistic\Helpers\Token;
 use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
@@ -33,6 +36,22 @@ class Payments_Controller {
 						'provider' => [ 'sanitize_callback' => 'sanitize_key' ],
 						'per_page' => [ 'sanitize_callback' => 'absint' ],
 						'offset'   => [ 'sanitize_callback' => 'absint' ],
+					],
+				],
+			]
+		);
+
+		register_rest_route(
+			$ns,
+			'/payments/status',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ self::class, 'public_status' ],
+					'permission_callback' => '__return_true', // signed-token gated.
+					'args'                => [
+						'id'    => [ 'sanitize_callback' => 'absint' ],
+						'token' => [ 'sanitize_callback' => 'sanitize_text_field' ],
 					],
 				],
 			]
@@ -81,6 +100,42 @@ class Payments_Controller {
 			[
 				'records' => $rows,
 				'total'   => $total,
+			]
+		);
+	}
+
+	/**
+	 * Public payment status — same signed-token model as cancel/reschedule.
+	 * HMAC token (no DB state); 410 on bad token. No status writes here.
+	 */
+	public static function public_status( \WP_REST_Request $request ) {
+		$id    = (int) $request->get_param( 'id' );
+		$token = (string) $request->get_param( 'token' );
+
+		if ( ! $id || ! Token::consume_equals( Token::for_payment( $id ), $token ) ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired payment link.', 'bookingistic' ),
+				[ 'status' => 410 ]
+			);
+		}
+
+		$booking = Booking_Repository::find( $id );
+		if ( ! $booking ) {
+			return new \WP_Error( 'not_found', __( 'Booking not found.', 'bookingistic' ), [ 'status' => 404 ] );
+		}
+
+		$record = Payment_Repository::latest_for_booking( $id );
+
+		return new \WP_REST_Response(
+			[
+				'booking_id'     => $id,
+				'payment_status' => (string) $booking['payment_status'],
+				'booking_status' => (string) $booking['status'],
+				'amount_due'     => Payment_Manager::amount_due( $booking ),
+				'currency'       => $record['currency'] ?? Payment_Manager::currency(),
+				'provider'       => (string) ( $record['provider'] ?? '' ),
+				'pay_url'        => Token::payment_url( $id ),
 			]
 		);
 	}

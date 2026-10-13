@@ -334,6 +334,28 @@
 					? (i18n.rescheduleConfirmed || 'Reschedule confirmed')
 					: (data.status === 'confirmed' ? (i18n.bookingConfirmed || 'Booking confirmed') : (i18n.bookingReceived || 'Booking received'));
 				successBody.textContent = data.message || (i18n.checkInbox || 'Check your inbox for the details.');
+
+				// Paid booking: surface the pay-now CTA (gateway connected)
+				// or a pay-later notice. payUrl is a signed link.
+				var payBox = root.querySelector('[data-bookingistic-pay]');
+				if (payBox) {
+					payBox.innerHTML = '';
+					if (data.payment && data.payment.pay_url) {
+						var amt = data.payment.amount_due;
+						var label = (i18n.payNow || 'Pay now') + (amt > 0 ? ' — ' + amt.toFixed(2) + ' ' + (data.payment.currency || '') : '');
+						var a = document.createElement('a');
+						a.className = 'bookingistic-payment-box__button';
+						a.href = data.payment.pay_url;
+						a.textContent = label;
+						payBox.appendChild(a);
+					} else if (data.payment) {
+						var p = document.createElement('p');
+						p.className = 'bookingistic-payment-notice';
+						p.textContent = (i18n.payLater || 'Payment is due — we will send you payment instructions.');
+						payBox.appendChild(p);
+					}
+					if (payBox.childNodes.length) payBox.hidden = false;
+				}
 				setStep(3);
 			} catch (err) {
 				showError(err.message || i18n.errorGeneric);

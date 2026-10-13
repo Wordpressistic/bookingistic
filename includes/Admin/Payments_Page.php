@@ -42,6 +42,43 @@ class Payments_Page {
 	}
 
 	/**
+	 * Manual offline actions (mark paid / refund) — nonce + capability gated.
+	 * Invoked from Admin_Menu::handle_post_actions().
+	 */
+	public static function maybe_act(): void {
+		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
+		if ( ! in_array( $action, [ 'payment_mark_paid', 'payment_refund', 'payment_fail' ], true ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_bookingistic' ) && ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		check_admin_referer( self::NONCE );
+
+		$booking_id = (int) ( $_POST['booking_id'] ?? 0 );
+		$booking    = $booking_id ? \Bookingistic\Database\Booking_Repository::find( $booking_id ) : null;
+		if ( ! $booking ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-payments' ) );
+			exit;
+		}
+
+		// Actions: payment_mark_paid → paid, payment_refund → refunded, payment_fail → failed.
+		$map = [ 'payment_mark_paid' => 'paid', 'payment_refund' => 'refunded', 'payment_fail' => 'failed' ];
+		$status = $map[ $action ];
+		Payment_Manager::record_event(
+			$booking_id,
+			'manual',
+			$map[ $action ],
+			(float) $booking['payment_amount'],
+			(string) get_current_user_id(), // actor for audit trail.
+			[ 'manual' => true, 'user_id' => get_current_user_id() ]
+		);
+
+		wp_safe_redirect( add_query_arg( [ 'page' => 'bookingistic-payments', 'updated' => 1 ], admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	/**
 	 * Handles the gateway enable/disable form. Invoked from Admin_Menu::handle_post_actions().
 	 */
 	public static function maybe_save(): void {

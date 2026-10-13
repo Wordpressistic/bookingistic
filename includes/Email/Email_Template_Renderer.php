@@ -54,7 +54,7 @@ class Email_Template_Renderer {
 			'business_address'    => $settings['business_address'] ?? '',
 			'cancel_link'         => home_url( '/?bookingistic_action=cancel&id=0&t=sample' ),
 			'reschedule_link'     => home_url( '/?bookingistic_action=reschedule&id=0&t=sample' ),
-			'payment_link'        => '',
+			'payment_link'        => home_url( '/?bookingistic_action=pay&id=0&t=sample' ),
 			'meeting_link'        => '',
 			'website_url'         => home_url( '/' ),
 		];
@@ -103,7 +103,7 @@ class Email_Template_Renderer {
 			'business_address'    => $settings['business_address'] ?? '',
 			'cancel_link'         => $booking['cancel_token'] ? Token::cancel_url( (int) $booking['id'], $booking['cancel_token'] ) : '',
 			'reschedule_link'     => $booking['reschedule_token'] ? Token::reschedule_url( (int) $booking['id'], $booking['reschedule_token'] ) : '',
-			'payment_link'        => '',
+			'payment_link'        => \Bookingistic\Helpers\Token::payment_url( (int) $booking['id'] ),
 			'meeting_link'        => '',
 			'website_url'         => home_url( '/' ),
 		];

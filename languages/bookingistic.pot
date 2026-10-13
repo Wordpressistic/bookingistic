@@ -14,3 +14,76 @@ msgstr ""
 # Note: translate.wordpress.org regenerates the canonical POT from the
 # plugin source automatically after each wp.org release. This file exists
 # so local GlotPress imports and theme developers have a stable reference.
+
+#: includes/Payments/Abstract_Gateway.php includes/Frontend/Payment_Shortcode.php
+msgid "Payment gateway for paid bookings."
+msgstr ""
+
+#: includes/Frontend/Payment_Shortcode.php
+msgid "Payment details are available to the booking customer only."
+msgstr ""
+
+#: includes/Frontend/Payment_Shortcode.php
+msgid "Paid — thank you!"
+msgstr ""
+
+#: includes/Frontend/Payment_Shortcode.php
+msgid "Payment of %s is due. Please contact us to complete payment."
+msgstr ""
+
+#: includes/Frontend/Payment_Shortcode.php
+msgid "Pay now — %s"
+msgstr ""
+
+#: includes/Booking/Payment_Handler.php
+msgid "Invalid or expired payment link."
+msgstr ""
+
+#: includes/Booking/Payment_Handler.php
+msgid "Booking not found."
+msgstr ""
+
+#: includes/Booking/Payment_Handler.php
+msgid "This booking is already paid. No further payment is needed."
+msgstr ""
+
+#: includes/Booking/Payment_Handler.php
+msgid "Online payment is not available for this booking yet. Please contact us to complete payment."
+msgstr ""
+
+#: includes/Frontend/Assets.php
+msgid "Pay now"
+msgstr ""
+
+#: includes/Frontend/Assets.php
+msgid "Payment is due — we will send you payment instructions."
+msgstr ""
+
+#: templates/admin/service-edit.php
+msgid "Deposit (%)"
+msgstr ""
+
+#: templates/admin/service-edit.php
+msgid "Require only a percentage of the price upfront (0 = full amount). Supported by connected payment gateways."
+msgstr ""
+
+#: templates/admin/payments.php
+msgid "Guest"
+msgstr ""
+
+#: templates/admin/payments.php
+msgid "Actions"
+msgstr ""
+
+#: templates/admin/payments.php
+msgid "Mark paid"
+msgstr ""
+
+#: templates/admin/payments.php
+msgid "Refund"
+msgstr ""
+
+#: templates/admin/payments.php
+msgid "Payment record updated."
+msgstr ""
+

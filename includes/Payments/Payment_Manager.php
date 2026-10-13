@@ -2,10 +2,10 @@
 /**
  * Payments manager — gateway registry + booking payment lifecycle.
  *
- * Gateways are pluggable via the `bookingistic_payment_gateways` filter.
- * Each gateway implements Payment_Gateway. The manager records every
- * transition in the payment_records ledger and applies the resulting
- * booking payment_status + confirmation.
+ * Gateways are pluggable via the `bookingistic_payment_gateways` filter
+ * (alias: `bookingistic_gateways`). Each gateway implements Payment_Gateway.
+ * The manager records every transition in the payment_records ledger and
+ * applies the resulting booking payment_status + status transitions.
  *
  * @package Bookingistic
  */
@@ -14,6 +14,7 @@ namespace Bookingistic\Payments;
 
 use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Payment_Repository;
+use Bookingistic\Database\Service_Repository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -45,6 +46,14 @@ class Payment_Manager {
 			 */
 			$gateways = apply_filters( 'bookingistic_payment_gateways', $defaults );
 
+			/**
+			 * Alias filter (short name) — receives the same registry. Results
+			 * merge; both filters exist so integrations can use either name.
+			 *
+			 * @param array<string,Payment_Gateway> $gateways
+			 */
+			$gateways = apply_filters( 'bookingistic_gateways', $gateways );
+
 			$clean = [];
 			foreach ( (array) $gateways as $slug => $gateway ) {
 				if ( $gateway instanceof Payment_Gateway && $gateway->is_available() ) {
@@ -61,7 +70,28 @@ class Payment_Manager {
 	}
 
 	/**
+	 * Amount due for a booking: full price, or deposit when the service
+	 * sets one (deposit_percent 1-100).
+	 */
+	public static function amount_due( array $booking ): float {
+		$amount = (float) ( $booking['payment_amount'] ?? 0 );
+		if ( $amount <= 0 ) {
+			return 0.0;
+		}
+		$service = Service_Repository::find( (int) $booking['service_id'] );
+		$percent = $service ? (float) ( $service['deposit_percent'] ?? 0 ) : 0.0;
+		if ( $percent <= 0 || $percent >= 100 ) {
+			return round( $amount, 2 );
+		}
+		return round( $amount * $percent / 100, 2 );
+	}
+
+	/**
 	 * Ledger + booking update when a gateway reports a payment event.
+	 *
+	 * Status lifecycle: pending → paid | failed | refunded | cancelled.
+	 * Booking status map: first `paid` event confirms a pending booking;
+	 * `refunded`/`failed` never auto-cancel (admin decides).
 	 *
 	 * @param int    $booking_id Booking ID.
 	 * @param string $provider   Gateway slug.
@@ -114,8 +144,8 @@ class Payment_Manager {
 		 * Fires after a payment event has been recorded on a booking.
 		 *
 		 * @param int   $booking_id
-		 * @param array $record     Ledger row (or null-shape when ledger write failed).
-		 * @param array $booking    Updated booking row.
+		 * @param array $record     Ledger row (or empty when ledger write failed).
+		 * @param array $update     Booking fields that were changed.
 		 */
 		do_action( 'bookingistic_payment_recorded', $booking_id, Payment_Repository::find( $record_id ) ?: [], $update );
 	}
@@ -151,5 +181,36 @@ class Payment_Manager {
 	public static function is_gateway_enabled( string $slug ): bool {
 		$enabled = self::enabled_gateways();
 		return ! empty( $enabled[ $slug ] );
+	}
+
+	/**
+	 * Whether at least one gateway is enabled AND able to take payments now.
+	 */
+	public static function has_active_gateway(): bool {
+		foreach ( self::gateways() as $gateway ) {
+			if ( $gateway->is_enabled() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Hosted payment URL for a booking (gateway-provided), or '' when the
+	 * booking needs no payment / no gateway is connected.
+	 */
+	public static function payment_url( array $booking ): string {
+		if ( 'pending' !== $booking['payment_status'] || (float) ( $booking['payment_amount'] ?? 0 ) <= 0 ) {
+			return '';
+		}
+		$record = Payment_Repository::latest_for_booking( (int) $booking['id'] );
+		if ( ! $record || 'woocommerce' !== $record['provider'] ) {
+			return '';
+		}
+		$gateway = self::gateway( (string) $record['provider'] );
+		if ( ! $gateway instanceof Gateways\WooCommerce_Gateway ) {
+			return '';
+		}
+		return $gateway->checkout_url( (int) $booking['id'] );
 	}
 }

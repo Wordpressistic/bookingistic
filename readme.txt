@@ -121,8 +121,13 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 
 = 2.3.0 =
 * New: Payments module — WooCommerce Orders gateway with enable/disable switch under Bookingistic → Payments
-* New: payment ledger — every payment attempt (pending/paid/refunded/failed) recorded per booking, with admin screen and REST endpoints (`/payments`, `/payments/gateways`)
-* New: `bookingistic_payment_gateways`, `bookingistic_payment_recorded`, `bookingistic_payment_currency` filters for custom gateways
+* New: payment ledger — every payment attempt (pending/paid/refunded/failed) recorded per booking, with admin screen and REST endpoints (`/payments`, `/payments/gateways`, `/payments/status`)
+* New: `bookingistic_payment_gateways` (alias `bookingistic_gateways`), `bookingistic_payment_recorded`, `bookingistic_payment_currency` filters — gateway registry is fully pluggable
+* New: deposits — per-service deposit percentage; only the deposit is charged upfront (`deposit_paid` status), supported across forms, admin and REST
+* New: signed pay-now links (`?bookingistic_action=pay`, HMAC token, 410 on bad token) + `[bookingistic_payment id email]` shortcode with Pay now button
+* New: booking form success screen shows a Pay now button when a gateway is connected, or pay-later instructions otherwise
+* New: `{payment_link}` email merge tag now carries the booking's signed pay link
+* New: admin manual actions — Mark paid / Refund on payment records (nonce + capability checked) for offline payments
 * New: paid bookings that receive payment are confirmed automatically (consistent with the WooCommerce integration flow)
 
 = 2.2.0 =
@@ -151,7 +156,7 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 == Upgrade Notice ==
 
 = 2.3.0 =
-Adds the payments foundation: WooCommerce Orders gateway + payment ledger. No database changes — upgrades cleanly from 2.x.
+Adds payments: WooCommerce Orders gateway, payment ledger, deposits, signed pay links and the [bookingistic_payment] shortcode. A small automatic database upgrade (service deposit column) runs on update.
 
 = 2.2.0 =
 New designs, calendar views, industry presets and Google Calendar sync. Database upgrades run automatically — back up before updating as with any release.

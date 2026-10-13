@@ -41,6 +41,7 @@ class Services_Page {
 			'buffer_before'     => (int) ( $_POST['buffer_before'] ?? 0 ),
 			'buffer_after'      => (int) ( $_POST['buffer_after'] ?? 0 ),
 			'price'             => (float) ( $_POST['price'] ?? 0 ),
+			'deposit_percent'   => (float) ( $_POST['deposit_percent'] ?? 0 ),
 			'category'          => sanitize_text_field( wp_unslash( $_POST['category'] ?? '' ) ),
 			'booking_type'      => sanitize_key( $_POST['booking_type'] ?? 'one_to_one' ),
 			'confirmation_mode' => sanitize_key( $_POST['confirmation_mode'] ?? 'auto' ),

@@ -112,6 +112,7 @@ $is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 					<span class="bookingistic-success__icon" aria-hidden="true">✓</span>
 					<h3 data-bookingistic-success-title><?php esc_html_e( 'Booking confirmed', 'bookingistic' ); ?></h3>
 					<p data-bookingistic-success-body><?php esc_html_e( 'Check your inbox for the details.', 'bookingistic' ); ?></p>
+					<div data-bookingistic-pay class="bookingistic-payment-box" hidden></div>
 				</div>
 			</section>
 

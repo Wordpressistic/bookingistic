@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 class Installer {
 
 	const DB_VERSION_OPTION = 'bookingistic_db_version';
-	const DB_VERSION        = '2.2.0';
+	const DB_VERSION        = '2.3.0';
 
 	public static function install(): void {
 		Tables::create_all();

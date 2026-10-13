@@ -51,6 +51,13 @@ $is_new = empty( $service );
 				<td><input id="price" name="price" type="number" step="0.01" min="0" value="<?php echo esc_attr( $service['price'] ?? 0 ); ?>"></td>
 			</tr>
 			<tr>
+				<th><label for="deposit_percent"><?php esc_html_e( 'Deposit (%)', 'bookingistic' ); ?></label></th>
+				<td>
+					<input id="deposit_percent" name="deposit_percent" type="number" step="1" min="0" max="100" value="<?php echo esc_attr( $service['deposit_percent'] ?? 0 ); ?>">
+					<p class="description"><?php esc_html_e( 'Require only a percentage of the price upfront (0 = full amount). Supported by connected payment gateways.', 'bookingistic' ); ?></p>
+				</td>
+			</tr>
+			<tr>
 				<th><label for="category"><?php esc_html_e( 'Category', 'bookingistic' ); ?></label></th>
 				<td><input id="category" name="category" type="text" value="<?php echo esc_attr( $service['category'] ?? '' ); ?>"></td>
 			</tr>
