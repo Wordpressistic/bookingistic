@@ -39,7 +39,10 @@ $pill = [
 ];
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1><?php esc_html_e( 'Payments', 'bookingistic' ); ?></h1>
+	<header class="bookingistic-header">
+		<h1><?php esc_html_e( 'Payments', 'bookingistic' ); ?><span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><span class="dashicons dashicons-money-alt"></span><?php echo esc_html( number_format_i18n( $total ) ); ?></span></span></h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Payment methods and the full ledger of every payment attempt.', 'bookingistic' ); ?></p>
+	</header>
 
 	<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Payment settings saved.', 'bookingistic' ); ?></p></div>
@@ -49,15 +52,19 @@ $pill = [
 	<?php endif; ?>
 
 	<?php if ( empty( $gateways ) ) : ?>
-		<div class="bookingistic-card bookingistic-card--muted">
-			<p><?php esc_html_e( 'No payment gateways are available yet. Install WooCommerce to collect payments for paid bookings, or add a gateway via the bookingistic_payment_gateways filter.', 'bookingistic' ); ?></p>
+		<div class="bookingistic-card">
+			<div class="bookingistic-empty">
+				<span class="dashicons dashicons-money-alt"></span>
+				<p><?php esc_html_e( 'No payment gateways are available yet. Install WooCommerce to collect payments for paid bookings, or add a gateway via the bookingistic_payment_gateways filter.', 'bookingistic' ); ?></p>
+			</div>
 		</div>
 	<?php else : ?>
-		<h2 class="title"><?php esc_html_e( 'Payment methods', 'bookingistic' ); ?></h2>
-		<form method="post">
-			<?php wp_nonce_field( \Bookingistic\Admin\Payments_Page::NONCE ); ?>
-			<input type="hidden" name="bookingistic_admin_action" value="save_payments">
-			<table class="widefat striped" style="max-width:820px">
+		<div class="bookingistic-card" style="max-width:860px">
+			<h2><span class="dashicons dashicons-cart"></span><?php esc_html_e( 'Payment methods', 'bookingistic' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( \Bookingistic\Admin\Payments_Page::NONCE ); ?>
+				<input type="hidden" name="bookingistic_admin_action" value="save_payments">
+				<table class="widefat striped">
 				<tbody>
 					<?php foreach ( $gateways as $slug => $gateway ) : ?>
 						<tr>
@@ -72,11 +79,15 @@ $pill = [
 					<?php endforeach; ?>
 				</tbody>
 			</table>
-			<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Save payment methods', 'bookingistic' ); ?></button></p>
+			<p style="margin:14px 0 0"><button type="submit" class="button button-primary"><?php esc_html_e( 'Save payment methods', 'bookingistic' ); ?></button></p>
 		</form>
+		</div>
 	<?php endif; ?>
 
-	<h2 class="title"><?php esc_html_e( 'Payment records', 'bookingistic' ); ?></h2>
+	<div class="bookingistic-card bookingistic-card--flush" style="margin-top:16px">
+		<div class="bookingistic-table-card__head bookingistic-card__body" style="padding-bottom:0">
+			<h2 style="margin:0"><span class="dashicons dashicons-list-view"></span><?php esc_html_e( 'Payment records', 'bookingistic' ); ?></h2>
+		</div>
 
 	<form method="get" class="bookingistic-calendar__filters" style="margin-top:6px">
 		<input type="hidden" name="page" value="bookingistic-payments">
@@ -102,7 +113,10 @@ $pill = [
 	</form>
 
 	<?php if ( empty( $rows ) ) : ?>
-		<div class="bookingistic-card bookingistic-card--muted"><p><?php esc_html_e( 'No payment records yet. Records appear here once a paid booking goes through a payment method.', 'bookingistic' ); ?></p></div>
+		<div class="bookingistic-empty">
+			<span class="dashicons dashicons-money-alt"></span>
+			<p><?php esc_html_e( 'No payment records yet. Records appear here once a paid booking goes through a payment method.', 'bookingistic' ); ?></p>
+		</div>
 	<?php endif; ?>
 
 	<table class="widefat striped">
@@ -166,4 +180,5 @@ $pill = [
 			?>
 		</div></div>
 	<?php endif; ?>
+	</div>
 </div>

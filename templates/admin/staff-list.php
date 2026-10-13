@@ -10,23 +10,31 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1>
-		<?php esc_html_e( 'Staff', 'bookingistic' ); ?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-staff&new=1' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a>
-	</h1>
+	<header class="bookingistic-header">
+		<h1>
+			<?php esc_html_e( 'Staff', 'bookingistic' ); ?>
+			<span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><?php echo esc_html( number_format_i18n( count( $staff ) ) ); ?></span></span>
+			<span class="bookingistic-header__actions"><a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-staff&new=1' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a></span>
+		</h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Team members, working hours, and Google Calendar sync.', 'bookingistic' ); ?></p>
+	</header>
 
 	<?php if ( ! empty( $_GET['deleted'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Staff deleted.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( empty( $staff ) ) : ?>
-		<div class="bookingistic-card bookingistic-card--muted">
-			<p><?php esc_html_e( 'No staff yet. For solo operators, bookings default to a single host using the business working hours from Settings — adding staff is optional.', 'bookingistic' ); ?></p>
+		<div class="bookingistic-card">
+			<div class="bookingistic-empty">
+				<span class="dashicons"></span>
+				<p><?php esc_html_e( 'No staff yet. For solo operators, bookings default to a single host using the business working hours from Settings — adding staff is optional.', 'bookingistic' ); ?></p>
+			</div>
 		</div>
 		</div>
 		<?php return; ?>
 	<?php endif; ?>
 
+	<div class="bookingistic-card bookingistic-card--flush">
 	<table class="widefat striped">
 		<thead><tr>
 			<th><?php esc_html_e( 'Name', 'bookingistic' ); ?></th>
@@ -49,4 +57,5 @@ defined( 'ABSPATH' ) || exit;
 			<?php endforeach; ?>
 		</tbody>
 	</table>
+	</div>
 </div>

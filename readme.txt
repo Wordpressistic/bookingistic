@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,14 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 4. Admin dashboard — bookings, services, staff, email automations
 
 == Changelog ==
+
+= 2.4.0 =
+* New: premium admin UI — every Bookingistic screen restyled with a consistent design system (page headers with taglines, card-based panels, refined tables, status pills, sticky save bar)
+* New: Integrations page rebuilt as an animated card grid — icon, description, Connected/Not connected pill, hover lift, and staggered fade-in (pure CSS, respects prefers-reduced-motion)
+* New: dashboard, bookings, services, staff, customers, and customer profiles now show live stat cards (real counts from your data)
+* New: Reports screen with bookings-by-status summary and top services (replaces the Phase 2 placeholder)
+* Tweak: legacy "Bookings (v1)" menu removed from the admin sidebar (data and the legacy REST endpoint are untouched; developers can restore it with the `bookingistic_legacy_bookings_show_ui` filter)
+* Tweak: admin stylesheet rebuilt around CSS variables matching the WordPress admin palette; no external fonts or CDNs
 
 = 2.3.0 =
 * New: Payments module — WooCommerce Orders gateway with enable/disable switch under Bookingistic → Payments

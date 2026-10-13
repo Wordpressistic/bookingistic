@@ -21,6 +21,17 @@ class Backward_Compatibility {
 
 	public const LEGACY_CPT = 'wpistic_booking';
 
+	/**
+	 * Whether the legacy "Bookings (v1)" submenu should appear under Bookingistic.
+	 *
+	 * Hidden by default since v2.4.0 — the modern Bookings screen under
+	 * Bookingistic → Bookings supersedes it. Power users can restore the legacy
+	 * screen with: add_filter( 'bookingistic_legacy_bookings_show_ui', '__return_true' );
+	 */
+	public static function legacy_show_ui(): bool {
+		return (bool) apply_filters( 'bookingistic_legacy_bookings_show_ui', false );
+	}
+
 	public static function register_cpt(): void {
 		register_post_type(
 			self::LEGACY_CPT,
@@ -30,7 +41,7 @@ class Backward_Compatibility {
 					'singular_name' => __( 'Legacy Booking', 'bookingistic' ),
 				],
 				'public'          => false,
-				'show_ui'         => true,
+				'show_ui'         => self::legacy_show_ui(),
 				'show_in_menu'    => 'bookingistic',
 				'show_in_rest'    => false,
 				'capability_type' => 'post',

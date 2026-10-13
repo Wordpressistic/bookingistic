@@ -18,10 +18,14 @@ $current_staff    = (int) ( $_GET['staff_id'] ?? 0 );
 $current_payment  = sanitize_key( $_GET['payment_status'] ?? '' );
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1>
-		<?php esc_html_e( 'Bookings', 'bookingistic' ); ?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&new=1' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a>
-	</h1>
+	<header class="bookingistic-header">
+		<h1>
+			<?php esc_html_e( 'Bookings', 'bookingistic' ); ?>
+			<span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><span class="dashicons dashicons-awards"></span><?php echo esc_html( number_format_i18n( $result['total'] ?? 0 ) ); ?></span></span>
+			<span class="bookingistic-header__actions"><a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&new=1' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a></span>
+		</h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Every booking across all services — filter, reschedule, and manage statuses.', 'bookingistic' ); ?></p>
+	</header>
 
 	<ul class="subsubsub bookingistic-filters">
 		<?php
@@ -84,11 +88,17 @@ $current_payment  = sanitize_key( $_GET['payment_status'] ?? '' );
 	</form>
 
 	<?php if ( empty( $rows ) ) : ?>
-		<div class="bookingistic-card bookingistic-card--muted"><p><?php esc_html_e( 'No bookings yet.', 'bookingistic' ); ?></p></div>
+		<div class="bookingistic-card">
+			<div class="bookingistic-empty">
+				<span class="dashicons dashicons-calendar-alt"></span>
+				<p><?php esc_html_e( 'No bookings yet.', 'bookingistic' ); ?></p>
+			</div>
+		</div>
 		</div>
 		<?php return; ?>
 	<?php endif; ?>
 
+	<div class="bookingistic-card bookingistic-card--flush">
 	<table class="widefat striped">
 		<thead>
 			<tr>
@@ -152,7 +162,8 @@ $current_payment  = sanitize_key( $_GET['payment_status'] ?? '' );
 					'total'   => (int) $result['pages'],
 				]
 			);
-			?>
-		</div></div>
-	<?php endif; ?>
+				?>
+			</div></div>
+		<?php endif; ?>
+	</div>
 </div>

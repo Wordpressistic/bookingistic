@@ -1,75 +1,293 @@
 /**
- * Bookingistic — admin styles.
+ * Bookingistic — admin design system (v2.4.0 "premium UI").
+ *
+ * Local only: no external fonts, no CDNs (wp.org guideline). Uses the WP admin
+ * system font stack and standard admin palette hooks so the plugin blends with
+ * any admin color scheme while looking deliberately premium.
  */
 
-.bookingistic-wrap { max-width: 1200px; }
+/* ===== Design tokens ===== */
+.bookingistic-wrap {
+	--bk-accent: #7c3aed;
+	--bk-accent-strong: #6d28d9;
+	--bk-accent-soft: #f3efff;
+	--bk-ink: #1d2327;
+	--bk-ink-2: #50575e;
+	--bk-muted: #787c82;
+	--bk-line: #e2e6ea;
+	--bk-line-soft: #eceff2;
+	--bk-bg-soft: #f6f7f9;
+	--bk-card: #ffffff;
+	--bk-green: #067a4e;
+	--bk-green-bg: #e5f5ee;
+	--bk-amber: #8a5a00;
+	--bk-amber-bg: #fdf2d0;
+	--bk-red: #b3261e;
+	--bk-red-bg: #fdeaea;
+	--bk-blue: #135e96;
+	--bk-blue-bg: #e8f1fa;
+	--bk-gray-bg: #eef0f3;
+	--bk-radius: 12px;
+	--bk-radius-sm: 8px;
+	--bk-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 8px 24px -18px rgba(16, 24, 40, 0.25);
+	--bk-shadow-lift: 0 2px 4px rgba(16, 24, 40, 0.06), 0 18px 36px -20px rgba(16, 24, 40, 0.38);
 
-.bookingistic-header {
-	padding: 20px 0 8px;
+	max-width: 1280px;
+	color: var(--bk-ink);
 }
-.bookingistic-header h1 { margin: 0; font-size: 22px; }
-.bookingistic-header__tagline { color: #6b7280; margin: 4px 0 0; font-size: 13px; }
 
+/* ===== Page header ===== */
+.bookingistic-header {
+	padding: 20px 4px 4px;
+}
+.bookingistic-header h1 {
+	margin: 0;
+	padding: 0;
+	font-size: 23px;
+	line-height: 1.3;
+	font-weight: 700;
+	letter-spacing: -0.015em;
+	color: var(--bk-ink);
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+.bookingistic-header__actions {
+	margin-left: auto;
+	display: inline-flex;
+	gap: 8px;
+}
+.bookingistic-header__tagline {
+	margin: 4px 0 0;
+	color: var(--bk-muted);
+	font-size: 13px;
+}
+.bookingistic-header__badges { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.bookingistic-header__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bk-accent-strong);
+	background: var(--bk-accent-soft);
+	border: 1px solid #e3d9ff;
+	border-radius: 999px;
+	padding: 3px 10px;
+}
+.bookingistic-header__badge .dashicons { font-size: 14px; width: 14px; height: 14px; }
+
+/* ===== Stat cards ===== */
 .bookingistic-stats {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
 	gap: 12px;
-	margin: 18px 0 24px;
+	margin: 18px 0 22px;
 }
 .bookingistic-stat {
-	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-radius: 10px;
-	padding: 16px 18px;
+	position: relative;
+	background: var(--bk-card);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius);
+	padding: 14px 16px 13px;
 	display: grid;
-	gap: 4px;
+	gap: 3px;
+	box-shadow: var(--bk-shadow);
+	overflow: hidden;
+	transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.bookingistic-stat__label { color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
-.bookingistic-stat__value { font-size: 24px; font-weight: 600; color: #111827; }
+.bookingistic-stat::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	background: var(--bk-accent);
+	opacity: 0.85;
+}
+.bookingistic-stat:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--bk-shadow-lift);
+}
+.bookingistic-stat__label {
+	color: var(--bk-muted);
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+}
+.bookingistic-stat__value {
+	font-size: 26px;
+	font-weight: 700;
+	color: var(--bk-ink);
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+.bookingistic-stat__hint { color: var(--bk-muted); font-size: 11px; }
+.bookingistic-stat--green::before { background: #12a150; }
+.bookingistic-stat--amber::before { background: #d97706; }
+.bookingistic-stat--red::before   { background: #dc2626; }
+.bookingistic-stat--blue::before  { background: #2563eb; }
 
+/* ===== Cards & grids ===== */
 .bookingistic-grid { display: grid; gap: 16px; }
-.bookingistic-grid--two { grid-template-columns: 1fr 1fr; }
-@media (max-width: 980px) { .bookingistic-grid--two { grid-template-columns: 1fr; } }
+.bookingistic-grid--two { grid-template-columns: 1.6fr 1fr; }
+.bookingistic-grid--even { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1100px) {
+	.bookingistic-grid--two,
+	.bookingistic-grid--even { grid-template-columns: 1fr; }
+}
 
 .bookingistic-card {
-	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
+	background: var(--bk-card);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius);
 	padding: 18px 20px;
+	box-shadow: var(--bk-shadow);
+	margin-top: 0;
 }
-.bookingistic-card h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
-.bookingistic-card--muted { background: #f9fafb; }
+.bookingistic-card + .bookingistic-card { margin-top: 16px; }
+.bookingistic-card > h2 {
+	margin: 0 0 12px;
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bk-ink-2);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.bookingistic-card > h2 .dashicons {
+	color: var(--bk-accent);
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+}
+.bookingistic-card--muted { background: var(--bk-bg-soft); }
+.bookingistic-card--flush { padding: 0; overflow: hidden; }
+.bookingistic-card--flush .bookingistic-table-card__head {
+	padding: 14px 20px 12px;
+	border-bottom: 1px solid var(--bk-line-soft);
+}
+.bookingistic-card__body { padding: 14px 20px 16px; }
 
-.bookingistic-muted { color: #6b7280; font-size: 13px; }
+/* Wrap WP tables inside cards cleanly. */
+.bookingistic-card > .wp-list-table,
+.bookingistic-card > form > .wp-list-table,
+.bookingistic-card > table { border: 0; box-shadow: none; }
+.bookingistic-card > table { border-radius: var(--bk-radius-sm); }
+.bookingistic-card .wp-list-table thead th {
+	font-size: 11.5px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bk-muted);
+	font-weight: 700;
+	border-bottom: 1px solid var(--bk-line);
+}
+.bookingistic-card .wp-list-table td,
+.bookingistic-card .wp-list-table th { padding-top: 10px; padding-bottom: 10px; }
 
-.bookingistic-activity { list-style: none; padding: 0; margin: 0; }
-.bookingistic-activity li { padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
-.bookingistic-activity li:last-child { border-bottom: 0; }
-.bookingistic-activity li strong { display: block; font-size: 13px; }
-.bookingistic-activity .bookingistic-muted { font-size: 12px; }
+.bookingistic-muted { color: var(--bk-muted); font-size: 13px; }
+.bookingistic-card .inside,
+.bookingistic-card code { font-size: 12.5px; }
 
+/* ===== Status pills ===== */
 .bookingistic-pill {
 	display: inline-block;
-	padding: 2px 8px;
+	padding: 2px 9px;
 	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
+	line-height: 1.7;
+	border: 1px solid transparent;
 }
-.bookingistic-pill--pending     { background: #fef3c7; color: #92400e; }
-.bookingistic-pill--confirmed   { background: #d1fae5; color: #065f46; }
-.bookingistic-pill--rescheduled { background: #dbeafe; color: #1e3a8a; }
-.bookingistic-pill--completed   { background: #e5e7eb; color: #374151; }
-.bookingistic-pill--cancelled   { background: #fee2e2; color: #991b1b; }
-.bookingistic-pill--no_show     { background: #fde68a; color: #78350f; }
+.bookingistic-pill--pending     { background: var(--bk-amber-bg); color: var(--bk-amber); border-color: #f3ddb0; }
+.bookingistic-pill--confirmed   { background: var(--bk-green-bg); color: var(--bk-green); border-color: #bfe8d4; }
+.bookingistic-pill--rescheduled { background: var(--bk-blue-bg);  color: var(--bk-blue);  border-color: #c3dcf2; }
+.bookingistic-pill--completed   { background: var(--bk-gray-bg);  color: #3f444a;         border-color: #dbe0e6; }
+.bookingistic-pill--cancelled   { background: var(--bk-red-bg);   color: var(--bk-red);   border-color: #f5c6c4; }
+.bookingistic-pill--no_show     { background: #fbeccc;            color: #7c4a03;         border-color: #efd9ac; }
+.bookingistic-pill--deposit_paid { background: #e7f0fd; color: #1d4ed8; border-color: #c7dbf8; }
+.bookingistic-pill--paid        { background: var(--bk-green-bg); color: var(--bk-green); border-color: #bfe8d4; }
+.bookingistic-pill--failed,
+.bookingistic-pill--refunded    { background: var(--bk-red-bg);   color: var(--bk-red);   border-color: #f5c6c4; }
+.bookingistic-pill--free,
+.bookingistic-pill--sent        { background: var(--bk-green-bg); color: var(--bk-green); border-color: #bfe8d4; }
+.bookingistic-pill--disabled    { background: var(--bk-gray-bg);  color: #5b6067;         border-color: #dbe0e6; }
+.bookingistic-pill--active      { background: var(--bk-green-bg); color: var(--bk-green); border-color: #bfe8d4; }
+.bookingistic-pill--inactive    { background: var(--bk-gray-bg);  color: #5b6067;         border-color: #dbe0e6; }
+.bookingistic-pill--draft       { background: var(--bk-amber-bg); color: var(--bk-amber); border-color: #f3ddb0; }
 
-.bookingistic-filters { margin: 10px 0 16px; }
+/* ===== Buttons ===== */
+.bookingistic-wrap .button,
+.bookingistic-wrap .button-secondary {
+	border-radius: 6px;
+	border-color: #d5d9de;
+	box-shadow: 0 1px 1px rgba(16, 24, 40, 0.04);
+	transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+.bookingistic-wrap .button:hover { border-color: #b9bec5; }
+.bookingistic-wrap .button-primary,
+.bookingistic-wrap .button-primary:visited {
+	background: var(--bk-accent);
+	border-color: var(--bk-accent-strong);
+	border-radius: 6px;
+	text-shadow: none;
+	box-shadow: 0 1px 2px rgba(109, 40, 217, 0.35);
+	transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+.bookingistic-wrap .button-primary:hover,
+.bookingistic-wrap .button-primary:focus {
+	background: var(--bk-accent-strong);
+	border-color: var(--bk-accent-strong);
+	box-shadow: 0 2px 6px rgba(109, 40, 217, 0.4);
+}
+.bookingistic-wrap .button-primary:active { transform: translateY(1px); }
+.bookingistic-header .page-title-action {
+	margin-top: 0;
+	vertical-align: middle;
+	border-radius: 6px;
+}
+/* Scope the legacy `page-title-action` used inside h1 blocks. */
+h1 .page-title-action {
+	margin-top: 0 !important;
+	vertical-align: middle;
+}
+
+/* ===== Filter bars ===== */
+.bookingistic-filters { margin: 12px 0 16px; }
 .bookingistic-filters li::after { content: " | "; color: #d1d5db; }
 .bookingistic-filters li:last-child::after { content: ""; }
 .bookingistic-filters .current { font-weight: 600; }
 
-/* ===== Calendar ===== */
+.bookingistic-calendar__filters {
+	display: flex;
+	gap: 14px;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	margin-bottom: 14px;
+	padding: 12px 14px;
+	background: var(--bk-card);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius);
+	box-shadow: var(--bk-shadow);
+}
+.bookingistic-calendar__filters label { display: grid; gap: 4px; font-size: 12px; color: var(--bk-muted); }
+.bookingistic-calendar__filters label > span {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.bookingistic-calendar__filters select { min-width: 140px; }
+.bookingistic-calendar__filters-spacer { flex: 1; }
+
+/* ===== Calendar (visual only) ===== */
 .bookingistic-calendar__header {
 	display: flex;
 	align-items: center;
@@ -79,39 +297,13 @@
 }
 .bookingistic-calendar__title { margin: 0; font-size: 18px; flex: 1; min-width: 200px; }
 .bookingistic-calendar__nav, .bookingistic-calendar__views { display: inline-flex; gap: 6px; }
-
-.bookingistic-calendar__filters {
-	display: flex;
-	gap: 14px;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	margin-bottom: 14px;
-	padding: 12px 14px;
-	background: #f9fafb;
-	border: 1px solid #e5e7eb;
-	border-radius: 10px;
-}
-.bookingistic-calendar__filters label { display: grid; gap: 4px; font-size: 12px; color: #6b7280; }
-.bookingistic-calendar__filters select { min-width: 140px; }
-.bookingistic-calendar__filters-spacer { flex: 1; }
-
-.bookingistic-calendar { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; min-height: 400px; }
-
-.bookingistic-calendar__loading, .bookingistic-calendar__error {
-	padding: 32px;
-	text-align: center;
-	color: #6b7280;
-}
-.bookingistic-calendar__error { color: #991b1b; }
-
-.bookingistic-calendar__grid--month {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	gap: 4px;
-}
+.bookingistic-calendar { background: var(--bk-card); border: 1px solid var(--bk-line); border-radius: var(--bk-radius); padding: 12px; min-height: 400px; box-shadow: var(--bk-shadow); }
+.bookingistic-calendar__loading, .bookingistic-calendar__error { padding: 32px; text-align: center; color: var(--bk-muted); }
+.bookingistic-calendar__error { color: var(--bk-red); }
+.bookingistic-calendar__grid--month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .bookingistic-calendar__dow {
 	text-align: center;
-	color: #6b7280;
+	color: var(--bk-muted);
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
@@ -119,19 +311,18 @@
 }
 .bookingistic-calendar__cell {
 	min-height: 100px;
-	background: #f9fafb;
-	border-radius: 8px;
+	background: var(--bk-bg-soft);
+	border-radius: var(--bk-radius-sm);
 	padding: 6px;
 	font-size: 12px;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
-.bookingistic-calendar__cell header { display: flex; justify-content: space-between; font-weight: 600; color: #374151; }
-.bookingistic-calendar__cell.is-today { background: #eff6ff; outline: 1px solid #93c5fd; }
+.bookingistic-calendar__cell header { display: flex; justify-content: space-between; font-weight: 600; color: var(--bk-ink-2); }
+.bookingistic-calendar__cell.is-today { background: #f1ebff; outline: 1px solid #c9b8ff; }
 .bookingistic-calendar__cell--blank { background: transparent; min-height: 0; }
 .bookingistic-calendar__cell-events { display: grid; gap: 3px; }
-
 .bookingistic-calendar__event {
 	width: 100%;
 	border: 0;
@@ -144,28 +335,25 @@
 	gap: 4px;
 	align-items: center;
 	overflow: hidden;
+	background: #fff;
+	border: 1px solid var(--bk-line);
 }
+.bookingistic-calendar__event:hover { border-color: #b9a3f5; background: var(--bk-accent-soft); }
 .bookingistic-calendar__event-time { font-weight: 600; flex-shrink: 0; }
 .bookingistic-calendar__event-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.bookingistic-calendar__grid--week {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	gap: 6px;
-}
+.bookingistic-calendar__grid--week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .bookingistic-calendar__col {
-	background: #f9fafb;
-	border-radius: 8px;
+	background: var(--bk-bg-soft);
+	border-radius: var(--bk-radius-sm);
 	padding: 8px;
 	min-height: 320px;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 }
-.bookingistic-calendar__col header { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; }
-.bookingistic-calendar__col-date { font-weight: 700; color: #111827; }
+.bookingistic-calendar__col header { display: flex; justify-content: space-between; font-size: 12px; color: var(--bk-muted); }
+.bookingistic-calendar__col-date { font-weight: 700; color: var(--bk-ink); }
 .bookingistic-calendar__col-events { display: grid; gap: 4px; }
-
 .bookingistic-calendar__day { display: grid; gap: 8px; }
 .bookingistic-calendar__day-event {
 	display: grid;
@@ -173,83 +361,59 @@
 	gap: 16px;
 	align-items: center;
 	padding: 12px 14px;
-	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-left: 4px solid #93c5fd;
-	border-radius: 8px;
+	background: var(--bk-card);
+	border: 1px solid var(--bk-line);
+	border-left: 4px solid var(--bk-accent);
+	border-radius: var(--bk-radius-sm);
 	cursor: pointer;
 	font-size: 13px;
 	text-align: left;
+	transition: background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
-.bookingistic-calendar__day-event:hover { background: #f9fafb; }
-.bookingistic-calendar__day-time { font-weight: 600; color: #111827; }
+.bookingistic-calendar__day-event:hover { background: var(--bk-bg-soft); transform: translateY(-1px); box-shadow: var(--bk-shadow); }
+.bookingistic-calendar__day-time { font-weight: 600; color: var(--bk-ink); }
 
 /* ===== Modal ===== */
-.bookingistic-modal {
-	position: fixed; inset: 0;
-	display: flex; align-items: center; justify-content: center;
-	z-index: 9999;
-}
+.bookingistic-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .bookingistic-modal[hidden] { display: none !important; }
-.bookingistic-modal__overlay {
-	position: absolute; inset: 0;
-	background: rgba(17,24,39,0.55);
-}
+.bookingistic-modal__overlay { position: absolute; inset: 0; background: rgba(23, 25, 35, 0.55); backdrop-filter: blur(2px); }
 .bookingistic-modal__panel {
 	position: relative;
-	background: #fff;
-	border-radius: 12px;
+	background: var(--bk-card);
+	border-radius: 14px;
 	max-width: 520px;
 	width: 90%;
 	max-height: 85vh;
 	overflow: auto;
 	padding: 24px 26px;
-	box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45);
+	box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
 }
 .bookingistic-modal__close {
 	position: absolute; top: 10px; right: 12px;
-	background: transparent; border: 0; cursor: pointer; font-size: 22px; line-height: 1; color: #6b7280;
+	background: transparent; border: 0; cursor: pointer; font-size: 22px; line-height: 1; color: var(--bk-muted);
 }
-.bookingistic-modal__close:hover { color: #111827; }
+.bookingistic-modal__close:hover { color: var(--bk-ink); }
 
-.bookingistic-detail {
-	display: grid;
-	grid-template-columns: 110px 1fr;
-	gap: 4px 14px;
-	margin: 14px 0;
-	font-size: 13px;
-}
-.bookingistic-detail dt { color: #6b7280; font-weight: 600; padding: 6px 0; }
-.bookingistic-detail dd { margin: 0; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
-
-.bookingistic-detail-grid {
-	display: grid;
-	grid-template-columns: 2fr 1fr;
-	gap: 18px;
-}
-@media (max-width: 900px) {
-	.bookingistic-detail-grid { grid-template-columns: 1fr; }
-}
+/* ===== Detail lists ===== */
+.bookingistic-detail { display: grid; grid-template-columns: 110px 1fr; gap: 4px 14px; margin: 14px 0; font-size: 13px; }
+.bookingistic-detail dt { color: var(--bk-muted); font-weight: 600; padding: 6px 0; }
+.bookingistic-detail dd { margin: 0; padding: 6px 0; border-bottom: 1px solid var(--bk-line-soft); }
+.bookingistic-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+@media (max-width: 900px) { .bookingistic-detail-grid { grid-template-columns: 1fr; } }
 
 /* ===== Variable picker ===== */
-.bookingistic-var-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 6px;
-	max-height: 360px;
-	overflow: auto;
-	padding: 4px;
-}
+.bookingistic-var-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 360px; overflow: auto; padding: 4px; }
 .bookingistic-var {
-	background: #f3f4f6;
-	border: 1px solid #e5e7eb;
+	background: var(--bk-bg-soft);
+	border: 1px solid var(--bk-line);
 	border-radius: 6px;
 	padding: 6px 8px;
 	font-size: 11px;
 	text-align: left;
 	cursor: pointer;
+	transition: background 0.12s ease, border-color 0.12s ease;
 }
-.bookingistic-var:hover { background: #dbeafe; border-color: #93c5fd; }
+.bookingistic-var:hover { background: var(--bk-accent-soft); border-color: #c9b8f5; }
 .bookingistic-var code { font-size: 11px; background: transparent; }
 
 /* ===== Staff editor ===== */
@@ -259,12 +423,219 @@
 	gap: 6px;
 	max-width: 720px;
 	padding: 10px 14px;
-	background: #f9fafb;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
+	background: var(--bk-bg-soft);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius-sm);
 }
 .bookingistic-staff-services label { display: flex; gap: 6px; align-items: center; font-size: 13px; }
 .bookingistic-wh-table th, .bookingistic-wh-table td { padding: 6px 10px; }
 .bookingistic-wh-table input[type="time"] { width: 110px; }
 .bookingistic-daysoff-table th, .bookingistic-daysoff-table td { padding: 6px 10px; }
 .button-link-delete { color: #b91c1c; }
+
+/* ===== Activity feed ===== */
+.bookingistic-activity { list-style: none; padding: 0; margin: 0; }
+.bookingistic-activity li { padding: 9px 0; border-bottom: 1px solid var(--bk-line-soft); }
+.bookingistic-activity li:last-child { border-bottom: 0; padding-bottom: 0; }
+.bookingistic-activity li strong { display: block; font-size: 13px; }
+.bookingistic-activity .bookingistic-muted { font-size: 12px; }
+
+/* =====================================================================
+   Integrations — animated card grid (showpiece)
+   ===================================================================== */
+.bookingistic-integrations {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+	gap: 18px;
+	margin: 22px 0 8px;
+}
+
+.bookingistic-integration {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--bk-card);
+	border: 1px solid var(--bk-line);
+	border-radius: 14px;
+	padding: 20px;
+	box-shadow: var(--bk-shadow);
+	transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.22s cubic-bezier(0.2, 0.7, 0.3, 1), border-color 0.22s ease;
+}
+
+.bookingistic-integration:hover,
+.bookingistic-integration:focus-within {
+	transform: translateY(-4px);
+	box-shadow: var(--bk-shadow-lift);
+	border-color: #cdbcfa;
+}
+
+/* Animated accent hairline sweeping across the card top on hover. */
+.bookingistic-integration::before {
+	content: "";
+	position: absolute;
+	top: -1px;
+	left: 0;
+	right: 0;
+	height: 3px;
+	border-radius: 14px 14px 0 0;
+	background: linear-gradient(90deg, var(--bk-accent), #ec4899);
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.bookingistic-integration:hover::before,
+.bookingistic-integration:focus-within::before { transform: scaleX(1); }
+
+.bookingistic-integration__icon {
+	width: 46px;
+	height: 46px;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, var(--bk-accent-soft), #fdf3f8);
+	border: 1px solid #e8defc;
+	margin-bottom: 12px;
+	transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.bookingistic-integration:hover .bookingistic-integration__icon {
+	transform: scale(1.06) rotate(-3deg);
+}
+.bookingistic-integration__icon .dashicons {
+	font-size: 24px;
+	width: 24px;
+	height: 24px;
+	color: var(--bk-accent-strong);
+}
+.bookingistic-integration--connected .bookingistic-integration__icon { background: var(--bk-green-bg); border-color: #bfe8d4; }
+.bookingistic-integration--connected .bookingistic-integration__icon .dashicons { color: var(--bk-green); }
+
+.bookingistic-integration__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 4px;
+}
+.bookingistic-integration__name { margin: 0; font-size: 15px; font-weight: 700; color: var(--bk-ink); }
+.bookingistic-integration__desc { margin: 4px 0 14px; color: var(--bk-muted); font-size: 12.5px; line-height: 1.5; flex-grow: 1; }
+.bookingistic-integration__foot { margin-top: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Staggered entrance — pure CSS, no JS. */
+@keyframes bookingistic-fade-up {
+	from { opacity: 0; transform: translateY(14px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+.bookingistic-integration {
+	opacity: 0;
+	animation: bookingistic-fade-up 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+	animation-delay: calc(var(--bk-i, 0) * 70ms);
+}
+@media (prefers-reduced-motion: reduce) {
+	.bookingistic-integration {
+		animation: none;
+		opacity: 1;
+	}
+	.bookingistic-integration:hover,
+	.bookingistic-integration:focus-within { transform: none; }
+	.bookingistic-integration::before { transition: none; }
+}
+
+/* Expandable configure panel inside each card. */
+.bookingistic-integration__panel {
+	margin-top: 14px;
+	border-top: 1px dashed var(--bk-line);
+	padding-top: 14px;
+	display: grid;
+	gap: 10px;
+}
+.bookingistic-integration__panel[hidden] { display: none; }
+.bookingistic-integration__panel label {
+	display: grid;
+	gap: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--bk-ink-2);
+}
+.bookingistic-integration__panel input[type="text"],
+.bookingistic-integration__panel input[type="password"],
+.bookingistic-integration__panel input[type="email"],
+.bookingistic-integration__panel input[type="url"],
+.bookingistic-integration__panel textarea {
+	width: 100%;
+	max-width: none;
+	border-radius: 6px;
+	border-color: #d5d9de;
+}
+.bookingistic-integration__panel input:focus,
+.bookingistic-integration__panel textarea:focus { border-color: var(--bk-accent); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); outline: none; }
+.bookingistic-integration__panel .description { font-weight: 400; margin: 0; }
+.bookingistic-integration__check {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12.5px;
+	color: var(--bk-ink-2);
+	padding: 7px 10px;
+	background: var(--bk-bg-soft);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius-sm);
+	cursor: pointer;
+	user-select: none;
+}
+.bookingistic-integration__check input { margin: 0; }
+
+/* =====================================================================
+   Integration detail editor (legacy/expanded form view, kept working)
+   ===================================================================== */
+.bookingistic-integration-editor { max-width: 760px; }
+
+/* =====================================================================
+   Shared page chrome niceties
+   ===================================================================== */
+.bookingistic-wrap .notice { border-radius: var(--bk-radius-sm); box-shadow: var(--bk-shadow); }
+.bookingistic-wrap table.form-table th { color: var(--bk-ink-2); }
+.bookingistic-wrap .card-section-title {
+	margin: 26px 0 12px;
+	font-size: 14px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--bk-ink-2);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.bookingistic-wrap .card-section-title .dashicons { color: var(--bk-accent); }
+.bookingistic-empty {
+	text-align: center;
+	padding: 34px 20px;
+	color: var(--bk-muted);
+}
+.bookingistic-empty .dashicons { font-size: 34px; width: 34px; height: 34px; color: #c8cdd4; margin-bottom: 6px; }
+
+/* Sticky save bar on long forms (settings / editors). */
+.bookingistic-submitbar {
+	position: sticky;
+	bottom: 0;
+	z-index: 5;
+	margin-top: 18px;
+	padding: 12px 16px;
+	background: rgba(255, 255, 255, 0.96);
+	border: 1px solid var(--bk-line);
+	border-radius: var(--bk-radius);
+	box-shadow: var(--bk-shadow-lift);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	backdrop-filter: blur(4px);
+}
+.bookingistic-submitbar .bookingistic-muted { margin: 0; }
+
+/* Responsive tables inside cards */
+@media (max-width: 782px) {
+	.bookingistic-header h1 { font-size: 20px; }
+	.bookingistic-stats { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+	.bookingistic-stat__value { font-size: 22px; }
+	.bookingistic-detail { grid-template-columns: 96px 1fr; }
+}

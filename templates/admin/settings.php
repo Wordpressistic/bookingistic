@@ -20,7 +20,10 @@ $days = [
 $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) );
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1><?php esc_html_e( 'Settings', 'bookingistic' ); ?></h1>
+	<header class="bookingistic-header">
+		<h1><?php esc_html_e( 'Settings', 'bookingistic' ); ?></h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Business profile, notifications, availability rules, and branding.', 'bookingistic' ); ?></p>
+	</header>
 
 	<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Settings saved.', 'bookingistic' ); ?></p></div>
@@ -30,7 +33,8 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 		<?php wp_nonce_field( 'bookingistic_admin_settings' ); ?>
 		<input type="hidden" name="bookingistic_admin_action" value="save_settings">
 
-		<h2><?php esc_html_e( 'Business', 'bookingistic' ); ?></h2>
+		<div class="bookingistic-card">
+		<h2><span class="dashicons dashicons-store"></span><?php esc_html_e( 'Business', 'bookingistic' ); ?></h2>
 		<table class="form-table">
 			<tr><th><label><?php esc_html_e( 'Business name', 'bookingistic' ); ?></label></th>
 				<td><input type="text" name="business_name" class="regular-text" value="<?php echo esc_attr( $settings['business_name'] ?? '' ); ?>"></td></tr>
@@ -46,7 +50,10 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				<td><input type="text" name="timezone" class="regular-text" value="<?php echo esc_attr( $settings['timezone'] ?? wp_timezone_string() ); ?>"></td></tr>
 		</table>
 
-		<h2><?php esc_html_e( 'Email sender', 'bookingistic' ); ?></h2>
+		</div>
+
+		<div class="bookingistic-card">
+		<h2><span class="dashicons dashicons-email-alt"></span><?php esc_html_e( 'Email sender', 'bookingistic' ); ?></h2>
 		<table class="form-table">
 			<tr><th><label><?php esc_html_e( 'From name', 'bookingistic' ); ?></label></th>
 				<td><input type="text" name="from_name" class="regular-text" value="<?php echo esc_attr( $settings['from_name'] ?? '' ); ?>"></td></tr>
@@ -64,7 +71,10 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				</td></tr>
 		</table>
 
-		<h2><?php esc_html_e( 'Availability', 'bookingistic' ); ?></h2>
+		</div>
+
+		<div class="bookingistic-card">
+		<h2><span class="dashicons dashicons-clock"></span><?php esc_html_e( 'Availability', 'bookingistic' ); ?></h2>
 		<table class="form-table">
 			<tr><th><label><?php esc_html_e( 'Minimum notice (hours)', 'bookingistic' ); ?></label></th>
 				<td><input type="number" min="0" name="min_notice_hours" value="<?php echo esc_attr( $settings['min_notice_hours'] ?? 4 ); ?>"></td></tr>
@@ -93,7 +103,10 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				</td></tr>
 		</table>
 
-		<h2><?php esc_html_e( 'Holidays', 'bookingistic' ); ?></h2>
+		</div>
+
+		<div class="bookingistic-card">
+		<h2><span class="dashicons dashicons-calendar-alt"></span><?php esc_html_e( 'Holidays', 'bookingistic' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Dates the whole business is closed. Availability returns zero slots on any date in these ranges, regardless of staff.', 'bookingistic' ); ?></p>
 		<table class="widefat" style="max-width:620px" data-bookingistic-daterange="holidays">
 			<thead><tr>
@@ -121,7 +134,10 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 			<tfoot><tr><td colspan="3"><button type="button" class="button" data-bookingistic-daterange-add><?php esc_html_e( 'Add date range', 'bookingistic' ); ?></button></td></tr></tfoot>
 		</table>
 
-		<h2><?php esc_html_e( 'White label & branding', 'bookingistic' ); ?></h2>
+		</div>
+
+		<div class="bookingistic-card">
+		<h2><span class="dashicons dashicons-awards"></span><?php esc_html_e( 'White label & branding', 'bookingistic' ); ?></h2>
 		<?php
 		$has_license = ! empty( $settings['premium_license_active'] );
 		$opted_in    = ! empty( $settings['remove_branding'] );
@@ -156,8 +172,11 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 			</tr>
 		</table>
 
-		<p class="submit">
+		</div>
+
+		<div class="bookingistic-submitbar">
 			<button type="submit" class="button button-primary"><?php esc_html_e( 'Save settings', 'bookingistic' ); ?></button>
-		</p>
+			<p class="bookingistic-muted"><?php esc_html_e( 'Changes apply to new bookings and emails immediately.', 'bookingistic' ); ?></p>
+		</div>
 	</form>
 </div>

@@ -437,9 +437,29 @@
 		}
 	}
 
+	/* ===== Integrations: card grid configure-panel toggle (UI only) ===== */
+	function bindIntegrationPanels() {
+		document.querySelectorAll('[data-bookingistic-toggle-panel]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var slug = btn.getAttribute('data-bookingistic-toggle-panel');
+				var panel = document.getElementById('bookingistic-panel-' + slug);
+				if (panel) {
+					panel.hidden = !panel.hidden;
+					btn.textContent = panel.hidden
+						? (btn.hasAttribute('data-bk-connect') ? btn.getAttribute('data-bk-connect') : btn.textContent)
+						: 'Close';
+					if (!panel.hidden) {
+						var first = panel.querySelector('input:not([type=hidden]), textarea');
+						if (first) { first.focus(); }
+					}
+				}
+			});
+		});
+	}
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters(); });
+		document.addEventListener('DOMContentLoaded', () => { bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters(); bindIntegrationPanels(); });
 	} else {
-		bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters();
+		bindCalendar(); bindModal(); bindManualBookingForm(); bindAutomationEditor(); bindDateRangeRepeaters(); bindIntegrationPanels();
 	}
 })();

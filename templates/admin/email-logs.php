@@ -21,7 +21,10 @@ foreach ( $automations as $a ) {
 }
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1><?php esc_html_e( 'Email logs', 'bookingistic' ); ?></h1>
+	<header class="bookingistic-header">
+		<h1><?php esc_html_e( 'Email Logs', 'bookingistic' ); ?><span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><?php echo esc_html( number_format_i18n( $total ) ); ?></span></span></h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Every automated email Bookingistic attempted to send.', 'bookingistic' ); ?></p>
+	</header>
 
 	<form method="get" class="bookingistic-calendar__filters" style="margin-top:6px">
 		<input type="hidden" name="page" value="bookingistic-email-logs">
@@ -46,11 +49,17 @@ foreach ( $automations as $a ) {
 	</form>
 
 	<?php if ( empty( $rows ) ) : ?>
-		<div class="bookingistic-card bookingistic-card--muted"><p><?php esc_html_e( 'No emails sent yet.', 'bookingistic' ); ?></p></div>
+		<div class="bookingistic-card">
+			<div class="bookingistic-empty">
+				<span class="dashicons dashicons-email-alt"></span>
+				<p><?php esc_html_e( 'No emails sent yet.', 'bookingistic' ); ?></p>
+			</div>
+		</div>
 		</div>
 		<?php return; ?>
 	<?php endif; ?>
 
+	<div class="bookingistic-card bookingistic-card--flush">
 	<table class="widefat striped">
 		<thead><tr>
 			<th><?php esc_html_e( 'When', 'bookingistic' ); ?></th>
@@ -97,4 +106,5 @@ foreach ( $automations as $a ) {
 			?>
 		</div></div>
 	<?php endif; ?>
+	</div>
 </div>

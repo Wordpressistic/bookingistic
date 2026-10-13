@@ -10,16 +10,25 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1>
-		<?php esc_html_e( 'Services', 'bookingistic' ); ?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-services&new=1' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a>
-	</h1>
+	<header class="bookingistic-header">
+		<h1>
+			<?php esc_html_e( 'Services', 'bookingistic' ); ?>
+			<span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><?php echo esc_html( number_format_i18n( count( $services ) ) ); ?></span></span>
+			<span class="bookingistic-header__actions"><a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-services&new=1' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a></span>
+		</h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Bookable offerings — duration, pricing, deposits, and confirmation flow.', 'bookingistic' ); ?></p>
+	</header>
 
 	<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Service saved.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 
-	<table class="widefat striped">
+	<div class="bookingistic-card bookingistic-card--flush">
+		<div class="bookingistic-table-card__head bookingistic-card__body" style="padding-bottom:0">
+			<p class="bookingistic-muted" style="margin:0"><?php esc_html_e( 'Each service gets its own booking form via shortcode or Elementor widget.', 'bookingistic' ); ?></p>
+		</div>
+
+		<table class="widefat striped">
 		<thead>
 			<tr>
 				<th><?php esc_html_e( 'Name', 'bookingistic' ); ?></th>
@@ -47,4 +56,5 @@ defined( 'ABSPATH' ) || exit;
 			<?php endforeach; ?>
 		</tbody>
 	</table>
+	</div>
 </div>

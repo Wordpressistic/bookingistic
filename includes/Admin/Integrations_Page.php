@@ -19,6 +19,17 @@ class Integrations_Page {
 
 	public static function render(): void {
 		$integrations = Integrations_Manager::all();
+
+		// UI metadata: dashicon + one-line category tag per slug (card grid only).
+		$ui_map = [
+			'woocommerce'     => [ 'icon' => 'dashicons-cart',                        'tag' => __( 'Payments', 'bookingistic' ) ],
+			'google_calendar' => [ 'icon' => 'dashicons-calendar-alt',                'tag' => __( 'Scheduling', 'bookingistic' ) ],
+			'outlook'         => [ 'icon' => 'dashicons-email',                       'tag' => __( 'Scheduling', 'bookingistic' ) ],
+			'messageistic'    => [ 'icon' => 'dashicons-smartphone',                  'tag' => __( 'Messaging', 'bookingistic' ) ],
+			'crmistic'        => [ 'icon' => 'dashicons-groups',                      'tag' => __( 'CRM', 'bookingistic' ) ],
+		];
+		$ui_map = apply_filters( 'bookingistic_integrations_ui_map', $ui_map );
+
 		include BOOKINGISTIC_DIR . 'templates/admin/integrations.php';
 	}
 

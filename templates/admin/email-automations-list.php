@@ -10,19 +10,24 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1>
-		<?php esc_html_e( 'Email Automations', 'bookingistic' ); ?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-emails&new=1' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a>
-	</h1>
+	<header class="bookingistic-header">
+		<h1>
+			<?php esc_html_e( 'Email Automations', 'bookingistic' ); ?>
+			<span class="bookingistic-header__badges"><span class="bookingistic-header__badge"><?php echo esc_html( number_format_i18n( count( $rules ) ) ); ?></span></span>
+			<span class="bookingistic-header__actions"><a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-emails&new=1' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Add new', 'bookingistic' ); ?></a></span>
+		</h1>
+		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Automated emails for every stage of the booking lifecycle.', 'bookingistic' ); ?></p>
+	</header>
 
 	<?php if ( ! empty( $_GET['deleted'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Automation deleted.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 
-	<p class="bookingistic-muted">
+	<p class="bookingistic-muted" style="margin:0 0 14px">
 		<?php esc_html_e( 'Each rule fires when its trigger event runs (or, for reminders, when the cron tick finds a booking inside the delay window). Service-specific rules override the generic rule for that service.', 'bookingistic' ); ?>
 	</p>
 
+	<div class="bookingistic-card bookingistic-card--flush">
 	<table class="widefat striped">
 		<thead><tr>
 			<th><?php esc_html_e( 'Name', 'bookingistic' ); ?></th>
@@ -49,4 +54,5 @@ defined( 'ABSPATH' ) || exit;
 			<?php endforeach; ?>
 		</tbody>
 	</table>
+	</div>
 </div>
