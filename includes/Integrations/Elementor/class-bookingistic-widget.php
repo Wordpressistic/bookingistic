@@ -118,7 +118,7 @@ class Bookingistic_Widget extends \Elementor\Widget_Base {
 
 		$staff = Staff_Repository::for_service( (int) $service['id'] );
 
-		echo Booking_Form::render(
+		$form_html = Booking_Form::render(
 			$service,
 			$staff,
 			0,
@@ -127,6 +127,7 @@ class Bookingistic_Widget extends \Elementor\Widget_Base {
 				'template' => sanitize_key( $settings['template'] ?? '' ),
 				'calendar' => sanitize_key( $settings['calendar_view'] ?? '' ),
 			]
-		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside template pipeline.
+		);
+		echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML is built and escaped inside the Booking_Form template pipeline (identical to [bookingistic] shortcode output).
 	}
 }

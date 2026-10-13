@@ -43,10 +43,12 @@ class Reschedule_Manager {
 			$start_ts = strtotime( $booking['start_datetime'] . ' UTC' );
 			if ( $start_ts && ( $start_ts - time() ) < ( $window_hrs * HOUR_IN_SECONDS ) ) {
 				wp_die(
-					sprintf(
-						/* translators: %d hours window. */
-						esc_html__( 'Reschedule is only allowed up to %d hours before the booking. Please contact us instead.', 'bookingistic' ),
-						$window_hrs
+					esc_html(
+						sprintf(
+							/* translators: %d hours window. */
+							__( 'Reschedule is only allowed up to %d hours before the booking. Please contact us instead.', 'bookingistic' ),
+							$window_hrs
+						)
 					),
 					'',
 					400
@@ -73,12 +75,12 @@ class Reschedule_Manager {
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php echo $title; ?></title>
+	<title><?php echo esc_html( $title ); ?></title>
 	<?php wp_head(); ?>
 </head>
 <body class="bookingistic-page">
 	<main style="max-width:980px;margin:48px auto;padding:0 20px">
-		<h1><?php echo $title; ?></h1>
+		<h1><?php echo esc_html( $title ); ?></h1>
 		<p><?php esc_html_e( 'Pick a new time. Your current booking will be replaced once confirmed.', 'bookingistic' ); ?></p>
 		<?php
 		echo do_shortcode(

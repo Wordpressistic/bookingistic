@@ -43,10 +43,12 @@ class Cancellation_Manager {
 			$start_ts = strtotime( $booking['start_datetime'] . ' UTC' );
 			if ( $start_ts && ( $start_ts - time() ) < ( $window_hrs * HOUR_IN_SECONDS ) ) {
 				wp_die(
-					sprintf(
-						/* translators: %d hours window. */
-						esc_html__( 'Cancellation is only allowed up to %d hours before the booking. Please contact us instead.', 'bookingistic' ),
-						$window_hrs
+					esc_html(
+						sprintf(
+							/* translators: %d hours window. */
+							__( 'Cancellation is only allowed up to %d hours before the booking. Please contact us instead.', 'bookingistic' ),
+							$window_hrs
+						)
 					),
 					'',
 					400
