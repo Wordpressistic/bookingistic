@@ -117,7 +117,10 @@ class WooCommerce_Gateway extends Abstract_Gateway {
 		if ( ! $booking ) {
 			return;
 		}
-		Payment_Manager::record_event( $booking_id, $this->slug(), $status, (float) $booking['payment_amount'], (string) $order_id, [ 'wc_order_id' => $order_id ] );
+		// Keep the settled amount from the WC order (honours deposits),
+		// not the booking's full price.
+		$settled = $order_id && function_exists( 'wc_get_order' ) ? (float) wc_get_order( $order_id )->get_total() : (float) $booking['payment_amount'];
+		Payment_Manager::record_event( $booking_id, $this->slug(), $status, $settled, (string) $order_id, [ 'wc_order_id' => $order_id ] );
 	}
 
 	private function integration(): WooCommerce_Integration {
