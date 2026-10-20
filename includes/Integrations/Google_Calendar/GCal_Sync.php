@@ -12,8 +12,8 @@
  *
  * Flow: staff member clicks "Connect Google Calendar" (staff editor) →
  * consent screen → Google redirects back to the REST callback → tokens stored
- * encrypted-ish (base64; consider stronger at-rest encryption for regulated
- * sites) on the staff row.
+ * encrypted at rest (secretbox via Helpers\Crypto, keyed from the WP auth
+ * salt) on the staff row.
  *
  * Setup: create an OAuth client (Web application) in Google Cloud Console and
  * paste its Client ID / Secret into Bookingistic → Integrations → Google
@@ -27,6 +27,7 @@ namespace Bookingistic\Integrations\Google_Calendar;
 use Bookingistic\Database\Calendar_Event_Repository;
 use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Staff_Repository;
+use Bookingistic\Helpers\Crypto;
 use Bookingistic\Helpers\Date_Time;
 use Bookingistic\Integrations\Integration_Base;
 
@@ -136,17 +137,17 @@ class GCal_Sync {
 			'access_token'  => $tokens['access_token'] ?? '',
 			'expires_at'    => time() + (int) ( $tokens['expires_in'] ?? 3600 ),
 		];
-		$wpdb->update(
-			Staff_Repository::table(),
-			[
-				'gcal_connected' => 1,
-				'gcal_id'        => $calendar_id,
-				'gcal_token'     => base64_encode( wp_json_encode( $payload ) ),
-			],
-			[ 'id' => $staff_id ],
-			[ '%d', '%s', '%s' ],
-			[ '%d' ]
-		);
+			$wpdb->update(
+				Staff_Repository::table(),
+				[
+					'gcal_connected' => 1,
+					'gcal_id'        => $calendar_id,
+					'gcal_token'     => Crypto::encrypt( (string) wp_json_encode( $payload ) ),
+				],
+				[ 'id' => $staff_id ],
+				[ '%d', '%s', '%s' ],
+				[ '%d' ]
+			);
 	}
 
 	private static function load_tokens( int $staff_id ): ?array {
@@ -154,7 +155,7 @@ class GCal_Sync {
 		if ( ! $staff || empty( $staff['gcal_token'] ) ) {
 			return null;
 		}
-		$decoded = json_decode( (string) base64_decode( $staff['gcal_token'] ), true );
+		$decoded = json_decode( (string) Crypto::decrypt( (string) $staff['gcal_token'] ), true );
 		return is_array( $decoded ) ? $decoded : null;
 	}
 

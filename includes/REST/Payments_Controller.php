@@ -51,6 +51,8 @@ class Payments_Controller {
 					'permission_callback' => '__return_true', // signed-token gated.
 					'args'                => [
 						'id'    => [ 'sanitize_callback' => 'absint' ],
+						// Links carry `t`; `token` accepted as an explicit alias.
+						't'     => [ 'sanitize_callback' => 'sanitize_text_field' ],
 						'token' => [ 'sanitize_callback' => 'sanitize_text_field' ],
 					],
 				],
@@ -110,9 +112,9 @@ class Payments_Controller {
 	 */
 	public static function public_status( \WP_REST_Request $request ) {
 		$id    = (int) $request->get_param( 'id' );
-		$token = (string) $request->get_param( 'token' );
+		$token = (string) ( $request->get_param( 't' ) ?: $request->get_param( 'token' ) );
 
-		if ( ! $id || ! Token::consume_equals( Token::for_payment( $id ), $token ) ) {
+		if ( ! $id || ! Token::payment_token_valid( $id, $token ) ) {
 			return new \WP_Error(
 				'invalid_token',
 				__( 'Invalid or expired payment link.', 'bookingistic' ),

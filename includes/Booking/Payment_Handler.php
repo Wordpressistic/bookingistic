@@ -3,10 +3,10 @@
  * Customer-facing payment handler.
  *
  * Listens for /?bookingistic_action=pay&id=N&t=TOKEN on any front-end URL.
- * The token is a deterministic HMAC (Token::for_payment) — no DB state.
- * Valid link → redirect to the connected gateway's hosted checkout
- * (WooCommerce order payment page). No gateway / already paid → friendly
- * notice instead of a dead link. Bad token → 410 (same as cancel).
+ * The token is an expiring HMAC (Token::for_payment/payment_token_valid) —
+ * no DB state. Valid link → redirect to the connected gateway's hosted
+ * checkout (WooCommerce order payment page). No gateway / already paid →
+ * friendly notice instead of a dead link. Bad/expired token → 410.
  *
  * @package Bookingistic
  */
@@ -32,7 +32,7 @@ class Payment_Handler {
 		$id    = (int) ( $_GET['id'] ?? 0 );
 		$token = sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) );
 
-		if ( ! $id || ! Token::consume_equals( Token::for_payment( $id ), $token ) ) {
+		if ( ! $id || ! Token::payment_token_valid( $id, $token ) ) {
 			wp_die( esc_html__( 'Invalid or expired payment link.', 'bookingistic' ), '', 410 );
 		}
 

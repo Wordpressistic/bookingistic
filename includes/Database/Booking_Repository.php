@@ -18,6 +18,50 @@ class Booking_Repository {
 		return Tables::bookings_table();
 	}
 
+	/**
+	 * Serialize concurrent slot submissions per staff (or per service when
+	 * no staff is assigned): opens a transaction and takes a row lock on the
+	 * staff (or service) row, so two requests cannot both pass the overlap
+	 * check before either inserts. InnoDB required — on MyISAM or when a
+	 * transaction is already open the lock silently degrades to the
+	 * previous check-then-insert behavior.
+	 *
+	 * Pair with self::commit_slot_lock() / self::rollback_slot_lock().
+	 */
+	public static function begin_slot_lock( int $staff_id, int $service_id ): bool {
+		global $wpdb;
+
+		if ( $wpdb->query( 'START TRANSACTION' ) === false ) {
+			return false;
+		}
+
+		if ( $staff_id > 0 ) {
+			$staff_table = Tables::staff_table();
+			$sql         = $wpdb->prepare( "SELECT id FROM {$staff_table} WHERE id = %d FOR UPDATE", $staff_id ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		} else {
+			$service_table = Tables::services_table();
+			$sql           = $wpdb->prepare( "SELECT id FROM {$service_table} WHERE id = %d FOR UPDATE", $service_id ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		if ( $wpdb->get_var( $sql ) === null ) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( 'ROLLBACK' );
+			return false;
+		}
+
+		return true;
+	}
+
+	public static function commit_slot_lock(): void {
+		global $wpdb;
+		$wpdb->query( 'COMMIT' );
+	}
+
+	public static function rollback_slot_lock(): void {
+		global $wpdb;
+		$wpdb->query( 'ROLLBACK' );
+	}
+
+
 	public static function find( int $id ): ?array {
 		global $wpdb;
 		$table = self::table();

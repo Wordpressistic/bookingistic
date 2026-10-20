@@ -34,14 +34,21 @@ class Booking_Manager {
 		$staff_id   = (int) ( $data['staff_id'] ?? 0 );
 		$start_utc  = (string) ( $data['start_utc'] ?? '' );
 
-		$validation = Booking_Validator::validate_slot( $service_id, $start_utc, $staff_id );
-		if ( is_wp_error( $validation ) ) {
-			return $validation;
-		}
-
 		$customer = Customer_Repository::upsert( $data['customer'] ?? [] );
 		if ( is_wp_error( $customer ) ) {
 			return $customer;
+		}
+
+		// Serialize concurrent submissions on this staff/service row so two
+		// requests cannot both pass the overlap check before either inserts.
+		$locked = Booking_Repository::begin_slot_lock( $staff_id, $service_id );
+
+		$validation = Booking_Validator::validate_slot( $service_id, $start_utc, $staff_id );
+		if ( is_wp_error( $validation ) ) {
+			if ( $locked ) {
+				Booking_Repository::rollback_slot_lock();
+			}
+			return $validation;
 		}
 
 		$service = $validation['service'];
@@ -63,7 +70,14 @@ class Booking_Manager {
 			]
 		);
 		if ( is_wp_error( $booking ) ) {
+			if ( $locked ) {
+				Booking_Repository::rollback_slot_lock();
+			}
 			return $booking;
+		}
+
+		if ( $locked ) {
+			Booking_Repository::commit_slot_lock();
 		}
 
 		do_action( 'bookingistic_booking_submitted', $booking, $customer, $service );

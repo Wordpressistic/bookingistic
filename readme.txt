@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.4.0
+Stable tag: 2.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,13 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 4. Admin dashboard — bookings, services, staff, email automations
 
 == Changelog ==
+
+= 2.5.0 =
+* Fixed: `/wp-json/bookingistic/v1/payments/status` now accepts the signed link's `t` parameter (previously only read `token`, so plugin-issued links always returned 410)
+* Security: pay-now links now expire after 90 days — the token embeds its expiry under an HMAC; previously a leaked pay link stayed valid forever
+* Security: Google Calendar OAuth tokens are now encrypted at rest (authenticated secretbox keyed from the site salt); existing tokens migrate transparently on the next save
+* New: race-safe booking — concurrent submissions for the same staff member are serialized with a row lock and the availability re-check runs inside the transaction, preventing double-booking under simultaneous submits (InnoDB; silently degrades to check-then-insert on MyISAM)
+* Dev: standalone test suite under `tests/` (run `php tests/run-all.php`) covering payment token expiry, crypto round-trip, and deposit math
 
 = 2.4.0 =
 * New: premium admin UI — every Bookingistic screen restyled with a consistent design system (page headers with taglines, card-based panels, refined tables, status pills, sticky save bar)

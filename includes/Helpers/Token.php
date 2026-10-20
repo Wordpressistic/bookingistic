@@ -11,7 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 class Token {
 
-	private const TTL_DAYS = 90;
+	private const TTL_DAYS   = 90;
+	private const PAY_TTL_DAYS = 90;
 
 	public static function cancel_url( int $booking_id, string $token ): string {
 		return add_query_arg(
@@ -25,12 +26,38 @@ class Token {
 	}
 
 	/**
-	 * Deterministic HMAC token for payment links. Unlike cancel/reschedule
-	 * tokens it is derived (not stored), so legacy bookings get valid pay
-	 * links too and nothing new persists in the DB.
+	 * Expiring HMAC token for payment links. Format:
+	 *   <expiry-hex>-<hmac_sha256( 'bookingistic-pay-<id>|<expiry>', salt )>
+	 * Derived (not stored), so nothing persists in the DB, but a leaked link
+	 * stops working after PAY_TTL_DAYS. Fresh links are issued on every
+	 * payment_url() call, so live bookings always get a valid one.
 	 */
 	public static function for_payment( int $booking_id ): string {
-		return hash_hmac( 'sha256', 'bookingistic-pay-' . (int) $booking_id, wp_salt( 'auth' ) );
+		$expires = time() + self::PAY_TTL_DAYS * DAY_IN_SECONDS;
+		return self::sign_payment( $booking_id, $expires );
+	}
+
+	/**
+	 * Validate a payment link token: recomputes the HMAC over the embedded
+	 * expiry and rejects expired or malformed tokens. Pre-2.5 links (plain
+	 * HMACs without an expiry) no longer verify — any newly generated
+	 * email/shortcode link works immediately.
+	 */
+	public static function payment_token_valid( int $booking_id, string $given ): bool {
+		$given = trim( $given );
+		if ( '' === $given || strlen( $given ) > 100 || ! preg_match( '/^[a-f0-9]+-[a-f0-9]{64}$/', $given ) ) {
+			return false;
+		}
+		[ $expires_hex, $mac ] = explode( '-', $given, 2 );
+		$expires = (int) hexdec( $expires_hex );
+		if ( $expires < time() ) {
+			return false;
+		}
+		return hash_equals( self::sign_payment( $booking_id, $expires ), $given );
+	}
+
+	private static function sign_payment( int $booking_id, int $expires ): string {
+		return dechex( $expires ) . '-' . hash_hmac( 'sha256', 'bookingistic-pay-' . (int) $booking_id . '|' . $expires, wp_salt( 'auth' ) );
 	}
 
 	public static function payment_url( int $booking_id ): string {
