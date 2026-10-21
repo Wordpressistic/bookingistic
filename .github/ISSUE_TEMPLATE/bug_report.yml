@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the plugin doesn't work as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+        **Security issue?** Please don't file it here. Email hello@insightistic.com instead (see SECURITY.md).
+        **Never paste a signing key, OAuth client secret, license key or token into an issue.**
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Booking form (frontend)
+        - Calendar views
+        - Admin screens
+        - Payments / WooCommerce
+        - Google Calendar sync
+        - Email automation
+        - REST API
+        - Elementor widget
+        - Activation / upgrade / uninstall
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Bookingistic version
+      placeholder: "2.5.1"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "WordPress 7.1, PHP 8.3, nginx; WooCommerce 10.x if payments-related"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what actually happened. Include browser console errors or PHP log entries if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See error
+    validations:
+      required: true

@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Wordpressistic/bookingistic/blob/main/SECURITY.md
+    about: Please report vulnerabilities privately (hello@insightistic.com or the Security tab), not as a public issue.
+  - name: Usage questions and help
+    url: https://wordpress.org/support/plugin/bookingistic/
+    about: The WordPress.org support forum is the fastest way to get help with setup and configuration.
+  - name: Bookingistic website
+    url: https://bookingistic.com
+    about: Product overview and news.
+  - name: Commercial and partnership inquiries
+    url: mailto:support@wpistic.com
+    about: Billing-adjacent and partnership questions go to support@wpistic.com rather than GitHub issues.
