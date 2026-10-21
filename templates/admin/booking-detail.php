@@ -30,7 +30,7 @@ $has_slot = ! empty( $booking['start_datetime'] );
 		<div class="notice notice-success"><p><?php esc_html_e( 'Booking rescheduled.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 	<?php if ( ! empty( $_GET['error'] ) ) : ?>
-		<div class="notice notice-error"><p><?php echo esc_html( wp_unslash( $_GET['error'] ) ); ?></p></div>
+		<div class="notice notice-error"><p><?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); ?></p></div>
 	<?php endif; ?>
 
 	<div class="bookingistic-detail-grid">

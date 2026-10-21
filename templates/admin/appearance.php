@@ -111,9 +111,4 @@ use Bookingistic\Frontend\Template_Loader;
 			<?php echo $sample_form; // phpcs:ignore WordPress.Security.EscapeOutput -- built and escaped in Appearance_Page. ?>
 		</div>
 	</div>
-
-	<style>
-		.bookingistic-appearance__grid { display: grid; grid-template-columns: minmax(340px, 480px) 1fr; gap: 24px; align-items: start; }
-		@media (max-width: 1100px) { .bookingistic-appearance__grid { grid-template-columns: 1fr; } }
-	</style>
 </div>

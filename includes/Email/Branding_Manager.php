@@ -2,9 +2,9 @@
 /**
  * Email branding helper.
  *
- * Premium-ready: `can_remove_branding()` currently returns false (free tier),
- * but every email rendering path consults this helper, so removing the
- * branding footer is a one-line flip when premium gating goes live.
+ * All shipped functionality is free and fully enabled (WordPress.org
+ * guideline: no locked features). The footer shows only the site owner's
+ * custom footer text, which they configure themselves under Settings.
  *
  * @package Bookingistic
  */
@@ -15,40 +15,27 @@ defined( 'ABSPATH' ) || exit;
 
 class Branding_Manager {
 
+	/**
+	 * Whether the site owner may suppress the custom footer text. Always true:
+	 * nothing in the free plugin is gated behind a license. The filter remains
+	 * for backward compatibility with sites that used it.
+	 */
 	public static function can_remove_branding(): bool {
-		$settings = get_option( 'bookingistic_settings', [] );
-		$has_license = ! empty( $settings['premium_license_active'] );
-		$opted_in    = ! empty( $settings['remove_branding'] );
-
 		/**
-		 * Premium plugins / license layers can return true here regardless of stored settings.
+		 * Legacy filter — kept so existing code keeps working. The value has
+		 * no effect on shipped functionality.
 		 *
-		 * Default: only allow removal when both a premium license is active AND
-		 * the site owner has opted in via Settings → White label.
+		 * @param bool $remove
 		 */
-		return (bool) apply_filters(
-			'bookingistic_can_remove_branding',
-			$has_license && $opted_in
-		);
+		return (bool) apply_filters( 'bookingistic_can_remove_branding', true );
 	}
 
 	public static function footer_html(): string {
-		$settings    = get_option( 'bookingistic_settings', [] );
-		$custom      = trim( (string) ( $settings['footer_text'] ?? '' ) );
-		$brand_block = '';
+		$settings = get_option( 'bookingistic_settings', [] );
+		$custom   = trim( (string) ( $settings['footer_text'] ?? '' ) );
 
-		if ( ! self::can_remove_branding() ) {
-			$brand_block = '<p style="margin:24px 0 0;font-size:12px;color:#8B92A9;text-align:center">'
-				. esc_html__( 'Powered by Bookingistic by WordPressistic', 'bookingistic' ) . '<br>'
-				. esc_html__( 'Build Your Business Automation with AI', 'bookingistic' ) . '<br>'
-				. '<a href="https://www.wordpressistic.com" style="color:#5EA1FF">https://www.wordpressistic.com</a>'
-				. '</p>';
-		}
-
-		$custom_block = $custom
+		return $custom
 			? '<p style="margin:16px 0 0;font-size:12px;color:#8B92A9;text-align:center">' . wp_kses_post( $custom ) . '</p>'
 			: '';
-
-		return $custom_block . $brand_block;
 	}
 }

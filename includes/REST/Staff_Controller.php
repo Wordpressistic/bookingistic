@@ -118,6 +118,7 @@ class Staff_Controller {
 				$row['special_availability'],
 				$row['booking_limit_per_day'],
 				$row['working_hours'],
+				$row['email'],
 				$row['phone'],
 				$row['user_id'],
 				$row['created_at'],

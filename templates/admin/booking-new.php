@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 	<h1><?php esc_html_e( 'New booking', 'bookingistic' ); ?></h1>
 
 	<?php if ( ! empty( $_GET['error'] ) ) : ?>
-		<div class="notice notice-error"><p><?php echo esc_html( wp_unslash( $_GET['error'] ) ); ?></p></div>
+		<div class="notice notice-error"><p><?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); ?></p></div>
 	<?php endif; ?>
 
 	<form method="post" data-bookingistic-manual>

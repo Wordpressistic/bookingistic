@@ -141,16 +141,12 @@ class Google_Calendar_Integration extends Integration_Base {
 
 	private function write_ics_temp( array $booking ): ?string {
 		$ics = \Bookingistic\Integrations\ICS\ICS_Generator::for_booking( $booking );
-		$upload = wp_get_upload_dir();
-		if ( empty( $upload['basedir'] ) ) {
+		// System temp dir — outside the webroot, so booking data is never
+		// written to a publicly served location. Random name: unguessable.
+		$path = get_temp_dir() . uniqid( 'bookingistic-', true ) . '.ics';
+		if ( false === file_put_contents( $path, $ics ) ) {
 			return null;
 		}
-		$dir = trailingslashit( $upload['basedir'] ) . 'bookingistic';
-		if ( ! file_exists( $dir ) ) {
-			wp_mkdir_p( $dir );
-		}
-		$path = $dir . '/booking-' . (int) $booking['id'] . '.ics';
-		file_put_contents( $path, $ics );
 		return $path;
 	}
 

@@ -137,37 +137,13 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 		</div>
 
 		<div class="bookingistic-card">
-		<h2><span class="dashicons dashicons-awards"></span><?php esc_html_e( 'White label & branding', 'bookingistic' ); ?></h2>
-		<?php
-		$has_license = ! empty( $settings['premium_license_active'] );
-		$opted_in    = ! empty( $settings['remove_branding'] );
-		$can_remove  = \Bookingistic\Email\Branding_Manager::can_remove_branding();
-		?>
+		<h2><span class="dashicons dashicons-awards"></span><?php esc_html_e( 'Email footer', 'bookingistic' ); ?></h2>
 		<table class="form-table">
 			<tr>
-				<th><label><?php esc_html_e( 'Premium license active', 'bookingistic' ); ?></label></th>
+				<th><label for="bookingistic-footer-text"><?php esc_html_e( 'Custom footer text', 'bookingistic' ); ?></label></th>
 				<td>
-					<label>
-						<input type="checkbox" name="premium_license_active" value="1" <?php checked( $has_license ); ?>>
-						<?php esc_html_e( 'Mark this site as premium-licensed.', 'bookingistic' ); ?>
-					</label>
-					<p class="description"><?php esc_html_e( 'Wire your real license check via the bookingistic_can_remove_branding filter for production. This checkbox is the manual fallback.', 'bookingistic' ); ?></p>
-				</td>
-			</tr>
-			<tr>
-				<th><label><?php esc_html_e( 'Remove WordPressistic branding footer', 'bookingistic' ); ?></label></th>
-				<td>
-					<label>
-						<input type="checkbox" name="remove_branding" value="1" <?php checked( $opted_in ); ?> <?php disabled( ! $has_license ); ?>>
-						<?php esc_html_e( 'Hide the "Powered by Bookingistic by WordPressistic" footer on every automated email.', 'bookingistic' ); ?>
-					</label>
-					<p class="description">
-						<?php if ( $can_remove ) : ?>
-							<span style="color:#065f46"><?php esc_html_e( 'Currently: WordPressistic branding is removed from automated emails.', 'bookingistic' ); ?></span>
-						<?php else : ?>
-							<span style="color:#92400e"><?php esc_html_e( 'Currently: WordPressistic branding is included on every automated email.', 'bookingistic' ); ?></span>
-						<?php endif; ?>
-					</p>
+					<textarea name="footer_text" id="bookingistic-footer-text" rows="3" class="large-text"><?php echo esc_textarea( $settings['footer_text'] ?? '' ); ?></textarea>
+					<p class="description"><?php esc_html_e( 'Optional text (plain text or basic HTML) shown at the bottom of every automated email. Leave empty for no footer.', 'bookingistic' ); ?></p>
 				</td>
 			</tr>
 		</table>

@@ -26,11 +26,23 @@ class Security {
 	}
 
 	public static function client_ip(): string {
-		$candidates = [ 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ];
+		// Direct client address is the only trustworthy default. Forwarding
+		// headers (CF-Connecting-IP / X-Forwarded-For) are client-controllable
+		// unless the site actually sits behind a trusted proxy, so they are
+		// only honored when the site explicitly opts in.
+		$trust_proxy = apply_filters(
+			'bookingistic_trust_proxy_headers',
+			(bool) ( defined( 'BOOKINGISTIC_TRUST_PROXY_HEADERS' ) && BOOKINGISTIC_TRUST_PROXY_HEADERS )
+		);
+
+		$candidates = $trust_proxy
+			? [ 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' ]
+			: [ 'REMOTE_ADDR' ];
+
 		foreach ( $candidates as $k ) {
 			if ( ! empty( $_SERVER[ $k ] ) ) {
-				$ip = explode( ',', (string) $_SERVER[ $k ] )[0];
-				$ip = trim( $ip );
+				$raw = sanitize_text_field( wp_unslash( (string) $_SERVER[ $k ] ) );
+				$ip  = trim( explode( ',', $raw )[0] );
 				if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
 					return $ip;
 				}

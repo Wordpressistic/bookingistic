@@ -57,9 +57,8 @@ class Settings_Page {
 		}
 		$settings['holidays'] = $holidays;
 
-		// White-label.
-		$settings['premium_license_active'] = ! empty( $raw['premium_license_active'] );
-		$settings['remove_branding']        = ! empty( $raw['remove_branding'] );
+		// Legacy white-label keys are no longer saved: nothing in the plugin
+		// is gated behind a license (WordPress.org guidelines).
 
 		update_option( 'bookingistic_settings', $settings );
 

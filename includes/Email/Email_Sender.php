@@ -39,6 +39,20 @@ class Email_Sender {
 
 		$sent = wp_mail( $to, $subject, $body, $headers, $attachments );
 
+		// Clean up transient attachment files this plugin wrote (e.g. .ics
+		// temps in the system temp dir). Only files we created are removed.
+		$temp_dir = realpath( get_temp_dir() );
+		foreach ( $attachments as $file ) {
+			if ( ! is_string( $file ) || ! $temp_dir ) {
+				continue;
+			}
+			$real = realpath( $file );
+			$name = $real ? basename( $real ) : '';
+			if ( $real && 0 === strpos( $real, $temp_dir ) && 0 === strpos( $name, 'bookingistic-' ) && substr( $name, -4 ) === '.ics' ) {
+				wp_delete_file( $real );
+			}
+		}
+
 		Email_Log_Repository::record(
 			[
 				'automation_id'   => (int) ( $context['automation_id'] ?? 0 ),

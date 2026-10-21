@@ -98,7 +98,7 @@ class Backward_Compatibility {
 
 	public static function handle_legacy_form(): void {
 		if ( ! isset( $_POST['wpistic_bookingistic_nonce'] ) ||
-			! wp_verify_nonce( wp_unslash( $_POST['wpistic_bookingistic_nonce'] ), 'wpistic_bookingistic' ) ) {
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wpistic_bookingistic_nonce'] ) ), 'wpistic_bookingistic' ) ) {
 			self::redirect_back( 'error' );
 		}
 		if ( ! empty( $_POST['website2'] ) ) {

@@ -4,11 +4,11 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Advanced Booking, Calendar & Email Automation for WordPress. 4 form designs, 3 calendar views, industry presets, Elementor widget, Google Calendar two-way sync, staff scheduling, and automated emails — all native to WordPress.
+Booking, calendar & email automation for WordPress — form designs, calendar views, Google Sync, staff scheduling, and payments via WooCommerce.
 
 == Description ==
 
@@ -52,7 +52,7 @@ Drag-and-drop the Bookingistic Form widget with live controls for service, templ
 
 **Email automation**
 
-Branded HTML confirmations, reminders (hourly cron), cancellation and reschedule notices. Automation rules fire on booking events; every send is logged. Free tier adds a small branding footer — removable with a filter.
+Branded HTML confirmations, reminders (hourly cron), cancellation and reschedule notices. Automation rules fire on booking events; every send is logged. Site owners can add their own custom footer text under Settings.
 
 **Payments (bring your own gateway)**
 
@@ -117,7 +117,29 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 3. Calendar view — pills scroller for mobile-first booking
 4. Admin dashboard — bookings, services, staff, email automations
 
+== External services ==
+
+**Google Calendar (optional, per staff member)**
+
+This plugin can connect to Google Calendar so each staff member can two-way sync their bookings. Nothing is sent to Google until a staff member explicitly clicks "Connect Google Calendar" in the staff editor and authorizes access with their own free Google OAuth client.
+
+* What it is used for: pushing confirmed bookings to the connected Google Calendar, and reading that calendar's free/busy blocks so external events block booking slots.
+* What data is sent and when: booking details (service name, date/time, customer name and notes) are sent when a booking is confirmed, rescheduled, or deleted, for staff members who connected their calendar. OAuth tokens are stored in the site's own database.
+* Which services are contacted: Google's OAuth endpoints (accounts.google.com, oauth2.googleapis.com) and the Google Calendar API (www.googleapis.com).
+* Google Terms of Service: https://policies.google.com/terms
+* Google Privacy Policy: https://policies.google.com/privacy
+
 == Changelog ==
+
+= 2.5.1 =
+* Removed the email footer branding and its license gate — every shipped feature is now free and fully enabled (WordPress.org guidelines)
+* Security: staff email addresses are no longer exposed by the public REST endpoints
+* Security: client IP detection for rate limiting now uses only the direct connection address unless the site explicitly opts in to trusted proxy headers, and all header input is sanitized
+* Security: legacy form nonce is now sanitized before verification; admin error notices sanitize input before escaping
+* Privacy: email .ics attachments are written to the system temp directory with random names and deleted after sending — no booking data in the public uploads folder
+* Fixed: appearance screen styles load through the standard enqueue system
+* Fixed: removed the redundant translation loader (WordPress.org loads translations automatically)
+* Brand: plugin links now point to bookingistic.com
 
 = 2.5.0 =
 * Fixed: `/wp-json/bookingistic/v1/payments/status` now accepts the signed link's `t` parameter (previously only read `token`, so plugin-issued links always returned 410)

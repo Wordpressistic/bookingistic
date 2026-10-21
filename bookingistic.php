@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       Bookingistic
- * Plugin URI:        https://www.wordpressistic.com/solutions/booking/
+ * Plugin URI:        https://bookingistic.com
  * Description:       Advanced Booking, Calendar & Email Automation for WordPress. Turn your site into a premium booking system with services, staff, availability, calendar views, and automated emails.
- * Version:           2.5.0
+ * Version:           2.5.1
  * Requires at least: 6.4
  * Requires PHP:      8.0
- * Author:            WordPressistic
- * Author URI:        https://www.wordpressistic.com
+ * Author:            Shuvo Chandra Sarker
+ * Author URI:        https://bookingistic.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       bookingistic
@@ -22,7 +22,7 @@ if ( defined( 'BOOKINGISTIC_VERSION' ) ) {
 	return;
 }
 
-define( 'BOOKINGISTIC_VERSION', '2.5.0' );
+define( 'BOOKINGISTIC_VERSION', '2.5.1' );
 define( 'BOOKINGISTIC_FILE', __FILE__ );
 define( 'BOOKINGISTIC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BOOKINGISTIC_URL', plugin_dir_url( __FILE__ ) );
@@ -48,7 +48,8 @@ register_deactivation_hook( __FILE__, [ \Bookingistic\Core\Deactivator::class, '
 add_action(
 	'plugins_loaded',
 	static function () {
-		load_plugin_textdomain( 'bookingistic', false, dirname( BOOKINGISTIC_BASENAME ) . '/languages' );
+		// Translations for the WordPress.org slug load automatically since
+		// WP 4.6 — no load_plugin_textdomain() call is needed.
 		\Bookingistic\Core\Plugin::instance()->boot();
 	},
 	5
