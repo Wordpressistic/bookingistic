@@ -37,7 +37,7 @@ class Integrations_Page {
 		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
 		// check — every handler runs on each admin POST.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
-		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 		if ( 'save_integration' !== $action ) {
 			return;
 		}

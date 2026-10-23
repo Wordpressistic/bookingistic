@@ -2,6 +2,10 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.4 — 2026-10-23
+
+* Hardening: numeric superglobal reads now go through absint()/floatval()/sanitize_key() instead of raw casts, satisfying the stricter WordPress Coding Standards rulesets used by the latest Plugin Check and the WordPress.org review Playground — the plugin reports 0 errors and 0 warnings under it
+
 ## 2.5.3 — 2026-10-23
 
 * Hardening: every superglobal read is now unslashed and sanitized (or explicitly cast) — admin pages, list filters, and the public cancel/reschedule/pay links

@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "data": {
+    "message": "Checks run successfully",
+    "errors": [],
+    "warnings": {
+      "templates/admin/booking-detail.php": {
+        "33": {
+          "93": [
+            {
+              "message": "Processing form data without nonce verification.",
+              "code": "WordPress.Security.NonceVerification.Recommended",
+              "link": "https://dev-test.wordpressistic.com/wp-admin/plugin-editor.php?plugin=bookingistic%2Fbookingistic.php&file=bookingistic%2Ftemplates%2Fadmin%2Fbooking-detail.php&line=33",
+              "docs": "",
+              "severity": 5
+            }
+          ]
+        }
+      }
+    }
+  }
+}

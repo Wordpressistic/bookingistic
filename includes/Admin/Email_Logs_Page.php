@@ -29,7 +29,7 @@ class Email_Logs_Page {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$automation_id = isset( $_GET['automation_id'] ) ? absint( wp_unslash( $_GET['automation_id'] ) ) : 0;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page          = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1;
+		$page          = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
 		$per_page      = 50;
 		$offset        = ( $page - 1 ) * $per_page;
 

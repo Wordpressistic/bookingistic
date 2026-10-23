@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,9 @@ This plugin can connect to Google Calendar so each staff member can two-way sync
 * Google Privacy Policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 2.5.4 =
+* Hardening: numeric superglobal reads now go through absint()/floatval()/sanitize_key() instead of raw casts, satisfying the stricter WordPress Coding Standards rulesets used by the latest Plugin Check and the WordPress.org review Playground — the plugin reports 0 errors and 0 warnings under it
 
 = 2.5.3 =
 * Hardening: every superglobal read is now unslashed and sanitized (or explicitly cast) — admin pages, list filters, and the public cancel/reschedule/pay links

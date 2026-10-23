@@ -32,7 +32,7 @@ class Services_Page {
 		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
 		// check — every handler runs on each admin POST.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
-		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 		if ( 'save_service' !== $action ) {
 			return;
 		}
@@ -44,20 +44,20 @@ class Services_Page {
 			'slug'              => sanitize_title( wp_unslash( $_POST['slug'] ?? '' ) ),
 			'description'       => wp_kses_post( wp_unslash( $_POST['description'] ?? '' ) ),
 			'short_description' => sanitize_textarea_field( wp_unslash( $_POST['short_description'] ?? '' ) ),
-			'duration_minutes'  => (int) wp_unslash( $_POST['duration_minutes'] ?? 30 ),
-			'buffer_before'     => (int) wp_unslash( $_POST['buffer_before'] ?? 0 ),
-			'buffer_after'      => (int) wp_unslash( $_POST['buffer_after'] ?? 0 ),
-			'price'             => (float) wp_unslash( $_POST['price'] ?? 0 ),
-			'deposit_percent'   => (float) wp_unslash( $_POST['deposit_percent'] ?? 0 ),
+			'duration_minutes'  => absint( wp_unslash( $_POST['duration_minutes'] ?? 30 ) ),
+			'buffer_before'     => absint( wp_unslash( $_POST['buffer_before'] ?? 0 ) ),
+			'buffer_after'      => absint( wp_unslash( $_POST['buffer_after'] ?? 0 ) ),
+			'price'             => floatval( wp_unslash( $_POST['price'] ?? 0 ) ),
+			'deposit_percent'   => floatval( wp_unslash( $_POST['deposit_percent'] ?? 0 ) ),
 			'category'          => sanitize_text_field( wp_unslash( $_POST['category'] ?? '' ) ),
 			'booking_type'      => sanitize_key( wp_unslash( $_POST['booking_type'] ?? 'one_to_one' ) ),
 			'confirmation_mode' => sanitize_key( wp_unslash( $_POST['confirmation_mode'] ?? 'auto' ) ),
-			'max_attendees'     => (int) wp_unslash( $_POST['max_attendees'] ?? 1 ),
+			'max_attendees'     => absint( wp_unslash( $_POST['max_attendees'] ?? 1 ) ),
 			'status'            => sanitize_key( wp_unslash( $_POST['status'] ?? 'active' ) ),
-			'sort_order'        => (int) wp_unslash( $_POST['sort_order'] ?? 0 ),
+			'sort_order'        => absint( wp_unslash( $_POST['sort_order'] ?? 0 ) ),
 		];
 
-		$id = (int) wp_unslash( $_POST['service_id'] ?? 0 );
+		$id = absint( wp_unslash( $_POST['service_id'] ?? 0 ) );
 		if ( $id > 0 ) {
 			Service_Repository::update( $id, $payload );
 		} else {

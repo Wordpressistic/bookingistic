@@ -164,7 +164,7 @@ $bookingistic_payment    = isset( $_GET['payment_status'] ) ? sanitize_key( wp_u
 				[
 					'base'    => add_query_arg( 'paged', '%#%' ),
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
-					'current' => isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1,
+					'current' => isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1,
 					'total'   => (int) $result['pages'],
 				]
 			);

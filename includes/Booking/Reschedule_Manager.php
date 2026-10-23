@@ -30,7 +30,7 @@ class Reschedule_Manager {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$id    = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+		$id    = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$token = isset( $_GET['t'] ) ? sanitize_text_field( wp_unslash( $_GET['t'] ) ) : '';
 

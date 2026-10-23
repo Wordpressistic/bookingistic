@@ -27,7 +27,7 @@ class Customers_Page {
 
 	private static function render_list(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter.
-		$page   = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1;
+		$page   = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
 		$result = Customer_Repository::paginate( $page, 25 );
 
 		echo '<div class="wrap bookingistic-wrap"><h1>' . esc_html__( 'Customers', 'bookingistic' ) . '</h1>';

@@ -45,8 +45,8 @@ class Staff_Page {
 	public static function maybe_save(): void {
 		// Action dispatcher peek: save_staff and delete_staff verify their own
 		// nonces below before any processing.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 
 		if ( $action === 'save_staff' ) {
 			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_STAFF );
@@ -84,14 +84,14 @@ class Staff_Page {
 				'phone'                 => Sanitizer::phone( wp_unslash( $_POST['phone'] ?? '' ) ),
 				'photo_url'             => esc_url_raw( wp_unslash( $_POST['photo_url'] ?? '' ) ),
 				'bio'                   => sanitize_textarea_field( wp_unslash( $_POST['bio'] ?? '' ) ),
-				'booking_limit_per_day' => (int) wp_unslash( $_POST['booking_limit_per_day'] ?? 0 ),
+				'booking_limit_per_day' => absint( wp_unslash( $_POST['booking_limit_per_day'] ?? 0 ) ),
 				'status'                => sanitize_key( wp_unslash( $_POST['status'] ?? 'active' ) ),
 				'working_hours'         => $working_hours,
 				'days_off'              => $days_off,
 				'service_ids'           => array_map( 'intval', (array) ( $_POST['service_ids'] ?? [] ) ),
 			];
 
-			$id = (int) wp_unslash( $_POST['staff_id'] ?? 0 );
+			$id = absint( wp_unslash( $_POST['staff_id'] ?? 0 ) );
 			$saved = $id > 0
 				? Staff_Repository::update( $id, $payload )
 				: Staff_Repository::create( $payload );
@@ -108,7 +108,7 @@ class Staff_Page {
 		if ( $action === 'delete_staff' ) {
 			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_STAFF );
 			check_admin_referer( 'bookingistic_admin_staff_delete' );
-			Staff_Repository::delete( (int) wp_unslash( $_POST['staff_id'] ?? 0 ) );
+			Staff_Repository::delete( absint( wp_unslash( $_POST['staff_id'] ?? 0 ) ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&deleted=1' ) );
 			exit;
 		}
@@ -122,7 +122,7 @@ class Staff_Page {
 		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
 		// check — every handler runs on each admin POST.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
-		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 		if ( ! in_array( $action, [ 'gcal_disconnect', 'gcal_sync_now' ], true ) ) {
 			return;
 		}
@@ -132,14 +132,14 @@ class Staff_Page {
 		check_admin_referer( 'bookingistic_admin_gcal' );
 
 		if ( $action === 'gcal_disconnect' ) {
-			$staff_id = (int) wp_unslash( $_POST['staff_id'] ?? 0 );
+			$staff_id = absint( wp_unslash( $_POST['staff_id'] ?? 0 ) );
 			\Bookingistic\Integrations\Google_Calendar\GCal_Sync::disconnect( $staff_id );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&edit=' . $staff_id . '&gcal=disconnected' ) );
 			exit;
 		}
 
 		if ( $action === 'gcal_sync_now' ) {
-			$staff_id = (int) wp_unslash( $_POST['staff_id'] ?? 0 );
+			$staff_id = absint( wp_unslash( $_POST['staff_id'] ?? 0 ) );
 			\Bookingistic\Integrations\Google_Calendar\GCal_Sync::refresh_busy_for_staff( $staff_id );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&edit=' . $staff_id . '&gcal=synced' ) );
 			exit;

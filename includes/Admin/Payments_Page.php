@@ -25,7 +25,7 @@ class Payments_Page {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$provider = isset( $_GET['provider'] ) ? sanitize_key( wp_unslash( $_GET['provider'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page     = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1;
+		$page     = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1;
 		$per_page = 50;
 		$offset   = ( $page - 1 ) * $per_page;
 
@@ -53,7 +53,7 @@ class Payments_Page {
 		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
 		// check — every handler runs on each admin POST.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
-		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 		if ( ! in_array( $action, [ 'payment_mark_paid', 'payment_refund', 'payment_fail' ], true ) ) {
 			return;
 		}
@@ -62,7 +62,7 @@ class Payments_Page {
 		}
 		check_admin_referer( self::NONCE );
 
-		$booking_id = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
+		$booking_id = absint( wp_unslash( $_POST['booking_id'] ?? 0 ) );
 		$booking    = $booking_id ? \Bookingistic\Database\Booking_Repository::find( $booking_id ) : null;
 		if ( ! $booking ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-payments' ) );
@@ -92,7 +92,7 @@ class Payments_Page {
 		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
 		// check — every handler runs on each admin POST.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
-		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 		if ( 'save_payments' !== $action ) {
 			return;
 		}

@@ -52,8 +52,8 @@ class Email_Automations_Page {
 
 	public static function maybe_save(): void {
 		// Action dispatcher peek: each branch verifies its own nonce below.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ?? '' ) );
 
 		if ( $action === 'save_email_automation' ) {
 			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_EMAILS );
@@ -64,15 +64,15 @@ class Email_Automations_Page {
 				'trigger_event'    => sanitize_key( wp_unslash( $_POST['trigger_event'] ?? '' ) ),
 				'recipient_type'   => sanitize_key( wp_unslash( $_POST['recipient_type'] ?? 'customer' ) ),
 				'recipient_custom' => sanitize_email( wp_unslash( $_POST['recipient_custom'] ?? '' ) ),
-				'delay_amount'     => (int) wp_unslash( $_POST['delay_amount'] ?? 0 ),
+				'delay_amount'     => absint( wp_unslash( $_POST['delay_amount'] ?? 0 ) ),
 				'delay_unit'       => sanitize_key( wp_unslash( $_POST['delay_unit'] ?? 'minutes' ) ),
 				'subject'          => sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ),
 				'body'             => wp_kses_post( wp_unslash( $_POST['body'] ?? '' ) ),
-				'service_id'       => (int) wp_unslash( $_POST['service_id'] ?? 0 ),
+				'service_id'       => absint( wp_unslash( $_POST['service_id'] ?? 0 ) ),
 				'status'           => sanitize_key( wp_unslash( $_POST['status'] ?? 'active' ) ),
 			];
 
-			$id = (int) wp_unslash( $_POST['automation_id'] ?? 0 );
+			$id = absint( wp_unslash( $_POST['automation_id'] ?? 0 ) );
 			$saved = $id > 0
 				? Email_Automation_Repository::update( $id, $payload )
 				: Email_Automation_Repository::create( $payload );
@@ -88,7 +88,7 @@ class Email_Automations_Page {
 		if ( $action === 'delete_email_automation' ) {
 			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_EMAILS );
 			check_admin_referer( 'bookingistic_admin_email_automation_delete' );
-			Email_Automation_Repository::delete( (int) wp_unslash( $_POST['automation_id'] ?? 0 ) );
+			Email_Automation_Repository::delete( absint( wp_unslash( $_POST['automation_id'] ?? 0 ) ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-emails&deleted=1' ) );
 			exit;
 		}
