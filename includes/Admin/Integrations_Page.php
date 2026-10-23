@@ -37,6 +37,7 @@ class Integrations_Page {
 		if ( ( $_POST['bookingistic_admin_action'] ?? '' ) !== 'save_integration' ) {
 			return;
 		}
+		\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE );
 		check_admin_referer( 'bookingistic_admin_integration' );
 
 		$slug        = sanitize_key( wp_unslash( $_POST['integration_slug'] ?? '' ) );

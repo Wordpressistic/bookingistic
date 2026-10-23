@@ -41,6 +41,15 @@ class Bookings_Page {
 			return;
 		}
 
+		// Authorization up front, before any per-action nonce check: creating a
+		// booking needs only the create capability, every other mutation here
+		// (status, cancel, reschedule, notes) is an edit.
+		\Bookingistic\Core\Capabilities::verify(
+			$action === 'booking_create'
+				? \Bookingistic\Core\Capabilities::CREATE_BOOKINGS
+				: \Bookingistic\Core\Capabilities::EDIT_BOOKINGS
+		);
+
 		switch ( $action ) {
 			case 'booking_status':
 				check_admin_referer( 'bookingistic_admin_booking' );

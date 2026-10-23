@@ -39,18 +39,7 @@ final class Plugin {
 
 	public function boot(): void {
 		// Custom cron interval for calendar sync.
-		add_filter(
-			'cron_schedules',
-			static function ( $schedules ) {
-				if ( ! isset( $schedules['fifteen_minutes'] ) ) {
-					$schedules['fifteen_minutes'] = [
-						'interval' => 15 * MINUTE_IN_SECONDS,
-						'display'  => __( 'Every 15 minutes', 'bookingistic' ),
-					];
-				}
-				return $schedules;
-			}
-		);
+		add_filter( 'cron_schedules', [ Cron::class, 'register_schedules' ] );
 
 		// Database upgrade check.
 		add_action( 'init', [ Installer::class, 'maybe_upgrade' ], 1 );

@@ -2,6 +2,11 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.2 — 2026-10-23
+
+* Fixed: the Google Calendar sync cron event is now scheduled correctly on a fresh activation — the custom "every 15 minutes" interval is registered before scheduling (previously the interval was only registered after activation, so the event was silently skipped on new installs)
+* Security: every admin save and action handler (settings, services, staff, bookings, email automations, integrations, appearance) now verifies a capability before processing, in addition to the existing nonce checks — users without the matching Bookingistic capability get a 403
+
 ## 2.5.1 — 2026-10-21
 
 * Removed the email footer branding and its license gate — every shipped feature is now free and fully enabled (WordPress.org guidelines)

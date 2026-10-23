@@ -58,4 +58,23 @@ class Capabilities {
 	public static function current_user_can_manage(): bool {
 		return current_user_can( self::MANAGE ) || current_user_can( 'manage_options' );
 	}
+
+	/**
+	 * Enforce a capability for a state-changing admin request.
+	 *
+	 * Passes when the user holds the specific capability, the plugin-wide
+	 * manage capability, or manage_options; dies with 403 otherwise. Nonce
+	 * verification stays the caller's job — this is authorization, not
+	 * input-origin checking.
+	 */
+	public static function verify( string $cap ): void {
+		if ( current_user_can( $cap ) || current_user_can( self::MANAGE ) || current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		wp_die(
+			esc_html__( 'You do not have permission to perform this Bookingistic action.', 'bookingistic' ),
+			'',
+			[ 'response' => 403 ]
+		);
+	}
 }

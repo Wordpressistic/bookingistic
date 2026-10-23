@@ -50,6 +50,7 @@ class Appearance_Page {
 		$action = sanitize_key( wp_unslash( $_POST['bookingistic_admin_action'] ) );
 
 		if ( $action === 'save_appearance' ) {
+			Capabilities::verify( Capabilities::MANAGE );
 			check_admin_referer( self::NONCE );
 			Template_Loader::update_appearance(
 				[
@@ -64,6 +65,7 @@ class Appearance_Page {
 		}
 
 		if ( $action === 'apply_industry' ) {
+			Capabilities::verify( Capabilities::MANAGE );
 			check_admin_referer( self::NONCE );
 			$key       = sanitize_key( wp_unslash( $_POST['industry'] ?? '' ) );
 			$customize = Template_Loader::industries()[ $key ] ?? null;

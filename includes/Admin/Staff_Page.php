@@ -45,6 +45,7 @@ class Staff_Page {
 		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
 
 		if ( $action === 'save_staff' ) {
+			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_STAFF );
 			check_admin_referer( 'bookingistic_admin_staff' );
 
 			$working_hours = [];
@@ -94,6 +95,7 @@ class Staff_Page {
 		}
 
 		if ( $action === 'delete_staff' ) {
+			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_STAFF );
 			check_admin_referer( 'bookingistic_admin_staff_delete' );
 			Staff_Repository::delete( (int) ( $_POST['staff_id'] ?? 0 ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-staff&deleted=1' ) );

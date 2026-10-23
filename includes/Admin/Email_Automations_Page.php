@@ -53,6 +53,7 @@ class Email_Automations_Page {
 		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
 
 		if ( $action === 'save_email_automation' ) {
+			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_EMAILS );
 			check_admin_referer( 'bookingistic_admin_email_automation' );
 
 			$payload = [
@@ -82,6 +83,7 @@ class Email_Automations_Page {
 		}
 
 		if ( $action === 'delete_email_automation' ) {
+			\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_EMAILS );
 			check_admin_referer( 'bookingistic_admin_email_automation_delete' );
 			Email_Automation_Repository::delete( (int) ( $_POST['automation_id'] ?? 0 ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-emails&deleted=1' ) );

@@ -23,6 +23,11 @@ class Installer {
 		self::seed_default_email_automations();
 		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
 
+		// Fresh activations run before Plugin::boot() registers the cron
+		// recurrences (plugins_loaded has already fired), so register them
+		// inline first — wp_schedule_event() needs the interval to exist.
+		add_filter( 'cron_schedules', [ Cron::class, 'register_schedules' ] );
+
 		if ( ! wp_next_scheduled( 'bookingistic_send_reminders' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'bookingistic_send_reminders' );
 		}

@@ -20,6 +20,7 @@ class Settings_Page {
 		if ( ( $_POST['bookingistic_admin_action'] ?? '' ) !== 'save_settings' ) {
 			return;
 		}
+		\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_SETTINGS );
 		check_admin_referer( 'bookingistic_admin_settings' );
 
 		$raw      = wp_unslash( $_POST );

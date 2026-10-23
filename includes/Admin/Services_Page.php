@@ -30,6 +30,7 @@ class Services_Page {
 		if ( ( $_POST['bookingistic_admin_action'] ?? '' ) !== 'save_service' ) {
 			return;
 		}
+		\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_SERVICES );
 		check_admin_referer( 'bookingistic_admin_service' );
 
 		$payload = [
