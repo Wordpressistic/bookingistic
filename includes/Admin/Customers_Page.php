@@ -16,7 +16,8 @@ defined( 'ABSPATH' ) || exit;
 class Customers_Page {
 
 	public static function render(): void {
-		$view_id = (int) ( $_GET['view'] ?? 0 );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter.
+		$view_id = isset( $_GET['view'] ) ? absint( wp_unslash( $_GET['view'] ) ) : 0;
 		if ( $view_id ) {
 			self::render_detail( $view_id );
 			return;
@@ -25,7 +26,8 @@ class Customers_Page {
 	}
 
 	private static function render_list(): void {
-		$page   = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter.
+		$page   = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1;
 		$result = Customer_Repository::paginate( $page, 25 );
 
 		echo '<div class="wrap bookingistic-wrap"><h1>' . esc_html__( 'Customers', 'bookingistic' ) . '</h1>';

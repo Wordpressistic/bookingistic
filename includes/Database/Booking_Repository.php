@@ -9,6 +9,13 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
+// This repository intentionally queries the plugin's own custom tables. Table
+// names come from Tables:: class constants (never user input) and every value
+// is passed through $wpdb->prepare()/insert()/update(). The DirectQuery and
+// NoCaching sniffs target options/postmeta access patterns and are disabled
+// here by design.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 class Booking_Repository {
 
 	public const STATUSES         = [ 'pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'no_show' ];

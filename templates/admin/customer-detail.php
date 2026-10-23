@@ -42,15 +42,15 @@ defined( 'ABSPATH' ) || exit;
 							<th></th>
 						</tr></thead>
 						<tbody>
-							<?php foreach ( $bookings as $b ) :
-								$svc = \Bookingistic\Database\Service_Repository::find( (int) $b['service_id'] ); ?>
+							<?php foreach ( $bookings as $bookingistic_booking ) :
+								$bookingistic_service = \Bookingistic\Database\Service_Repository::find( (int) $bookingistic_booking['service_id'] ); ?>
 								<tr>
-									<td>#<?php echo (int) $b['id']; ?></td>
-									<td><?php echo esc_html( $svc['name'] ?? '—' ); ?></td>
-									<td><?php echo $b['start_datetime'] ? esc_html( $b['start_datetime'] . ' UTC' ) : '—'; ?></td>
-									<td><span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $b['status'] ); ?>"><?php echo esc_html( $b['status'] ); ?></span></td>
-									<td><?php echo esc_html( $b['payment_status'] ); ?></td>
-									<td><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $b['id'] ) ); ?>"><?php esc_html_e( 'Open', 'bookingistic' ); ?></a></td>
+									<td>#<?php echo (int) $bookingistic_booking['id']; ?></td>
+									<td><?php echo esc_html( $bookingistic_service['name'] ?? '—' ); ?></td>
+									<td><?php echo $bookingistic_booking['start_datetime'] ? esc_html( $bookingistic_booking['start_datetime'] . ' UTC' ) : '—'; ?></td>
+									<td><span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $bookingistic_booking['status'] ); ?>"><?php echo esc_html( $bookingistic_booking['status'] ); ?></span></td>
+									<td><?php echo esc_html( $bookingistic_booking['payment_status'] ); ?></td>
+									<td><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $bookingistic_booking['id'] ) ); ?>"><?php esc_html_e( 'Open', 'bookingistic' ); ?></a></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>

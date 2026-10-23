@@ -19,9 +19,11 @@ defined( 'ABSPATH' ) || exit;
 		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Team members, working hours, and Google Calendar sync.', 'bookingistic' ); ?></p>
 	</header>
 
+	<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display notice below. ?>
 	<?php if ( ! empty( $_GET['deleted'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Staff deleted.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
+	<?php // phpcs:enable ?>
 
 	<?php if ( empty( $staff ) ) : ?>
 		<div class="bookingistic-card">
@@ -45,14 +47,14 @@ defined( 'ABSPATH' ) || exit;
 			<th></th>
 		</tr></thead>
 		<tbody>
-			<?php foreach ( $staff as $s ) : ?>
+			<?php foreach ( $staff as $bookingistic_staff_member ) : ?>
 				<tr>
-					<td><strong><?php echo esc_html( $s['name'] ); ?></strong></td>
-					<td><?php echo esc_html( $s['email'] ); ?></td>
-					<td><?php echo esc_html( $s['phone'] ); ?></td>
-					<td><?php echo $s['booking_limit_per_day'] ? (int) $s['booking_limit_per_day'] : '∞'; ?></td>
-					<td><span class="bookingistic-pill bookingistic-pill--<?php echo $s['status'] === 'active' ? 'confirmed' : 'cancelled'; ?>"><?php echo esc_html( $s['status'] ); ?></span></td>
-					<td><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-staff&edit=' . (int) $s['id'] ) ); ?>"><?php esc_html_e( 'Edit', 'bookingistic' ); ?></a></td>
+					<td><strong><?php echo esc_html( $bookingistic_staff_member['name'] ); ?></strong></td>
+					<td><?php echo esc_html( $bookingistic_staff_member['email'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_staff_member['phone'] ); ?></td>
+					<td><?php echo $bookingistic_staff_member['booking_limit_per_day'] ? (int) $bookingistic_staff_member['booking_limit_per_day'] : '∞'; ?></td>
+					<td><span class="bookingistic-pill bookingistic-pill--<?php echo $bookingistic_staff_member['status'] === 'active' ? 'confirmed' : 'cancelled'; ?>"><?php echo esc_html( $bookingistic_staff_member['status'] ); ?></span></td>
+					<td><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-staff&edit=' . (int) $bookingistic_staff_member['id'] ) ); ?>"><?php esc_html_e( 'Edit', 'bookingistic' ); ?></a></td>
 				</tr>
 			<?php endforeach; ?>
 		</tbody>

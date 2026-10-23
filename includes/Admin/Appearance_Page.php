@@ -57,7 +57,7 @@ class Appearance_Page {
 					'template' => sanitize_key( wp_unslash( $_POST['template'] ?? '' ) ),
 					'calendar' => sanitize_key( wp_unslash( $_POST['calendar'] ?? '' ) ),
 					'accent'   => sanitize_hex_color( wp_unslash( $_POST['accent'] ?? '' ) ) ?: '#2563eb',
-					'radius'   => (string) (int) ( $_POST['radius'] ?? 14 ),
+					'radius'   => (string) (int) wp_unslash( $_POST['radius'] ?? '14' ),
 				]
 			);
 			wp_safe_redirect( admin_url( 'admin.php?page=' . self::PAGE_SLUG . '&saved=1' ) );

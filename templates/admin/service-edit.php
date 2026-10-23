@@ -8,10 +8,10 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-$is_new = empty( $service );
+$bookingistic_is_new = empty( $service );
 ?>
 <div class="wrap bookingistic-wrap">
-	<h1><?php echo $is_new ? esc_html__( 'Add service', 'bookingistic' ) : esc_html__( 'Edit service', 'bookingistic' ); ?></h1>
+	<h1><?php echo $bookingistic_is_new ? esc_html__( 'Add service', 'bookingistic' ) : esc_html__( 'Edit service', 'bookingistic' ); ?></h1>
 	<form method="post" action="">
 		<?php wp_nonce_field( 'bookingistic_admin_service' ); ?>
 		<input type="hidden" name="bookingistic_admin_action" value="save_service">
@@ -65,8 +65,8 @@ $is_new = empty( $service );
 				<th><label for="booking_type"><?php esc_html_e( 'Booking type', 'bookingistic' ); ?></label></th>
 				<td>
 					<select id="booking_type" name="booking_type">
-						<?php foreach ( [ 'one_to_one', 'service', 'call', 'group', 'resource' ] as $t ) : ?>
-							<option value="<?php echo esc_attr( $t ); ?>" <?php selected( $service['booking_type'] ?? 'one_to_one', $t ); ?>><?php echo esc_html( $t ); ?></option>
+					<?php foreach ( [ 'one_to_one', 'service', 'call', 'group', 'resource' ] as $bookingistic_booking_type ) : ?>
+						<option value="<?php echo esc_attr( $bookingistic_booking_type ); ?>" <?php selected( $service['booking_type'] ?? 'one_to_one', $bookingistic_booking_type ); ?>><?php echo esc_html( $bookingistic_booking_type ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</td>

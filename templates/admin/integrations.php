@@ -10,7 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$saved_slug = sanitize_key( $_GET['saved'] ?? '' );
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only saved-notice.
+$bookingistic_saved_slug = isset( $_GET['saved'] ) ? sanitize_key( wp_unslash( $_GET['saved'] ) ) : '';
 ?>
 <div class="wrap bookingistic-wrap">
 	<header class="bookingistic-header">
@@ -18,32 +19,32 @@ $saved_slug = sanitize_key( $_GET['saved'] ?? '' );
 		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Plug Bookingistic into the rest of your stack. Each integration is opt-in and only loads its hooks when enabled.', 'bookingistic' ); ?></p>
 	</header>
 
-	<?php if ( $saved_slug ) : ?>
+	<?php if ( $bookingistic_saved_slug ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Integration settings saved.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 
 	<div class="bookingistic-integrations">
-		<?php $card_index = 0; ?>
-		<?php foreach ( $integrations as $integration ) :
-			$slug      = $integration->slug();
-			$available = $integration->is_available();
-			$enabled   = $integration->is_enabled();
-			$fields    = $integration->fields();
-			$current   = $integration->all_settings();
-			$meta      = $ui_map[ $slug ] ?? [ 'icon' => 'dashicons-admin-generic', 'tag' => '' ];
-			$connected = $enabled && $available;
-			$state_key = ! $available ? 'disabled' : ( $enabled ? 'confirmed' : 'pending' );
+		<?php $bookingistic_card_index = 0; ?>
+		<?php foreach ( $integrations as $bookingistic_integration ) :
+			$bookingistic_slug      = $bookingistic_integration->slug();
+			$bookingistic_available = $bookingistic_integration->is_available();
+			$bookingistic_enabled   = $bookingistic_integration->is_enabled();
+			$bookingistic_fields    = $bookingistic_integration->fields();
+			$bookingistic_current   = $bookingistic_integration->all_settings();
+			$bookingistic_meta      = $ui_map[ $bookingistic_slug ] ?? [ 'icon' => 'dashicons-admin-generic', 'tag' => '' ];
+			$bookingistic_connected = $bookingistic_enabled && $bookingistic_available;
+			$bookingistic_state_key = ! $bookingistic_available ? 'disabled' : ( $bookingistic_enabled ? 'confirmed' : 'pending' );
 			?>
-			<div class="bookingistic-integration<?php echo $connected ? ' bookingistic-integration--connected' : ''; ?>" style="--bk-i: <?php echo (int) $card_index++; ?>">
-				<div class="bookingistic-integration__icon"><span class="dashicons <?php echo esc_attr( $meta['icon'] ); ?>"></span></div>
+			<div class="bookingistic-integration<?php echo $bookingistic_connected ? ' bookingistic-integration--connected' : ''; ?>" style="--bk-i: <?php echo (int) $bookingistic_card_index++; ?>">
+				<div class="bookingistic-integration__icon"><span class="dashicons <?php echo esc_attr( $bookingistic_meta['icon'] ); ?>"></span></div>
 
 				<div class="bookingistic-integration__head">
-					<h2 class="bookingistic-integration__name"><?php echo esc_html( $integration->label() ); ?></h2>
-					<span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $state_key ); ?>">
+					<h2 class="bookingistic-integration__name"><?php echo esc_html( $bookingistic_integration->label() ); ?></h2>
+					<span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $bookingistic_state_key ); ?>">
 						<?php
-						if ( ! $available ) {
+						if ( ! $bookingistic_available ) {
 							esc_html_e( 'Not available', 'bookingistic' );
-						} elseif ( $enabled ) {
+						} elseif ( $bookingistic_enabled ) {
 							esc_html_e( 'Connected', 'bookingistic' );
 						} else {
 							esc_html_e( 'Not connected', 'bookingistic' );
@@ -52,20 +53,20 @@ $saved_slug = sanitize_key( $_GET['saved'] ?? '' );
 					</span>
 				</div>
 
-				<?php if ( '' !== $meta['tag'] ) : ?>
-					<span class="bookingistic-header__badge" style="align-self:flex-start;margin-bottom:2px"><?php echo esc_html( $meta['tag'] ); ?></span>
+				<?php if ( '' !== $bookingistic_meta['tag'] ) : ?>
+					<span class="bookingistic-header__badge" style="align-self:flex-start;margin-bottom:2px"><?php echo esc_html( $bookingistic_meta['tag'] ); ?></span>
 				<?php endif; ?>
 
-				<p class="bookingistic-integration__desc"><?php echo esc_html( $integration->description() ); ?></p>
+				<p class="bookingistic-integration__desc"><?php echo esc_html( $bookingistic_integration->description() ); ?></p>
 
 				<div class="bookingistic-integration__foot">
-					<?php if ( $saved_slug === $slug ) : ?>
+					<?php if ( $bookingistic_saved_slug === $bookingistic_slug ) : ?>
 						<span class="bookingistic-pill bookingistic-pill--confirmed"><?php esc_html_e( 'Saved', 'bookingistic' ); ?></span>
 					<?php endif; ?>
-					<?php if ( ! $available ) : ?>
+					<?php if ( ! $bookingistic_available ) : ?>
 						<span class="bookingistic-muted">
 							<?php
-							if ( $slug === 'woocommerce' ) {
+							if ( $bookingistic_slug === 'woocommerce' ) {
 								esc_html_e( 'WooCommerce is not active on this site. Install and activate WooCommerce to use this integration.', 'bookingistic' );
 							} else {
 								esc_html_e( 'Required dependencies are not available in this environment.', 'bookingistic' );
@@ -73,43 +74,43 @@ $saved_slug = sanitize_key( $_GET['saved'] ?? '' );
 							?>
 						</span>
 					<?php else : ?>
-						<button type="button" class="button <?php echo $enabled ? '' : 'button-primary'; ?>" data-bookingistic-toggle-panel="<?php echo esc_attr( $slug ); ?>">
-							<?php echo $enabled ? esc_html__( 'Configure', 'bookingistic' ) : esc_html__( 'Connect', 'bookingistic' ); ?>
+						<button type="button" class="button <?php echo $bookingistic_enabled ? '' : 'button-primary'; ?>" data-bookingistic-toggle-panel="<?php echo esc_attr( $bookingistic_slug ); ?>">
+							<?php echo $bookingistic_enabled ? esc_html__( 'Configure', 'bookingistic' ) : esc_html__( 'Connect', 'bookingistic' ); ?>
 						</button>
 					<?php endif; ?>
 				</div>
 
-				<?php if ( $available ) : ?>
-					<div class="bookingistic-integration__panel" id="bookingistic-panel-<?php echo esc_attr( $slug ); ?>" hidden>
+				<?php if ( $bookingistic_available ) : ?>
+					<div class="bookingistic-integration__panel" id="bookingistic-panel-<?php echo esc_attr( $bookingistic_slug ); ?>" hidden>
 						<form method="post">
 							<?php wp_nonce_field( 'bookingistic_admin_integration' ); ?>
 							<input type="hidden" name="bookingistic_admin_action" value="save_integration">
-							<input type="hidden" name="integration_slug" value="<?php echo esc_attr( $slug ); ?>">
+							<input type="hidden" name="integration_slug" value="<?php echo esc_attr( $bookingistic_slug ); ?>">
 
 							<label class="bookingistic-integration__check">
-								<input type="checkbox" name="_enabled" value="1" <?php checked( $enabled ); ?>>
+								<input type="checkbox" name="_enabled" value="1" <?php checked( $bookingistic_enabled ); ?>>
 								<?php esc_html_e( 'Activate this integration', 'bookingistic' ); ?>
 							</label>
 
-							<?php foreach ( $fields as $key => $schema ) :
-								$value = $current[ $key ] ?? '';
-								$type  = $schema['type'] ?? 'text';
+							<?php foreach ( $bookingistic_fields as $bookingistic_field_key => $bookingistic_field_schema ) :
+								$bookingistic_field_value = $bookingistic_current[ $bookingistic_field_key ] ?? '';
+								$bookingistic_field_type  = $bookingistic_field_schema['type'] ?? 'text';
 								?>
-								<?php if ( 'checkbox' === $type ) : ?>
+								<?php if ( 'checkbox' === $bookingistic_field_type ) : ?>
 									<label class="bookingistic-integration__check">
-										<input type="checkbox" name="<?php echo esc_attr( $key ); ?>" value="1" <?php checked( ! empty( $value ) ); ?>>
-										<?php echo '' !== (string) ( $schema['description'] ?? '' ) ? esc_html( (string) $schema['description'] ) : esc_html( (string) ( $schema['label'] ?? $key ) ); ?>
+										<input type="checkbox" name="<?php echo esc_attr( $bookingistic_field_key ); ?>" value="1" <?php checked( ! empty( $bookingistic_field_value ) ); ?>>
+										<?php echo '' !== (string) ( $bookingistic_field_schema['description'] ?? '' ) ? esc_html( (string) $bookingistic_field_schema['description'] ) : esc_html( (string) ( $bookingistic_field_schema['label'] ?? $bookingistic_field_key ) ); ?>
 									</label>
 								<?php else : ?>
 									<label>
-										<?php echo esc_html( (string) ( $schema['label'] ?? $key ) ); ?>
-										<?php if ( 'textarea' === $type ) : ?>
-											<textarea name="<?php echo esc_attr( $key ); ?>" rows="4"><?php echo esc_textarea( (string) $value ); ?></textarea>
+										<?php echo esc_html( (string) ( $bookingistic_field_schema['label'] ?? $bookingistic_field_key ) ); ?>
+										<?php if ( 'textarea' === $bookingistic_field_type ) : ?>
+											<textarea name="<?php echo esc_attr( $bookingistic_field_key ); ?>" rows="4"><?php echo esc_textarea( (string) $bookingistic_field_value ); ?></textarea>
 										<?php else : ?>
-											<input type="<?php echo esc_attr( 'password' === $type ? 'password' : $type ); ?>" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( (string) $value ); ?>" autocomplete="off" placeholder="<?php echo esc_attr( (string) ( $schema['placeholder'] ?? '' ) ); ?>">
+											<input type="<?php echo esc_attr( 'password' === $bookingistic_field_type ? 'password' : $bookingistic_field_type ); ?>" name="<?php echo esc_attr( $bookingistic_field_key ); ?>" value="<?php echo esc_attr( (string) $bookingistic_field_value ); ?>" autocomplete="off" placeholder="<?php echo esc_attr( (string) ( $bookingistic_field_schema['placeholder'] ?? '' ) ); ?>">
 										<?php endif; ?>
-										<?php if ( 'checkbox' !== $type && ! empty( $schema['description'] ) ) : ?>
-											<span class="description"><?php echo esc_html( (string) $schema['description'] ); ?></span>
+										<?php if ( 'checkbox' !== $bookingistic_field_type && ! empty( $bookingistic_field_schema['description'] ) ) : ?>
+											<span class="description"><?php echo esc_html( (string) $bookingistic_field_schema['description'] ); ?></span>
 										<?php endif; ?>
 									</label>
 								<?php endif; ?>

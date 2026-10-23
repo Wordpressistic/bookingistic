@@ -17,7 +17,11 @@ class Settings_Page {
 	}
 
 	public static function maybe_save(): void {
-		if ( ( $_POST['bookingistic_admin_action'] ?? '' ) !== 'save_settings' ) {
+		// Dispatcher peek: the dispatcher runs every handler on each admin POST,
+		// so bail on action mismatch BEFORE any nonce/capability check.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		if ( 'save_settings' !== $action ) {
 			return;
 		}
 		\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE_SETTINGS );

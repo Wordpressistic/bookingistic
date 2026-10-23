@@ -33,8 +33,8 @@ defined( 'ABSPATH' ) || exit;
 			<span><?php esc_html_e( 'Service', 'bookingistic' ); ?></span>
 			<select data-bookingistic-calendar-filter="service_id">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( $services as $s ) : ?>
-					<option value="<?php echo (int) $s['id']; ?>"><?php echo esc_html( $s['name'] ); ?></option>
+				<?php foreach ( $services as $bookingistic_service_option ) : ?>
+					<option value="<?php echo (int) $bookingistic_service_option['id']; ?>"><?php echo esc_html( $bookingistic_service_option['name'] ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -42,8 +42,8 @@ defined( 'ABSPATH' ) || exit;
 			<span><?php esc_html_e( 'Staff', 'bookingistic' ); ?></span>
 			<select data-bookingistic-calendar-filter="staff_id">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( $staff as $s ) : ?>
-					<option value="<?php echo (int) $s['id']; ?>"><?php echo esc_html( $s['name'] ); ?></option>
+				<?php foreach ( $staff as $bookingistic_staff_option ) : ?>
+					<option value="<?php echo (int) $bookingistic_staff_option['id']; ?>"><?php echo esc_html( $bookingistic_staff_option['name'] ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -51,8 +51,8 @@ defined( 'ABSPATH' ) || exit;
 			<span><?php esc_html_e( 'Status', 'bookingistic' ); ?></span>
 			<select data-bookingistic-calendar-filter="status">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( [ 'pending', 'confirmed', 'rescheduled', 'completed', 'cancelled', 'no_show' ] as $st ) : ?>
-					<option value="<?php echo esc_attr( $st ); ?>"><?php echo esc_html( $st ); ?></option>
+				<?php foreach ( [ 'pending', 'confirmed', 'rescheduled', 'completed', 'cancelled', 'no_show' ] as $bookingistic_calendar_status ) : ?>
+					<option value="<?php echo esc_attr( $bookingistic_calendar_status ); ?>"><?php echo esc_html( $bookingistic_calendar_status ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -60,8 +60,8 @@ defined( 'ABSPATH' ) || exit;
 			<span><?php esc_html_e( 'Payment', 'bookingistic' ); ?></span>
 			<select data-bookingistic-calendar-filter="payment_status">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( [ 'free', 'pending', 'paid', 'deposit_paid', 'failed', 'refunded', 'pay_later' ] as $ps ) : ?>
-					<option value="<?php echo esc_attr( $ps ); ?>"><?php echo esc_html( $ps ); ?></option>
+				<?php foreach ( [ 'free', 'pending', 'paid', 'deposit_paid', 'failed', 'refunded', 'pay_later' ] as $bookingistic_calendar_pay_status ) : ?>
+					<option value="<?php echo esc_attr( $bookingistic_calendar_pay_status ); ?>"><?php echo esc_html( $bookingistic_calendar_pay_status ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>

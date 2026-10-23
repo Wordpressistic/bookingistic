@@ -17,20 +17,20 @@ defined( 'ABSPATH' ) || exit;
 
 use Bookingistic\Payments\Payment_Manager;
 
-$enabled_map = (array) ( ( (array) get_option( 'bookingistic_settings', [] ) )['payment_gateways'] ?? [] );
+$bookingistic_enabled_map = (array) ( ( (array) get_option( 'bookingistic_settings', [] ) )['payment_gateways'] ?? [] );
 
 // Guest names for the ledger table (one query per row; pages are small).
-$booking_labels = [];
-foreach ( $rows as $r ) {
-	$bid = (int) $r['booking_id'];
-	if ( isset( $booking_labels[ $bid ] ) ) {
+$bookingistic_guest_labels = [];
+foreach ( $rows as $bookingistic_ledger_row ) {
+	$bookingistic_booking_id = (int) $bookingistic_ledger_row['booking_id'];
+	if ( isset( $bookingistic_guest_labels[ $bookingistic_booking_id ] ) ) {
 		continue;
 	}
-	$b = \Bookingistic\Database\Booking_Repository::find( $bid );
-	$c = $b ? \Bookingistic\Database\Customer_Repository::find( (int) $b['customer_id'] ) : null;
-	$booking_labels[ $bid ] = $c ? trim( ( $c['first_name'] ?? '' ) . ' ' . ( $c['last_name'] ?? '' ) ) : '';
+	$bookingistic_booking = \Bookingistic\Database\Booking_Repository::find( $bookingistic_booking_id );
+	$bookingistic_customer = $bookingistic_booking ? \Bookingistic\Database\Customer_Repository::find( (int) $bookingistic_booking['customer_id'] ) : null;
+	$bookingistic_guest_labels[ $bookingistic_booking_id ] = $bookingistic_customer ? trim( ( $bookingistic_customer['first_name'] ?? '' ) . ' ' . ( $bookingistic_customer['last_name'] ?? '' ) ) : '';
 }
-$pill = [
+$bookingistic_pill = [
 	'pending'   => 'bookingistic-pill--pending',
 	'paid'      => 'bookingistic-pill--confirmed',
 	'failed'    => 'bookingistic-pill--cancelled',
@@ -44,12 +44,14 @@ $pill = [
 		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Payment methods and the full ledger of every payment attempt.', 'bookingistic' ); ?></p>
 	</header>
 
+	<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display notices below. ?>
 	<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Payment settings saved.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
 	<?php if ( ! empty( $_GET['updated'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Payment record updated.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
+	<?php // phpcs:enable ?>
 
 	<?php if ( empty( $gateways ) ) : ?>
 		<div class="bookingistic-card">
@@ -66,14 +68,14 @@ $pill = [
 				<input type="hidden" name="bookingistic_admin_action" value="save_payments">
 				<table class="widefat striped">
 				<tbody>
-					<?php foreach ( $gateways as $slug => $gateway ) : ?>
+					<?php foreach ( $gateways as $bookingistic_gateway_slug => $bookingistic_gateway ) : ?>
 						<tr>
 							<td style="width:36px">
-								<input type="checkbox" name="gateway_<?php echo esc_attr( $slug ); ?>" value="1" <?php checked( ! empty( $enabled_map[ $slug ] ) ); ?>>
+								<input type="checkbox" name="gateway_<?php echo esc_attr( $bookingistic_gateway_slug ); ?>" value="1" <?php checked( ! empty( $bookingistic_enabled_map[ $bookingistic_gateway_slug ] ) ); ?>>
 							</td>
 							<td>
-								<strong><?php echo esc_html( $gateway->label() ); ?></strong><br>
-								<span class="description"><?php echo esc_html( $gateway->description() ); ?></span>
+								<strong><?php echo esc_html( $bookingistic_gateway->label() ); ?></strong><br>
+								<span class="description"><?php echo esc_html( $bookingistic_gateway->description() ); ?></span>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -95,8 +97,8 @@ $pill = [
 			<span><?php esc_html_e( 'Status', 'bookingistic' ); ?></span>
 			<select name="status">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( \Bookingistic\Database\Payment_Repository::STATUSES as $s ) : ?>
-					<option value="<?php echo esc_attr( $s ); ?>" <?php selected( $status, $s ); ?>><?php echo esc_html( $s ); ?></option>
+				<?php foreach ( \Bookingistic\Database\Payment_Repository::STATUSES as $bookingistic_pay_status ) : ?>
+					<option value="<?php echo esc_attr( $bookingistic_pay_status ); ?>" <?php selected( $status, $bookingistic_pay_status ); ?>><?php echo esc_html( $bookingistic_pay_status ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -104,8 +106,8 @@ $pill = [
 			<span><?php esc_html_e( 'Provider', 'bookingistic' ); ?></span>
 			<select name="provider">
 				<option value=""><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( array_keys( $gateways ) as $slug ) : ?>
-					<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $provider, $slug ); ?>><?php echo esc_html( $slug ); ?></option>
+				<?php foreach ( array_keys( $gateways ) as $bookingistic_gateway_slug ) : ?>
+					<option value="<?php echo esc_attr( $bookingistic_gateway_slug ); ?>" <?php selected( $provider, $bookingistic_gateway_slug ); ?>><?php echo esc_html( $bookingistic_gateway_slug ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -131,33 +133,33 @@ $pill = [
 			<th><?php esc_html_e( 'Actions', 'bookingistic' ); ?></th>
 		</tr></thead>
 		<tbody>
-			<?php foreach ( $rows as $r ) : ?>
+			<?php foreach ( $rows as $bookingistic_ledger_row ) : ?>
 				<tr>
-					<td><?php echo esc_html( $r['created_at'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_ledger_row['created_at'] ); ?></td>
 					<td>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $r['booking_id'] ) ); ?>">#<?php echo (int) $r['booking_id']; ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $bookingistic_ledger_row['booking_id'] ) ); ?>">#<?php echo (int) $bookingistic_ledger_row['booking_id']; ?></a>
 					</td>
-					<td><?php echo esc_html( $booking_labels[ (int) $r['booking_id'] ] ?? '' ); ?></td>
-					<td><?php echo esc_html( $r['provider'] ); ?></td>
-					<td><?php echo esc_html( $r['external_id'] !== '' ? $r['external_id'] : '—' ); ?></td>
-					<td><?php echo esc_html( $r['currency'] . ' ' . number_format( (float) $r['amount'], 2 ) ); ?></td>
+					<td><?php echo esc_html( $bookingistic_guest_labels[ (int) $bookingistic_ledger_row['booking_id'] ] ?? '' ); ?></td>
+					<td><?php echo esc_html( $bookingistic_ledger_row['provider'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_ledger_row['external_id'] !== '' ? $bookingistic_ledger_row['external_id'] : '—' ); ?></td>
+					<td><?php echo esc_html( $bookingistic_ledger_row['currency'] . ' ' . number_format( (float) $bookingistic_ledger_row['amount'], 2 ) ); ?></td>
 					<td>
-						<span class="bookingistic-pill <?php echo esc_attr( $pill[ $r['status'] ] ?? 'bookingistic-pill--pending' ); ?>"><?php echo esc_html( $r['status'] ); ?></span>
+						<span class="bookingistic-pill <?php echo esc_attr( $bookingistic_pill[ $bookingistic_ledger_row['status'] ] ?? 'bookingistic-pill--pending' ); ?>"><?php echo esc_html( $bookingistic_ledger_row['status'] ); ?></span>
 					</td>
 					<td>
 						<form method="post" style="display:flex;gap:6px">
 							<?php wp_nonce_field( \Bookingistic\Admin\Payments_Page::NONCE ); ?>
 							<input type="hidden" name="bookingistic_admin_action" value="payment_mark_paid">
-							<input type="hidden" name="booking_id" value="<?php echo (int) $r['booking_id']; ?>">
-							<?php if ( 'pending' === $r['status'] || 'failed' === $r['status'] ) : ?>
+							<input type="hidden" name="booking_id" value="<?php echo (int) $bookingistic_ledger_row['booking_id']; ?>">
+							<?php if ( 'pending' === $bookingistic_ledger_row['status'] || 'failed' === $bookingistic_ledger_row['status'] ) : ?>
 								<button type="submit" class="button button-small"><?php esc_html_e( 'Mark paid', 'bookingistic' ); ?></button>
 							<?php endif; ?>
 						</form>
-						<?php if ( 'paid' === $r['status'] ) : ?>
+						<?php if ( 'paid' === $bookingistic_ledger_row['status'] ) : ?>
 						<form method="post" style="display:flex;gap:6px">
 							<?php wp_nonce_field( \Bookingistic\Admin\Payments_Page::NONCE ); ?>
 							<input type="hidden" name="bookingistic_admin_action" value="payment_refund">
-							<input type="hidden" name="booking_id" value="<?php echo (int) $r['booking_id']; ?>">
+							<input type="hidden" name="booking_id" value="<?php echo (int) $bookingistic_ledger_row['booking_id']; ?>">
 							<button type="submit" class="button button-small"><?php esc_html_e( 'Refund', 'bookingistic' ); ?></button>
 						</form>
 						<?php endif; ?>

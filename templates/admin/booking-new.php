@@ -16,9 +16,11 @@ defined( 'ABSPATH' ) || exit;
 <div class="wrap bookingistic-wrap">
 	<h1><?php esc_html_e( 'New booking', 'bookingistic' ); ?></h1>
 
+	<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display notice below. ?>
 	<?php if ( ! empty( $_GET['error'] ) ) : ?>
 		<div class="notice notice-error"><p><?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); ?></p></div>
 	<?php endif; ?>
+	<?php // phpcs:enable ?>
 
 	<form method="post" data-bookingistic-manual>
 		<?php wp_nonce_field( 'bookingistic_admin_booking_new' ); ?>
@@ -32,8 +34,8 @@ defined( 'ABSPATH' ) || exit;
 				<td>
 					<select name="service_id" required>
 						<option value=""><?php esc_html_e( '— Pick a service —', 'bookingistic' ); ?></option>
-						<?php foreach ( $services as $s ) : ?>
-							<option value="<?php echo (int) $s['id']; ?>"><?php echo esc_html( $s['name'] . ' · ' . $s['duration_minutes'] . ' min' ); ?></option>
+						<?php foreach ( $services as $bookingistic_service_option ) : ?>
+							<option value="<?php echo (int) $bookingistic_service_option['id']; ?>"><?php echo esc_html( $bookingistic_service_option['name'] . ' · ' . $bookingistic_service_option['duration_minutes'] . ' min' ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</td>
@@ -44,8 +46,8 @@ defined( 'ABSPATH' ) || exit;
 					<td>
 						<select name="staff_id">
 							<option value="0"><?php esc_html_e( 'Any / default host', 'bookingistic' ); ?></option>
-							<?php foreach ( $staff as $s ) : ?>
-								<option value="<?php echo (int) $s['id']; ?>"><?php echo esc_html( $s['name'] ); ?></option>
+							<?php foreach ( $staff as $bookingistic_staff_option ) : ?>
+								<option value="<?php echo (int) $bookingistic_staff_option['id']; ?>"><?php echo esc_html( $bookingistic_staff_option['name'] ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</td>

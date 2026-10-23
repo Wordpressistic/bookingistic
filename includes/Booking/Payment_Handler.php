@@ -26,11 +26,17 @@ class Payment_Handler {
 	}
 
 	public static function maybe_handle(): void {
-		if ( ( $_GET['bookingistic_action'] ?? '' ) !== 'pay' ) {
+		// Public signed-token endpoint: authorization is the expiring HMAC
+		// payment token checked below, not a nonce — links arrive by email,
+		// outside any admin session.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['bookingistic_action'] ) || sanitize_key( wp_unslash( $_GET['bookingistic_action'] ) ) !== 'pay' ) {
 			return;
 		}
-		$id    = (int) ( $_GET['id'] ?? 0 );
-		$token = sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$id    = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token = isset( $_GET['t'] ) ? sanitize_text_field( wp_unslash( $_GET['t'] ) ) : '';
 
 		if ( ! $id || ! Token::payment_token_valid( $id, $token ) ) {
 			wp_die( esc_html__( 'Invalid or expired payment link.', 'bookingistic' ), '', 410 );

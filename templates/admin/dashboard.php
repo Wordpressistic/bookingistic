@@ -45,12 +45,12 @@ defined( 'ABSPATH' ) || exit;
 						</tr>
 					</thead>
 					<tbody>
-						<?php foreach ( $recent_bookings['items'] as $b ) : ?>
+						<?php foreach ( $recent_bookings['items'] as $bookingistic_booking ) : ?>
 							<tr>
-								<td>#<?php echo (int) $b['id']; ?></td>
-								<td><?php echo esc_html( $b['service_id'] ); ?></td>
-								<td><?php echo $b['start_datetime'] ? esc_html( $b['start_datetime'] . ' UTC' ) : '—'; ?></td>
-								<td><span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $b['status'] ); ?>"><?php echo esc_html( $b['status'] ); ?></span></td>
+								<td>#<?php echo (int) $bookingistic_booking['id']; ?></td>
+								<td><?php echo esc_html( $bookingistic_booking['service_id'] ); ?></td>
+								<td><?php echo $bookingistic_booking['start_datetime'] ? esc_html( $bookingistic_booking['start_datetime'] . ' UTC' ) : '—'; ?></td>
+								<td><span class="bookingistic-pill bookingistic-pill--<?php echo esc_attr( $bookingistic_booking['status'] ); ?>"><?php echo esc_html( $bookingistic_booking['status'] ); ?></span></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -64,10 +64,10 @@ defined( 'ABSPATH' ) || exit;
 				<p class="bookingistic-muted"><?php esc_html_e( 'No emails sent yet.', 'bookingistic' ); ?></p>
 			<?php else : ?>
 				<ul class="bookingistic-activity">
-					<?php foreach ( $logs as $log ) : ?>
+					<?php foreach ( $logs as $bookingistic_log_row ) : ?>
 						<li>
-							<strong><?php echo esc_html( $log['subject'] ); ?></strong>
-							<span class="bookingistic-muted"><?php echo esc_html( $log['recipient_email'] . ' · ' . $log['status'] . ' · ' . $log['created_at'] ); ?></span>
+							<strong><?php echo esc_html( $bookingistic_log_row['subject'] ); ?></strong>
+							<span class="bookingistic-muted"><?php echo esc_html( $bookingistic_log_row['recipient_email'] . ' · ' . $bookingistic_log_row['status'] . ' · ' . $bookingistic_log_row['created_at'] ); ?></span>
 						</li>
 					<?php endforeach; ?>
 				</ul>

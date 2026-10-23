@@ -34,7 +34,11 @@ class Integrations_Page {
 	}
 
 	public static function maybe_save(): void {
-		if ( ( $_POST['bookingistic_admin_action'] ?? '' ) !== 'save_integration' ) {
+		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
+		// check — every handler runs on each admin POST.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		if ( 'save_integration' !== $action ) {
 			return;
 		}
 		\Bookingistic\Core\Capabilities::verify( \Bookingistic\Core\Capabilities::MANAGE );
@@ -49,6 +53,8 @@ class Integrations_Page {
 
 		$values = [ '_enabled' => ! empty( $_POST['_enabled'] ) ];
 		foreach ( $integration->fields() as $key => $schema ) {
+			// Sanitization is applied per field type by self::sanitize_field() below.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$raw = wp_unslash( $_POST[ $key ] ?? '' );
 			$values[ $key ] = self::sanitize_field( $raw, $schema['type'] ?? 'text' );
 		}

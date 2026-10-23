@@ -11,6 +11,11 @@ use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
 
+// Seed/upgrade queries run against the plugin's own custom tables (identifiers
+// from Tables:: class constants, values prepared). DirectQuery/NoCaching are
+// disabled here by design; see includes/Database/Booking_Repository.php.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 class Installer {
 
 	const DB_VERSION_OPTION = 'bookingistic_db_version';

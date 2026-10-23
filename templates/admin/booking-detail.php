@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$has_slot = ! empty( $booking['start_datetime'] );
+$bookingistic_has_slot = ! empty( $booking['start_datetime'] );
 ?>
 <div class="wrap bookingistic-wrap">
 	<h1>
@@ -26,10 +26,10 @@ $has_slot = ! empty( $booking['start_datetime'] );
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings' ) ); ?>" class="page-title-action"><?php esc_html_e( '← Back', 'bookingistic' ); ?></a>
 	</h1>
 
-	<?php if ( ! empty( $_GET['rescheduled'] ) ) : ?>
+	<?php if ( ! empty( $_GET['rescheduled'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display notice. ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Booking rescheduled.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
-	<?php if ( ! empty( $_GET['error'] ) ) : ?>
+	<?php if ( ! empty( $_GET['error'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display notice. ?>
 		<div class="notice notice-error"><p><?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); ?></p></div>
 	<?php endif; ?>
 
@@ -41,7 +41,7 @@ $has_slot = ! empty( $booking['start_datetime'] );
 					<dt><?php esc_html_e( 'Service', 'bookingistic' ); ?></dt>
 					<dd><?php echo esc_html( $service['name'] ?? '—' ); ?></dd>
 					<dt><?php esc_html_e( 'When', 'bookingistic' ); ?></dt>
-					<dd><?php echo $has_slot ? esc_html( $booking['start_datetime'] . ' → ' . $booking['end_datetime'] . ' UTC' ) : esc_html__( 'Lead (no slot)', 'bookingistic' ); ?></dd>
+					<dd><?php echo $bookingistic_has_slot ? esc_html( $booking['start_datetime'] . ' → ' . $booking['end_datetime'] . ' UTC' ) : esc_html__( 'Lead (no slot)', 'bookingistic' ); ?></dd>
 					<dt><?php esc_html_e( 'Timezone', 'bookingistic' ); ?></dt>
 					<dd><?php echo esc_html( $booking['timezone'] ?? '—' ); ?></dd>
 					<dt><?php esc_html_e( 'Staff', 'bookingistic' ); ?></dt>
@@ -68,7 +68,7 @@ $has_slot = ! empty( $booking['start_datetime'] );
 				</form>
 			</div>
 
-			<?php if ( $has_slot ) : ?>
+			<?php if ( $bookingistic_has_slot ) : ?>
 				<div class="bookingistic-card" style="margin-top:16px">
 					<h2><?php esc_html_e( 'Reschedule', 'bookingistic' ); ?></h2>
 					<form method="post">
@@ -85,8 +85,8 @@ $has_slot = ! empty( $booking['start_datetime'] );
 								<label><?php esc_html_e( 'Staff', 'bookingistic' ); ?><br>
 									<select name="staff_id">
 										<option value="0"><?php esc_html_e( 'Any / default host', 'bookingistic' ); ?></option>
-										<?php foreach ( $staff_list as $s ) : ?>
-											<option value="<?php echo (int) $s['id']; ?>" <?php selected( (int) $booking['staff_id'], (int) $s['id'] ); ?>><?php echo esc_html( $s['name'] ); ?></option>
+										<?php foreach ( $staff_list as $bookingistic_staff_option ) : ?>
+											<option value="<?php echo (int) $bookingistic_staff_option['id']; ?>" <?php selected( (int) $booking['staff_id'], (int) $bookingistic_staff_option['id'] ); ?>><?php echo esc_html( $bookingistic_staff_option['name'] ); ?></option>
 										<?php endforeach; ?>
 									</select>
 								</label>

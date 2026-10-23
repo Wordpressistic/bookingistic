@@ -23,11 +23,16 @@ class Reschedule_Manager {
 	}
 
 	public static function maybe_handle(): void {
-		if ( ( $_GET['bookingistic_action'] ?? '' ) !== 'reschedule' ) {
+		// Public signed-token endpoint: authorization is the HMAC token checked
+		// below, not a nonce — links arrive by email, outside any admin session.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['bookingistic_action'] ) || sanitize_key( wp_unslash( $_GET['bookingistic_action'] ) ) !== 'reschedule' ) {
 			return;
 		}
-		$id    = (int) ( $_GET['id'] ?? 0 );
-		$token = sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$id    = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token = isset( $_GET['t'] ) ? sanitize_text_field( wp_unslash( $_GET['t'] ) ) : '';
 
 		$booking = Booking_Repository::find( $id );
 		if ( ! $booking || ! Token::consume_equals( $booking['reschedule_token'], $token ) ) {

@@ -2,6 +2,13 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.3 — 2026-10-23
+
+* Hardening: every superglobal read is now unslashed and sanitized (or explicitly cast) — admin pages, list filters, and the public cancel/reschedule/pay links
+* Hardening: all admin templates now use plugin-prefixed variable names; read-only display filters are annotated for the WordPress coding standards
+* Fixed: removed a leftover duplicate "Footer text" field on the Settings screen that referenced the removed 2.5.1 branding gate
+* Dev: plugin now reports 0 errors and 0 warnings under the Plugin Check (PCP) static analysis suite
+
 ## 2.5.2 — 2026-10-23
 
 * Fixed: the Google Calendar sync cron event is now scheduled correctly on a fresh activation — the custom "every 15 minutes" interval is registered before scheduling (previously the interval was only registered after activation, so the event was silently skipped on new installs)

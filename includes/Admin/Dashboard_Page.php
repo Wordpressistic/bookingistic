@@ -13,6 +13,11 @@ use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
 
+// Read-only COUNT queries over the plugin's custom bookings table (identifiers
+// from Tables:: class constants). DirectQuery/NoCaching disabled by design;
+// see includes/Database/Booking_Repository.php.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 class Dashboard_Page {
 
 	public static function render(): void {

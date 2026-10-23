@@ -21,8 +21,9 @@ defined( 'ABSPATH' ) || exit;
 class Bookings_Page {
 
 	public static function render(): void {
-		$view_id = (int) ( $_GET['view'] ?? 0 );
-		$new     = isset( $_GET['new'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter.
+		$view_id = isset( $_GET['view'] ) ? absint( wp_unslash( $_GET['view'] ) ) : 0;
+		$new     = isset( $_GET['new'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display filter.
 
 		if ( $view_id ) {
 			self::render_detail( $view_id );
@@ -36,6 +37,9 @@ class Bookings_Page {
 	}
 
 	public static function maybe_act(): void {
+		// Action dispatcher peek: each branch verifies its own nonce below
+		// before any processing.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
 		if ( ! in_array( $action, [ 'booking_status', 'booking_create', 'booking_reschedule', 'booking_cancel', 'booking_notes' ], true ) ) {
 			return;
@@ -53,7 +57,7 @@ class Bookings_Page {
 		switch ( $action ) {
 			case 'booking_status':
 				check_admin_referer( 'bookingistic_admin_booking' );
-				$id     = (int) ( $_POST['booking_id'] ?? 0 );
+				$id     = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
 				$status = sanitize_key( (string) ( $_POST['status'] ?? '' ) );
 				if ( $id && $status ) {
 					Booking_Manager::set_status( $id, $status );
@@ -63,7 +67,20 @@ class Bookings_Page {
 
 			case 'booking_create':
 				check_admin_referer( 'bookingistic_admin_booking_new' );
-				$result = self::handle_create();
+				$result = self::handle_create(
+					[
+						'service_id' => (int) wp_unslash( $_POST['service_id'] ?? 0 ),
+						'staff_id'   => (int) wp_unslash( $_POST['staff_id'] ?? 0 ),
+						'start_utc'  => sanitize_text_field( wp_unslash( $_POST['start_utc'] ?? '' ) ),
+						'timezone'   => sanitize_text_field( wp_unslash( $_POST['timezone'] ?? wp_timezone_string() ) ),
+						'first_name' => sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) ),
+						'last_name'  => sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) ),
+						'email'      => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+						'phone'      => sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ),
+						'company'    => sanitize_text_field( wp_unslash( $_POST['company'] ?? '' ) ),
+						'notes'      => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+					]
+				);
 				if ( is_wp_error( $result ) ) {
 					wp_safe_redirect( add_query_arg( [ 'page' => 'bookingistic-bookings', 'new' => 1, 'error' => rawurlencode( $result->get_error_message() ) ], admin_url( 'admin.php' ) ) );
 				} else {
@@ -73,7 +90,7 @@ class Bookings_Page {
 
 			case 'booking_reschedule':
 				check_admin_referer( 'bookingistic_admin_booking_reschedule' );
-				$id      = (int) ( $_POST['booking_id'] ?? 0 );
+				$id      = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
 				$booking = Booking_Repository::find( $id );
 				if ( ! $booking ) {
 					wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-bookings' ) );
@@ -82,8 +99,8 @@ class Bookings_Page {
 				$result = Reschedule_Manager::apply(
 					$id,
 					$booking['reschedule_token'],
-					(string) ( $_POST['start_utc'] ?? '' ),
-					(int) ( $_POST['staff_id'] ?? 0 )
+					sanitize_text_field( wp_unslash( $_POST['start_utc'] ?? '' ) ),
+					(int) wp_unslash( $_POST['staff_id'] ?? 0 )
 				);
 				$redirect = admin_url( 'admin.php?page=bookingistic-bookings&view=' . $id );
 				if ( is_wp_error( $result ) ) {
@@ -96,7 +113,7 @@ class Bookings_Page {
 
 			case 'booking_cancel':
 				check_admin_referer( 'bookingistic_admin_booking' );
-				$id = (int) ( $_POST['booking_id'] ?? 0 );
+				$id = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
 				if ( $id ) {
 					Booking_Manager::set_status( $id, 'cancelled' );
 				}
@@ -105,7 +122,7 @@ class Bookings_Page {
 
 			case 'booking_notes':
 				check_admin_referer( 'bookingistic_admin_booking_notes' );
-				$id = (int) ( $_POST['booking_id'] ?? 0 );
+				$id = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
 				if ( $id ) {
 					Booking_Repository::update( $id, [ 'internal_notes' => sanitize_textarea_field( wp_unslash( $_POST['internal_notes'] ?? '' ) ) ] );
 				}
@@ -115,13 +132,19 @@ class Bookings_Page {
 	}
 
 	private static function render_list(): void {
+		// Read-only display filters; no state changes on this screen.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$args = [
-			'page'           => max( 1, (int) ( $_GET['paged'] ?? 1 ) ),
-			'per_page'       => 25,
-			'status'         => sanitize_key( (string) ( $_GET['status'] ?? '' ) ),
-			'service_id'     => (int) ( $_GET['service_id'] ?? 0 ),
-			'staff_id'       => (int) ( $_GET['staff_id'] ?? 0 ),
-			'payment_status' => sanitize_key( (string) ( $_GET['payment_status'] ?? '' ) ),
+			'page'     => isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1,
+			'per_page' => 25,
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'status'   => isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '',
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'service_id' => isset( $_GET['service_id'] ) ? absint( wp_unslash( $_GET['service_id'] ) ) : 0,
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'staff_id' => isset( $_GET['staff_id'] ) ? absint( wp_unslash( $_GET['staff_id'] ) ) : 0,
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'payment_status' => isset( $_GET['payment_status'] ) ? sanitize_key( wp_unslash( $_GET['payment_status'] ) ) : '',
 		];
 		$args   = array_filter( $args, static fn( $v ) => $v !== '' && $v !== 0 );
 		$result = Booking_Repository::query( $args );
@@ -162,17 +185,21 @@ class Bookings_Page {
 		include BOOKINGISTIC_DIR . 'templates/admin/booking-new.php';
 	}
 
-	private static function handle_create() {
-		$service_id = (int) ( $_POST['service_id'] ?? 0 );
-		$staff_id   = (int) ( $_POST['staff_id'] ?? 0 );
-		$start_utc  = sanitize_text_field( (string) ( $_POST['start_utc'] ?? '' ) );
-		$timezone   = sanitize_text_field( (string) ( $_POST['timezone'] ?? wp_timezone_string() ) );
+	/**
+	 * Create a booking from pre-sanitized admin form input (built in
+	 * maybe_act() after the nonce + capability checks).
+	 *
+	 * @param array $input Sanitized form fields.
+	 * @return array|\WP_Error
+	 */
+	private static function handle_create( array $input ) {
+		$service_id = $input['service_id'];
+		$staff_id   = $input['staff_id'];
+		$start_utc  = $input['start_utc'];
+		$timezone   = $input['timezone'];
+		$email      = $input['email'];
 
-		// Allow admin to override availability checks? For now, still validate (prevents double booking).
-		$first = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
-		$last  = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
-		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
-
+		// Availability is still validated server-side (prevents double booking).
 		if ( ! is_email( $email ) ) {
 			return new \WP_Error( 'bad_email', __( 'Valid email required.', 'bookingistic' ) );
 		}
@@ -187,15 +214,15 @@ class Bookings_Page {
 				'start_utc'  => $start_utc,
 				'timezone'   => $timezone,
 				'customer'   => [
-					'first_name' => $first,
-					'last_name'  => $last,
+					'first_name' => $input['first_name'],
+					'last_name'  => $input['last_name'],
 					'email'      => $email,
-					'phone'      => sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ),
-					'company'    => sanitize_text_field( wp_unslash( $_POST['company'] ?? '' ) ),
+					'phone'      => $input['phone'],
+					'company'    => $input['company'],
 					'timezone'   => $timezone,
 					'source'     => 'admin',
 				],
-				'notes'      => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+				'notes'      => $input['notes'],
 				'source'     => 'admin',
 			]
 		);

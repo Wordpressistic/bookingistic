@@ -47,6 +47,9 @@ class Admin_Menu {
 	}
 
 	public static function handle_post_actions(): void {
+		// Dispatcher only: each handler below verifies its own capability and
+		// nonce before processing any input.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended
 		if ( ! is_admin() || empty( $_POST['bookingistic_admin_action'] ) ) {
 			return;
 		}

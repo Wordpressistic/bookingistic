@@ -37,7 +37,7 @@ if ( $role ) {
 		'manage_bookingistic_staff',
 		'manage_bookingistic_settings',
 		'manage_bookingistic_email_automations',
-	] as $cap ) {
-		$role->remove_cap( $cap );
+	] as $bookingistic_cap ) {
+		$role->remove_cap( $bookingistic_cap );
 	}
 }

@@ -2,22 +2,22 @@
 /**
  * Email logs.
  *
- * @var array $rows
- * @var array $automations
- * @var int   $total
- * @var int   $page
- * @var int   $pages
+ * @var array  $rows
+ * @var array  $automations
+ * @var string $status        Active status filter (from Email_Logs_Page).
+ * @var int    $automation_id Active automation filter (from Email_Logs_Page).
+ * @var int    $total
+ * @var int    $page
+ * @var int    $pages
  *
  * @package Bookingistic
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$status        = sanitize_key( $_GET['status'] ?? '' );
-$automation_id = (int) ( $_GET['automation_id'] ?? 0 );
-$lookup        = [];
-foreach ( $automations as $a ) {
-	$lookup[ (int) $a['id'] ] = $a['name'];
+$bookingistic_lookup = [];
+foreach ( $automations as $bookingistic_automation ) {
+	$bookingistic_lookup[ (int) $bookingistic_automation['id'] ] = $bookingistic_automation['name'];
 }
 ?>
 <div class="wrap bookingistic-wrap">
@@ -40,8 +40,8 @@ foreach ( $automations as $a ) {
 			<span><?php esc_html_e( 'Automation', 'bookingistic' ); ?></span>
 			<select name="automation_id">
 				<option value="0"><?php esc_html_e( 'All', 'bookingistic' ); ?></option>
-				<?php foreach ( $automations as $a ) : ?>
-					<option value="<?php echo (int) $a['id']; ?>" <?php selected( $automation_id, (int) $a['id'] ); ?>><?php echo esc_html( $a['name'] ); ?></option>
+				<?php foreach ( $automations as $bookingistic_automation ) : ?>
+					<option value="<?php echo (int) $bookingistic_automation['id']; ?>" <?php selected( $automation_id, (int) $bookingistic_automation['id'] ); ?>><?php echo esc_html( $bookingistic_automation['name'] ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</label>
@@ -70,22 +70,22 @@ foreach ( $automations as $a ) {
 			<th><?php esc_html_e( 'Status', 'bookingistic' ); ?></th>
 		</tr></thead>
 		<tbody>
-			<?php foreach ( $rows as $r ) : ?>
+			<?php foreach ( $rows as $bookingistic_log_row ) : ?>
 				<tr>
-					<td><?php echo esc_html( $r['created_at'] ); ?></td>
-					<td><?php echo esc_html( $r['recipient_email'] ); ?></td>
-					<td><?php echo esc_html( $r['subject'] ); ?></td>
-					<td><?php echo esc_html( $lookup[ (int) $r['automation_id'] ] ?? '—' ); ?></td>
+					<td><?php echo esc_html( $bookingistic_log_row['created_at'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_log_row['recipient_email'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_log_row['subject'] ); ?></td>
+					<td><?php echo esc_html( $bookingistic_lookup[ (int) $bookingistic_log_row['automation_id'] ] ?? '—' ); ?></td>
 					<td>
-						<?php if ( $r['booking_id'] ) : ?>
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $r['booking_id'] ) ); ?>">#<?php echo (int) $r['booking_id']; ?></a>
+						<?php if ( $bookingistic_log_row['booking_id'] ) : ?>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings&view=' . (int) $bookingistic_log_row['booking_id'] ) ); ?>">#<?php echo (int) $bookingistic_log_row['booking_id']; ?></a>
 						<?php else : ?>—<?php endif; ?>
 					</td>
 					<td>
-						<?php if ( $r['status'] === 'sent' ) : ?>
+						<?php if ( $bookingistic_log_row['status'] === 'sent' ) : ?>
 							<span class="bookingistic-pill bookingistic-pill--confirmed">sent</span>
 						<?php else : ?>
-							<span class="bookingistic-pill bookingistic-pill--cancelled" title="<?php echo esc_attr( $r['error_message'] ); ?>">failed</span>
+							<span class="bookingistic-pill bookingistic-pill--cancelled" title="<?php echo esc_attr( $bookingistic_log_row['error_message'] ); ?>">failed</span>
 						<?php endif; ?>
 					</td>
 				</tr>

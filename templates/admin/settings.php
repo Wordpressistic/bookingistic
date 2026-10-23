@@ -8,7 +8,7 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-$days = [
+$bookingistic_days = [
 	1 => __( 'Mon', 'bookingistic' ),
 	2 => __( 'Tue', 'bookingistic' ),
 	3 => __( 'Wed', 'bookingistic' ),
@@ -17,7 +17,7 @@ $days = [
 	6 => __( 'Sat', 'bookingistic' ),
 	7 => __( 'Sun', 'bookingistic' ),
 ];
-$active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) );
+$bookingistic_active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) );
 ?>
 <div class="wrap bookingistic-wrap">
 	<header class="bookingistic-header">
@@ -25,9 +25,11 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 		<p class="bookingistic-header__tagline"><?php esc_html_e( 'Business profile, notifications, availability rules, and branding.', 'bookingistic' ); ?></p>
 	</header>
 
+	<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display notice below. ?>
 	<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Settings saved.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
+	<?php // phpcs:enable ?>
 
 	<form method="post" action="">
 		<?php wp_nonce_field( 'bookingistic_admin_settings' ); ?>
@@ -65,10 +67,6 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				<td><input type="email" name="admin_notify" class="regular-text" value="<?php echo esc_attr( $settings['admin_notify'] ?? '' ); ?>"></td></tr>
 			<tr><th><label><?php esc_html_e( 'Staff notification email', 'bookingistic' ); ?></label></th>
 				<td><input type="email" name="staff_notify" class="regular-text" value="<?php echo esc_attr( $settings['staff_notify'] ?? '' ); ?>"></td></tr>
-			<tr><th><label><?php esc_html_e( 'Footer text', 'bookingistic' ); ?></label></th>
-				<td><textarea name="footer_text" class="large-text" rows="2"><?php echo esc_textarea( $settings['footer_text'] ?? '' ); ?></textarea>
-					<p class="description"><?php esc_html_e( 'Free tier emails always include the WordPressistic branding footer. Premium can remove it.', 'bookingistic' ); ?></p>
-				</td></tr>
 		</table>
 
 		</div>
@@ -94,10 +92,10 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 				</td></tr>
 			<tr><th><label><?php esc_html_e( 'Working days', 'bookingistic' ); ?></label></th>
 				<td>
-					<?php foreach ( $days as $k => $label ) : ?>
+					<?php foreach ( $bookingistic_days as $bookingistic_day => $bookingistic_day_label ) : ?>
 						<label style="margin-right:8px">
-							<input type="checkbox" name="working_days[]" value="<?php echo (int) $k; ?>" <?php checked( in_array( $k, $active_days, true ) ); ?>>
-							<?php echo esc_html( $label ); ?>
+							<input type="checkbox" name="working_days[]" value="<?php echo (int) $bookingistic_day; ?>" <?php checked( in_array( $bookingistic_day, $bookingistic_active_days, true ) ); ?>>
+							<?php echo esc_html( $bookingistic_day_label ); ?>
 						</label>
 					<?php endforeach; ?>
 				</td></tr>
@@ -116,17 +114,17 @@ $active_days = array_map( 'intval', (array) ( $settings['working_days'] ?? [] ) 
 			</tr></thead>
 			<tbody data-bookingistic-daterange-rows>
 				<?php
-				$holiday_rows = $settings['holidays'] ?? [];
-				if ( empty( $holiday_rows ) ) {
-					$holiday_rows[] = [ 'from' => '', 'to' => '' ];
+				$bookingistic_holiday_rows = $settings['holidays'] ?? [];
+				if ( empty( $bookingistic_holiday_rows ) ) {
+					$bookingistic_holiday_rows[] = [ 'from' => '', 'to' => '' ];
 				}
-				foreach ( $holiday_rows as $i => $entry ) :
-					$from = is_array( $entry ) ? ( $entry['from'] ?? '' ) : $entry;
-					$to   = is_array( $entry ) ? ( $entry['to'] ?? '' ) : $entry;
+				foreach ( $bookingistic_holiday_rows as $bookingistic_index => $bookingistic_entry ) :
+					$bookingistic_from = is_array( $bookingistic_entry ) ? ( $bookingistic_entry['from'] ?? '' ) : $bookingistic_entry;
+					$bookingistic_to   = is_array( $bookingistic_entry ) ? ( $bookingistic_entry['to'] ?? '' ) : $bookingistic_entry;
 					?>
 					<tr>
-						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][from]" value="<?php echo esc_attr( $from ); ?>"></td>
-						<td><input type="date" name="holidays[<?php echo (int) $i; ?>][to]"   value="<?php echo esc_attr( $to ); ?>"></td>
+						<td><input type="date" name="holidays[<?php echo (int) $bookingistic_index; ?>][from]" value="<?php echo esc_attr( $bookingistic_from ); ?>"></td>
+						<td><input type="date" name="holidays[<?php echo (int) $bookingistic_index; ?>][to]"   value="<?php echo esc_attr( $bookingistic_to ); ?>"></td>
 						<td><button type="button" class="button-link-delete" data-bookingistic-daterange-remove>×</button></td>
 					</tr>
 				<?php endforeach; ?>

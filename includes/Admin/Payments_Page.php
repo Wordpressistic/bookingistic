@@ -19,9 +19,13 @@ class Payments_Page {
 	public static function render(): void {
 		global $wpdb;
 
-		$status   = sanitize_key( (string) ( $_GET['status'] ?? '' ) );
-		$provider = sanitize_key( (string) ( $_GET['provider'] ?? '' ) );
-		$page     = max( 1, (int) ( $_GET['paged'] ?? 1 ) );
+		// Read-only display filters; state changes are nonce+capability checked in maybe_save()/maybe_act().
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$status   = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$provider = isset( $_GET['provider'] ) ? sanitize_key( wp_unslash( $_GET['provider'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page     = isset( $_GET['paged'] ) ? max( 1, (int) wp_unslash( $_GET['paged'] ) ) : 1;
 		$per_page = 50;
 		$offset   = ( $page - 1 ) * $per_page;
 
@@ -46,7 +50,10 @@ class Payments_Page {
 	 * Invoked from Admin_Menu::handle_post_actions().
 	 */
 	public static function maybe_act(): void {
-		$action = (string) ( $_POST['bookingistic_admin_action'] ?? '' );
+		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
+		// check — every handler runs on each admin POST.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
 		if ( ! in_array( $action, [ 'payment_mark_paid', 'payment_refund', 'payment_fail' ], true ) ) {
 			return;
 		}
@@ -55,7 +62,7 @@ class Payments_Page {
 		}
 		check_admin_referer( self::NONCE );
 
-		$booking_id = (int) ( $_POST['booking_id'] ?? 0 );
+		$booking_id = (int) wp_unslash( $_POST['booking_id'] ?? 0 );
 		$booking    = $booking_id ? \Bookingistic\Database\Booking_Repository::find( $booking_id ) : null;
 		if ( ! $booking ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-payments' ) );
@@ -82,7 +89,11 @@ class Payments_Page {
 	 * Handles the gateway enable/disable form. Invoked from Admin_Menu::handle_post_actions().
 	 */
 	public static function maybe_save(): void {
-		if ( empty( $_POST['bookingistic_admin_action'] ) || 'save_payments' !== $_POST['bookingistic_admin_action'] ) {
+		// Dispatcher peek: bail on action mismatch BEFORE any nonce/capability
+		// check — every handler runs on each admin POST.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified below before any processing.
+		$action = sanitize_key( wp_unslash( (string) ( $_POST['bookingistic_admin_action'] ?? '' ) ) );
+		if ( 'save_payments' !== $action ) {
 			return;
 		}
 		if ( ! current_user_can( 'manage_bookingistic' ) && ! current_user_can( 'manage_options' ) ) {

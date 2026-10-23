@@ -17,6 +17,10 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
+// Custom-table repository: identifiers come from Tables:: class constants and
+// every value is prepared. See Booking_Repository for the full rationale.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 class Staff_Repository {
 
 	public static function table(): string {

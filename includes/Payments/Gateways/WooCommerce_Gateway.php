@@ -21,6 +21,11 @@ use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
+// Ledger lookups run against the plugin's custom payment_records table
+// (identifiers from Tables:: class constants, values prepared).
+// DirectQuery/NoCaching disabled by design; see includes/Database/Booking_Repository.php.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
 class WooCommerce_Gateway extends Abstract_Gateway {
 
 	protected string $slug = 'woocommerce';

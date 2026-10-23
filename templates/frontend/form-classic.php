@@ -30,10 +30,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
+$bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 ?>
 <div id="<?php echo esc_attr( $booking_form_id ); ?>" class="bookingistic-form bookingistic-form--classic" data-service-id="<?php echo esc_attr( $service['id'] ); ?>" data-calendar-view="<?php echo esc_attr( $calendar_view ); ?>"
-	<?php if ( $is_reschedule ) : ?>
+	<?php if ( $bookingistic_is_reschedule ) : ?>
 		data-reschedule-id="<?php echo esc_attr( $reschedule_id ); ?>"
 		data-reschedule-token="<?php echo esc_attr( $reschedule_token ); ?>"
 	<?php endif; ?>>
@@ -75,9 +75,9 @@ $is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 					<div class="bookingistic-staff" data-bookingistic-staff-picker>
 						<span class="bookingistic-staff__label"><?php esc_html_e( 'Host', 'bookingistic' ); ?></span>
 						<button type="button" class="bookingistic-staff__option" data-staff-id="0" aria-pressed="true"><?php esc_html_e( 'Any', 'bookingistic' ); ?></button>
-						<?php foreach ( $assignable_staff as $staff_row ) : ?>
-							<button type="button" class="bookingistic-staff__option" data-staff-id="<?php echo (int) $staff_row['id']; ?>" aria-pressed="false">
-								<?php echo esc_html( $staff_row['name'] ); ?>
+						<?php foreach ( $assignable_staff as $bookingistic_staff_row ) : ?>
+							<button type="button" class="bookingistic-staff__option" data-staff-id="<?php echo (int) $bookingistic_staff_row['id']; ?>" aria-pressed="false">
+								<?php echo esc_html( $bookingistic_staff_row['name'] ); ?>
 							</button>
 						<?php endforeach; ?>
 					</div>
@@ -133,7 +133,7 @@ $is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 							<?php esc_html_e( 'Back', 'bookingistic' ); ?>
 						</button>
 						<button type="submit" class="bookingistic-btn bookingistic-btn--primary" data-action="submit">
-							<?php echo $is_reschedule
+							<?php echo $bookingistic_is_reschedule
 								? esc_html__( 'Confirm reschedule', 'bookingistic' )
 								: esc_html__( 'Confirm booking', 'bookingistic' ); ?>
 						</button>
