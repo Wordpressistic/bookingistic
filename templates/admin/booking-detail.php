@@ -26,12 +26,14 @@ $bookingistic_has_slot = ! empty( $booking['start_datetime'] );
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookingistic-bookings' ) ); ?>" class="page-title-action"><?php esc_html_e( '← Back', 'bookingistic' ); ?></a>
 	</h1>
 
-	<?php if ( ! empty( $_GET['rescheduled'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display notice. ?>
+	<?php // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only display notices below. ?>
+	<?php if ( ! empty( $_GET['rescheduled'] ) ) : ?>
 		<div class="notice notice-success"><p><?php esc_html_e( 'Booking rescheduled.', 'bookingistic' ); ?></p></div>
 	<?php endif; ?>
-	<?php if ( ! empty( $_GET['error'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display notice. ?>
+	<?php if ( ! empty( $_GET['error'] ) ) : ?>
 		<div class="notice notice-error"><p><?php echo esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ); ?></p></div>
 	<?php endif; ?>
+	<?php // phpcs:enable ?>
 
 	<div class="bookingistic-detail-grid">
 		<div>

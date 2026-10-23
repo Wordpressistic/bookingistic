@@ -5,3 +5,8 @@ tools/.mimosa/
 .DS_Store
 Thumbs.db
 plugin-check-result.json
+plugin-check-result.json
+pcp-full-result.json
+playground-pcp-result.json
+playground-boot-fail.png
+playground-install-fail.png
