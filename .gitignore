@@ -4,3 +4,4 @@ tools/.mimosa/
 *.log
 .DS_Store
 Thumbs.db
+plugin-check-result.json
