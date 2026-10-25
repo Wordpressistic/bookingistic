@@ -9,6 +9,15 @@
 	const cfg = window.BookingisticAdmin;
 	const i18n = cfg.i18n || {};
 
+	// Build an endpoint URL that works under both permalink styles:
+	// pretty  — https://site/wp-json/bookingistic/v1/
+	// plain   — https://site/?rest_route=%2Fbookingistic%2Fv1%2F (already a query string,
+	//           so extra params must join with '&' and the route path appends to the value).
+	function apiUrl(path, params) {
+		const base = cfg.restUrl + path;
+		return params ? base + (base.indexOf('?') !== -1 ? '&' : '?') + params : base;
+	}
+
 	function pad(n) { return String(n).padStart(2, '0'); }
 	function ymd(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 	function startOfWeek(d) {
@@ -42,7 +51,7 @@
 			if (!serviceSelect.value || !dateInput.value) return;
 			slotSelect.disabled = true;
 			slotSelect.innerHTML = `<option>${escapeHtml(i18n.loading || 'Loading…')}</option>`;
-			const url = `${cfg.restUrl}availability?service_id=${encodeURIComponent(serviceSelect.value)}&date=${encodeURIComponent(dateInput.value)}&tz=${encodeURIComponent(tzInput.value)}`;
+			const url = apiUrl('availability', `service_id=${encodeURIComponent(serviceSelect.value)}&date=${encodeURIComponent(dateInput.value)}&tz=${encodeURIComponent(tzInput.value)}`);
 			try {
 				const res = await fetch(url, { headers: { 'X-WP-Nonce': cfg.nonce } });
 				const data = await res.json();
@@ -141,7 +150,7 @@
 			for (const [k, v] of Object.entries(filters)) if (v) params.append(k, v);
 			root.innerHTML = `<div class="bookingistic-calendar__loading">${escapeHtml(i18n.loading)}</div>`;
 			try {
-				const res = await fetch(`${cfg.restUrl}calendar/events?${params}`, { headers: { 'X-WP-Nonce': cfg.nonce } });
+				const res = await fetch(apiUrl('calendar/events', params), { headers: { 'X-WP-Nonce': cfg.nonce } });
 				const data = await res.json();
 				if (!res.ok) throw new Error(data?.message || i18n.errorGeneric);
 				state.events = data.events || [];
@@ -285,7 +294,7 @@
 		body.innerHTML = `<p class="bookingistic-muted">${i18n.loading || 'Loading…'}</p>`;
 		modal.hidden = false;
 
-		fetch(`${cfg.restUrl}bookings/${bookingId}`, { headers: { 'X-WP-Nonce': cfg.nonce } })
+		fetch(apiUrl(`bookings/${bookingId}`), { headers: { 'X-WP-Nonce': cfg.nonce } })
 			.then(r => r.json())
 			.then(b => {
 				const start = b.start_datetime ? new Date(b.start_datetime.replace(' ', 'T') + 'Z') : null;
@@ -418,7 +427,7 @@
 				const original = testBtn.textContent;
 				testBtn.textContent = i18n.loading || 'Sending…';
 				try {
-					const res = await fetch(`${cfg.restUrl}email-automations/${id}/test`, {
+					const res = await fetch(apiUrl(`email-automations/${id}/test`), {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.nonce },
 						body: JSON.stringify({ to }),

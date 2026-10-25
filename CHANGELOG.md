@@ -2,6 +2,10 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.5 — 2026-10-23
+
+* Fixed: REST requests from the booking form and the admin calendar now work on sites using plain permalinks (the WordPress default on a fresh install) — endpoint URLs are built with a proper query-string join instead of plain concatenation, which previously produced "No route was found matching the URL and request method" on every booking-form and calendar request
+
 ## 2.5.4 — 2026-10-23
 
 * Hardening: numeric superglobal reads now go through absint()/floatval()/sanitize_key() instead of raw casts, satisfying the stricter WordPress Coding Standards rulesets used by the latest Plugin Check and the WordPress.org review Playground — the plugin reports 0 errors and 0 warnings under it

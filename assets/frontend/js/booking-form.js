@@ -11,6 +11,15 @@
 	if (typeof window.BookingisticConfig === 'undefined') return;
 
 	const cfg = window.BookingisticConfig;
+
+	// Build an endpoint URL that works under both permalink styles:
+	// pretty  — https://site/wp-json/bookingistic/v1/
+	// plain   — https://site/?rest_route=%2Fbookingistic%2Fv1%2F (already a query string,
+	//           so extra params must join with '&' and the route path appends to the value).
+	function apiUrl(path, params) {
+		const base = cfg.restUrl + path;
+		return params ? base + (base.indexOf('?') !== -1 ? '&' : '?') + params : base;
+	}
 	const i18n = cfg.i18n || {};
 
 	function pad(n) { return String(n).padStart(2, '0'); }
@@ -227,9 +236,9 @@
 			});
 			if (state.staffId) params.set('staff_id', String(state.staffId));
 			try {
-				const res = await fetch(`${cfg.restUrl}availability?${params}`, {
-					headers: { 'X-WP-Nonce': cfg.nonce },
-				});
+			const res = await fetch(apiUrl('availability', params.toString()), {
+				headers: { 'X-WP-Nonce': cfg.nonce },
+			});
 				const data = await res.json();
 				if (!res.ok) throw new Error(data?.message || i18n.errorGeneric);
 				state.availability = data.slots || [];
@@ -311,8 +320,8 @@
 
 			const isReschedule = state.rescheduleId > 0 && state.rescheduleToken;
 			const url = isReschedule
-				? `${cfg.restUrl}bookings/${state.rescheduleId}/reschedule`
-				: `${cfg.restUrl}bookings`;
+				? apiUrl(`bookings/${state.rescheduleId}/reschedule`)
+				: apiUrl('bookings');
 			const body = isReschedule
 				? { token: state.rescheduleToken, start_utc: payload.start_utc }
 				: payload;
