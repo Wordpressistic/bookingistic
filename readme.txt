@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.5
+Stable tag: 2.6.0-dev
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,12 @@ This plugin can connect to Google Calendar so each staff member can two-way sync
 * Google Privacy Policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 2.6.0-dev =
+* New: premium booking-form design language across all four form designs and all three calendar views — elevated card, step progress ("Step 1 of 3"), service summary card with price pill, day tiles, time pills and a live "Continue with Tue at 1:30 PM →" button
+* New: motion — slide/fade step transitions, spring-like day/time selection, skeleton shimmer while availability loads, staggered time pills, crossfading CTA text, animated success checkmark, floating toast cards and hover micro-interactions; pure CSS + vanilla JS, no new libraries or external requests, and fully disabled under prefers-reduced-motion
+* Accessibility: arrow-key / Home / End navigation for days, times and hosts; full-date labels on day buttons; polite live region for loading and availability; focus moves to each new step; visible focus rings; forced-colors support
+* Changed: Modern Card is the default design and #1b7257 the default accent for sites that have never saved Appearance settings; saved settings, shortcode attributes and the Elementor widget are unchanged
 
 = 2.5.5 =
 * Fixed: REST requests from the booking form and the admin calendar now work on sites using plain permalinks (the WordPress default on a fresh install) — endpoint URLs are built with a proper query-string join instead of plain concatenation, which previously produced "No route was found matching the URL and request method" on every booking-form and calendar request
