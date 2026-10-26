@@ -82,7 +82,7 @@ if ( isset( $bookingistic_wh['start'], $bookingistic_wh['end'] ) ) {
 			<tr><th><label><?php esc_html_e( 'Photo URL', 'bookingistic' ); ?></label></th>
 				<td><input type="url" name="photo_url" class="regular-text" value="<?php echo esc_attr( $bookingistic_staff['photo_url'] ); ?>"></td></tr>
 			<tr><th><label><?php esc_html_e( 'Bio', 'bookingistic' ); ?></label></th>
-				<td><textarea name="bio" rows="3" class="large-text"><?php echo esc_textarea( $bookingistic_staff['bio'] ); ?></textarea></td></tr>
+				<td><textarea name="bio" rows="3" class="large-text"><?php echo esc_textarea( (string) ( $bookingistic_staff['bio'] ?? '' ) ); ?></textarea></td></tr>
 			<tr><th><label><?php esc_html_e( 'Daily booking limit', 'bookingistic' ); ?></label></th>
 				<td><input type="number" name="booking_limit_per_day" min="0" value="<?php echo (int) $bookingistic_staff['booking_limit_per_day']; ?>">
 					<p class="description"><?php esc_html_e( '0 = unlimited.', 'bookingistic' ); ?></p></td></tr>
