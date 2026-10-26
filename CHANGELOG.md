@@ -4,7 +4,8 @@ All notable changes to Bookingistic are documented here (mirroring the WordPress
 
 ## 2.5.6 — 2026-10-26
 
-* Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. All phpcs:ignore/phpcs:disable comments that suppressed SQL sniffs were removed. No functional changes.
+* Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. No phpcs:ignore remains on any SQL-preparation (PreparedSQL / PreparedSQLPlaceholders / InterpolatedNotPrepared) sniff.
+* Performance: reads from the plugin's own tables are now object-cached (wp_cache_get/wp_cache_set, one cache group per table) and invalidated through a per-table last_changed key on every write (create, update, delete, status change, cancel, payment updates, schema install/upgrade, uninstall, and at the end of every booking transaction). Availability, overlap/double-booking, daily-limit, slot-lock, slug-uniqueness and reminder checks always read live data. The remaining Plugin Check DirectQuery notices carry narrow line-level ignores with the reason stated. No functional changes.
 
 ## 2.5.5 — 2026-10-23
 

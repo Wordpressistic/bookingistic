@@ -17,19 +17,31 @@ class Customer_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'customer_find', [ $id ], [ Cache::CUSTOMERS ] );
+		$row = wp_cache_get( $cache_key, Cache::CUSTOMERS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::CUSTOMERS );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
 	public static function find_by_email( string $email ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM %i WHERE email = %s', self::table(), $email ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'customer_find_by_email', [ $email ], [ Cache::CUSTOMERS ] );
+		$row = wp_cache_get( $cache_key, Cache::CUSTOMERS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE email = %s', self::table(), $email ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::CUSTOMERS );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
@@ -79,12 +91,16 @@ class Customer_Repository {
 					$update[ $k ] = $v;
 				}
 			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 			$wpdb->update( self::table(), $update, [ 'id' => $existing['id'] ] );
+			wp_cache_delete( 'last_changed', Cache::CUSTOMERS );
 			return self::find( (int) $existing['id'] );
 		}
 
 		$payload['created_at'] = $now;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert( self::table(), $payload );
+		wp_cache_delete( 'last_changed', Cache::CUSTOMERS );
 		if ( false === $ok ) {
 			return new \WP_Error( 'customer_insert_failed', __( 'Could not save customer.', 'bookingistic' ) );
 		}
@@ -97,11 +113,23 @@ class Customer_Repository {
 		$per_page = max( 1, min( 100, $per_page ) );
 		$offset   = ( $page - 1 ) * $per_page;
 		$table    = self::table();
-		$rows     = $wpdb->get_results(
-			$wpdb->prepare( 'SELECT * FROM %i ORDER BY created_at DESC LIMIT %d OFFSET %d', $table, $per_page, $offset ),
-			ARRAY_A
-		);
-		$total    = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+		$cache_key = Cache::key( 'customer_page', [ $per_page, $offset ], [ Cache::CUSTOMERS ] );
+		$rows = wp_cache_get( $cache_key, Cache::CUSTOMERS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare( 'SELECT * FROM %i ORDER BY created_at DESC LIMIT %d OFFSET %d', $table, $per_page, $offset ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::CUSTOMERS );
+		}
+		$cache_key = Cache::key( 'customer_count', [], [ Cache::CUSTOMERS ] );
+		$total = wp_cache_get( $cache_key, Cache::CUSTOMERS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$total = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+			wp_cache_set( $cache_key, $total, Cache::CUSTOMERS );
+		}
 		return [
 			'items' => array_map( [ self::class, 'normalize' ], $rows ?: [] ),
 			'total' => $total,

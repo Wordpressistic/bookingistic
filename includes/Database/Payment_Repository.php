@@ -26,6 +26,7 @@ class Payment_Repository {
 
 		$status = in_array( $data['status'] ?? '', self::STATUSES, true ) ? $data['status'] : 'pending';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert(
 			Tables::payment_records_table(),
 			[
@@ -41,6 +42,7 @@ class Payment_Repository {
 			],
 			[ '%d', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%s' ]
 		);
+		wp_cache_delete( 'last_changed', Cache::PAYMENTS );
 
 		return $ok ? (int) $wpdb->insert_id : 0;
 	}
@@ -65,7 +67,8 @@ class Payment_Repository {
 			'at'     => current_time( 'mysql', true ),
 		];
 
-		return (bool) $wpdb->update(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
+		$result = (bool) $wpdb->update(
 			Tables::payment_records_table(),
 			[
 				'status'     => $status,
@@ -76,11 +79,19 @@ class Payment_Repository {
 			[ '%s', '%s', '%s' ],
 			[ '%d' ]
 		);
+		wp_cache_delete( 'last_changed', Cache::PAYMENTS );
+		return $result;
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', Tables::payment_records_table(), $id ), ARRAY_A );
+		$cache_key = Cache::key( 'payment_find', [ $id ], [ Cache::PAYMENTS ] );
+		$row = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', Tables::payment_records_table(), $id ), ARRAY_A );
+			wp_cache_set( $cache_key, $row, Cache::PAYMENTS );
+		}
 		return $row ?: null;
 	}
 
@@ -88,15 +99,27 @@ class Payment_Repository {
 		global $wpdb;
 		$table = Tables::payment_records_table();
 		if ( $provider ) {
-			$row = $wpdb->get_row(
-				$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d AND provider = %s ORDER BY id DESC LIMIT 1', $table, $booking_id, $provider ),
-				ARRAY_A
-			);
+			$cache_key = Cache::key( 'payment_latest_a', func_get_args(), [ Cache::PAYMENTS ] );
+			$row = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
+			if ( ! $cache_found ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+				$row = $wpdb->get_row(
+					$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d AND provider = %s ORDER BY id DESC LIMIT 1', $table, $booking_id, $provider ),
+					ARRAY_A
+				);
+				wp_cache_set( $cache_key, $row, Cache::PAYMENTS );
+			}
 		} else {
-			$row = $wpdb->get_row(
-				$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d ORDER BY id DESC LIMIT 1', $table, $booking_id ),
-				ARRAY_A
-			);
+			$cache_key = Cache::key( 'payment_latest_b', func_get_args(), [ Cache::PAYMENTS ] );
+			$row = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
+			if ( ! $cache_found ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+				$row = $wpdb->get_row(
+					$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d ORDER BY id DESC LIMIT 1', $table, $booking_id ),
+					ARRAY_A
+				);
+				wp_cache_set( $cache_key, $row, Cache::PAYMENTS );
+			}
 		}
 		return $row ?: null;
 	}
@@ -110,25 +133,31 @@ class Payment_Repository {
 		$limit  = max( 1, min( 200, (int) ( $args['per_page'] ?? 50 ) ) );
 		$offset = max( 0, (int) ( $args['offset'] ?? 0 ) );
 
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM %i
-				WHERE ( %s = '' OR status = %s )
-				AND ( %s = '' OR provider = %s )
-				AND ( %d = 0 OR booking_id = %d )
-				ORDER BY id DESC LIMIT %d OFFSET %d",
-				Tables::payment_records_table(),
-				$f['status'],
-				$f['status'],
-				$f['provider'],
-				$f['provider'],
-				$f['booking_id'],
-				$f['booking_id'],
-				$limit,
-				$offset
-			),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'payment_query', [ $f, $limit, $offset ], [ Cache::PAYMENTS ] );
+		$rows = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i
+					WHERE ( %s = '' OR status = %s )
+					AND ( %s = '' OR provider = %s )
+					AND ( %d = 0 OR booking_id = %d )
+					ORDER BY id DESC LIMIT %d OFFSET %d",
+					Tables::payment_records_table(),
+					$f['status'],
+					$f['status'],
+					$f['provider'],
+					$f['provider'],
+					$f['booking_id'],
+					$f['booking_id'],
+					$limit,
+					$offset
+				),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::PAYMENTS );
+		}
 		return is_array( $rows ) ? $rows : [];
 	}
 
@@ -136,21 +165,28 @@ class Payment_Repository {
 		global $wpdb;
 		$f = self::filter_values( $args );
 
-		return (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM %i
-				WHERE ( %s = '' OR status = %s )
-				AND ( %s = '' OR provider = %s )
-				AND ( %d = 0 OR booking_id = %d )",
-				Tables::payment_records_table(),
-				$f['status'],
-				$f['status'],
-				$f['provider'],
-				$f['provider'],
-				$f['booking_id'],
-				$f['booking_id']
-			)
-		);
+		$cache_key = Cache::key( 'payment_count', [ $f ], [ Cache::PAYMENTS ] );
+		$cached = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$cached = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i
+					WHERE ( %s = '' OR status = %s )
+					AND ( %s = '' OR provider = %s )
+					AND ( %d = 0 OR booking_id = %d )",
+					Tables::payment_records_table(),
+					$f['status'],
+					$f['status'],
+					$f['provider'],
+					$f['provider'],
+					$f['booking_id'],
+					$f['booking_id']
+				)
+			);
+			wp_cache_set( $cache_key, $cached, Cache::PAYMENTS );
+		}
+		return $cached;
 	}
 
 	/**

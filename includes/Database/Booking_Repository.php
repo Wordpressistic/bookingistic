@@ -31,17 +31,21 @@ class Booking_Repository {
 	public static function begin_slot_lock( int $staff_id, int $service_id ): bool {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slot-lock transaction control (START TRANSACTION / SELECT ... FOR UPDATE / COMMIT / ROLLBACK); must hit the database live, never cacheable.
 		if ( $wpdb->query( 'START TRANSACTION' ) === false ) {
 			return false;
 		}
 
 		if ( $staff_id > 0 ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slot-lock transaction control (START TRANSACTION / SELECT ... FOR UPDATE / COMMIT / ROLLBACK); must hit the database live, never cacheable.
 			$locked = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE id = %d FOR UPDATE', Tables::staff_table(), $staff_id ) );
 		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slot-lock transaction control (START TRANSACTION / SELECT ... FOR UPDATE / COMMIT / ROLLBACK); must hit the database live, never cacheable.
 			$locked = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE id = %d FOR UPDATE', Tables::services_table(), $service_id ) );
 		}
 
 		if ( null === $locked ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slot-lock transaction control (START TRANSACTION / SELECT ... FOR UPDATE / COMMIT / ROLLBACK); must hit the database live, never cacheable.
 			$wpdb->query( 'ROLLBACK' );
 			return false;
 		}
@@ -51,21 +55,39 @@ class Booking_Repository {
 
 	public static function commit_slot_lock(): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Transaction control for the slot lock; plugin cache groups are invalidated right after.
 		$wpdb->query( 'COMMIT' );
+		// Rows written inside the transaction (and reads other requests cached
+		// before it ended) must not outlive it: invalidate after it ends.
+		foreach ( Cache::groups() as $cache_group ) {
+			wp_cache_delete( 'last_changed', $cache_group );
+		}
 	}
 
 	public static function rollback_slot_lock(): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Transaction control for the slot lock; plugin cache groups are invalidated right after.
 		$wpdb->query( 'ROLLBACK' );
+		// Rows written inside the transaction (and reads other requests cached
+		// before it ended) must not outlive it: invalidate after it ends.
+		foreach ( Cache::groups() as $cache_group ) {
+			wp_cache_delete( 'last_changed', $cache_group );
+		}
 	}
 
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'booking_find', [ $id ], [ Cache::BOOKINGS ] );
+		$row = wp_cache_get( $cache_key, Cache::BOOKINGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::BOOKINGS );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
@@ -75,10 +97,16 @@ class Booking_Repository {
 			return null;
 		}
 		// $field is whitelisted above and bound as an identifier via %i.
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM %i WHERE %i = %s', self::table(), $field, $token ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'booking_find_by_token', [ $field, $token ], [ Cache::BOOKINGS ] );
+		$row = wp_cache_get( $cache_key, Cache::BOOKINGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE %i = %s', self::table(), $field, $token ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::BOOKINGS );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
@@ -105,7 +133,9 @@ class Booking_Repository {
 			'updated_at'       => $now,
 		];
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert( self::table(), $row );
+		wp_cache_delete( 'last_changed', Cache::BOOKINGS );
 		if ( false === $ok ) {
 			return new \WP_Error( 'booking_insert_failed', __( 'Could not save booking.', 'bookingistic' ) );
 		}
@@ -143,13 +173,18 @@ class Booking_Repository {
 			$update['reminder_sent_at'] = $data['reminder_sent_at'];
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->update( self::table(), $update, [ 'id' => $id ] );
+		wp_cache_delete( 'last_changed', Cache::BOOKINGS );
 		return self::find( $id );
 	}
 
 	public static function delete( int $id ): bool {
 		global $wpdb;
-		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
+		$result = (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::BOOKINGS );
+		return $result;
 	}
 
 	/**
@@ -162,6 +197,7 @@ class Booking_Repository {
 		$scope_column = $staff_id > 0 ? 'staff_id' : 'service_id';
 		$scope_value  = $staff_id > 0 ? $staff_id : $service_id;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Double-booking overlap check; must read live data inside the slot lock, never a cached result.
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM %i
@@ -203,100 +239,118 @@ class Booking_Repository {
 		$table    = self::table();
 
 		if ( $asc ) {
-			$rows = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT * FROM %i
-					WHERE ( %s = '' OR status = %s )
-					AND ( %s = '' OR payment_status = %s )
-					AND ( %d = 0 OR service_id = %d )
-					AND ( %d = 0 OR staff_id = %d )
-					AND ( %d = 0 OR customer_id = %d )
-					AND ( %s = '' OR start_datetime >= %s )
-					AND ( %s = '' OR start_datetime <= %s )
-					ORDER BY %i ASC LIMIT %d OFFSET %d",
-					$table,
-					$status,
-					$status,
-					$payment_status,
-					$payment_status,
-					$service_id,
-					$service_id,
-					$staff_id,
-					$staff_id,
-					$customer_id,
-					$customer_id,
-					$from,
-					$from,
-					$to,
-					$to,
-					$order_by,
-					$per_page,
-					$offset
-				),
-				ARRAY_A
-			);
+			$cache_key = Cache::key( 'booking_query_asc', [ $status, $payment_status, $service_id, $staff_id, $customer_id, $from, $to, $order_by, $per_page, $offset ], [ Cache::BOOKINGS ] );
+			$rows = wp_cache_get( $cache_key, Cache::BOOKINGS, false, $cache_found );
+			if ( ! $cache_found ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+				$rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT * FROM %i
+						WHERE ( %s = '' OR status = %s )
+						AND ( %s = '' OR payment_status = %s )
+						AND ( %d = 0 OR service_id = %d )
+						AND ( %d = 0 OR staff_id = %d )
+						AND ( %d = 0 OR customer_id = %d )
+						AND ( %s = '' OR start_datetime >= %s )
+						AND ( %s = '' OR start_datetime <= %s )
+						ORDER BY %i ASC LIMIT %d OFFSET %d",
+						$table,
+						$status,
+						$status,
+						$payment_status,
+						$payment_status,
+						$service_id,
+						$service_id,
+						$staff_id,
+						$staff_id,
+						$customer_id,
+						$customer_id,
+						$from,
+						$from,
+						$to,
+						$to,
+						$order_by,
+						$per_page,
+						$offset
+					),
+					ARRAY_A
+				);
+				wp_cache_set( $cache_key, $rows, Cache::BOOKINGS );
+			}
 		} else {
-			$rows = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT * FROM %i
-					WHERE ( %s = '' OR status = %s )
-					AND ( %s = '' OR payment_status = %s )
-					AND ( %d = 0 OR service_id = %d )
-					AND ( %d = 0 OR staff_id = %d )
-					AND ( %d = 0 OR customer_id = %d )
-					AND ( %s = '' OR start_datetime >= %s )
-					AND ( %s = '' OR start_datetime <= %s )
-					ORDER BY %i DESC LIMIT %d OFFSET %d",
-					$table,
-					$status,
-					$status,
-					$payment_status,
-					$payment_status,
-					$service_id,
-					$service_id,
-					$staff_id,
-					$staff_id,
-					$customer_id,
-					$customer_id,
-					$from,
-					$from,
-					$to,
-					$to,
-					$order_by,
-					$per_page,
-					$offset
-				),
-				ARRAY_A
-			);
+			$cache_key = Cache::key( 'booking_query_desc', [ $status, $payment_status, $service_id, $staff_id, $customer_id, $from, $to, $order_by, $per_page, $offset ], [ Cache::BOOKINGS ] );
+			$rows = wp_cache_get( $cache_key, Cache::BOOKINGS, false, $cache_found );
+			if ( ! $cache_found ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+				$rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT * FROM %i
+						WHERE ( %s = '' OR status = %s )
+						AND ( %s = '' OR payment_status = %s )
+						AND ( %d = 0 OR service_id = %d )
+						AND ( %d = 0 OR staff_id = %d )
+						AND ( %d = 0 OR customer_id = %d )
+						AND ( %s = '' OR start_datetime >= %s )
+						AND ( %s = '' OR start_datetime <= %s )
+						ORDER BY %i DESC LIMIT %d OFFSET %d",
+						$table,
+						$status,
+						$status,
+						$payment_status,
+						$payment_status,
+						$service_id,
+						$service_id,
+						$staff_id,
+						$staff_id,
+						$customer_id,
+						$customer_id,
+						$from,
+						$from,
+						$to,
+						$to,
+						$order_by,
+						$per_page,
+						$offset
+					),
+					ARRAY_A
+				);
+				wp_cache_set( $cache_key, $rows, Cache::BOOKINGS );
+			}
 		}
 
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM %i
-				WHERE ( %s = '' OR status = %s )
-				AND ( %s = '' OR payment_status = %s )
-				AND ( %d = 0 OR service_id = %d )
-				AND ( %d = 0 OR staff_id = %d )
-				AND ( %d = 0 OR customer_id = %d )
-				AND ( %s = '' OR start_datetime >= %s )
-				AND ( %s = '' OR start_datetime <= %s )",
-				$table,
-				$status,
-				$status,
-				$payment_status,
-				$payment_status,
-				$service_id,
-				$service_id,
-				$staff_id,
-				$staff_id,
-				$customer_id,
-				$customer_id,
-				$from,
-				$from,
-				$to,
-				$to
-			)
-		);
+		$cache_key = Cache::key( 'booking_query_count', [ $status, $payment_status, $service_id, $staff_id, $customer_id, $from, $to ], [ Cache::BOOKINGS ] );
+		$total = wp_cache_get( $cache_key, Cache::BOOKINGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i
+					WHERE ( %s = '' OR status = %s )
+					AND ( %s = '' OR payment_status = %s )
+					AND ( %d = 0 OR service_id = %d )
+					AND ( %d = 0 OR staff_id = %d )
+					AND ( %d = 0 OR customer_id = %d )
+					AND ( %s = '' OR start_datetime >= %s )
+					AND ( %s = '' OR start_datetime <= %s )",
+					$table,
+					$status,
+					$status,
+					$payment_status,
+					$payment_status,
+					$service_id,
+					$service_id,
+					$staff_id,
+					$staff_id,
+					$customer_id,
+					$customer_id,
+					$from,
+					$from,
+					$to,
+					$to
+				)
+			);
+			wp_cache_set( $cache_key, $total, Cache::BOOKINGS );
+		}
 
 		return [
 			'items' => array_map( [ self::class, 'normalize' ], $rows ?: [] ),
@@ -314,6 +368,7 @@ class Booking_Repository {
 		global $wpdb;
 		// staff_id = 0 disables the staff filter (value-bound, no SQL concatenation).
 		$staff_id = max( 0, $staff_id );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Availability (busy-slot) lookup used to offer and validate slots; must read live data so no slot is offered or accepted from a stale cache.
 		$rows     = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, start_datetime, end_datetime, staff_id FROM %i
@@ -339,6 +394,7 @@ class Booking_Repository {
 	 */
 	public static function count_for_staff_day( int $staff_id, string $start_utc, string $end_utc ): int {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Per-staff daily booking limit check made while booking; must read live data.
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM %i
@@ -358,6 +414,7 @@ class Booking_Repository {
 		global $wpdb;
 		$now    = current_time( 'mysql', true );
 		$window = gmdate( 'Y-m-d H:i:s', strtotime( $now . ' +' . (int) $hours_before . ' hours' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Cron reminder scan; must read live data so a reminder is never sent twice from a stale cache.
 		$rows   = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM %i

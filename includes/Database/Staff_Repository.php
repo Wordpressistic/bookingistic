@@ -26,49 +26,73 @@ class Staff_Repository {
 	public static function all( array $args = [] ): array {
 		global $wpdb;
 		$status = ! empty( $args['status'] ) ? (string) $args['status'] : '';
-		$rows   = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) ORDER BY name ASC",
-				self::table(),
-				$status,
-				$status
-			),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'staff_all', [ $status ], [ Cache::STAFF ] );
+		$rows = wp_cache_get( $cache_key, Cache::STAFF, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) ORDER BY name ASC",
+					self::table(),
+					$status,
+					$status
+				),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::STAFF );
+		}
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$row = $wpdb->get_row(
-			$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'staff_find', [ $id ], [ Cache::STAFF ] );
+		$row = wp_cache_get( $cache_key, Cache::STAFF, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::STAFF );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
 	public static function for_service( int $service_id ): array {
 		global $wpdb;
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT s.* FROM %i s
-				INNER JOIN %i ss ON ss.staff_id = s.id
-				WHERE ss.service_id = %d AND s.status = 'active'
-				ORDER BY s.name ASC",
-				self::table(),
-				Tables::staff_services_table(),
-				$service_id
-			),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'staff_for_service', [ $service_id ], [ Cache::STAFF, Cache::STAFF_SERVICES ] );
+		$rows = wp_cache_get( $cache_key, Cache::STAFF, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT s.* FROM %i s
+					INNER JOIN %i ss ON ss.staff_id = s.id
+					WHERE ss.service_id = %d AND s.status = 'active'
+					ORDER BY s.name ASC",
+					self::table(),
+					Tables::staff_services_table(),
+					$service_id
+				),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::STAFF );
+		}
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function services_for_staff( int $staff_id ): array {
 		global $wpdb;
-		$ids = $wpdb->get_col(
-			$wpdb->prepare( 'SELECT service_id FROM %i WHERE staff_id = %d', Tables::staff_services_table(), $staff_id )
-		);
+		$cache_key = Cache::key( 'staff_services_for_staff', [ $staff_id ], [ Cache::STAFF_SERVICES ] );
+		$ids = wp_cache_get( $cache_key, Cache::STAFF_SERVICES, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$ids = $wpdb->get_col(
+				$wpdb->prepare( 'SELECT service_id FROM %i WHERE staff_id = %d', Tables::staff_services_table(), $staff_id )
+			);
+			wp_cache_set( $cache_key, $ids, Cache::STAFF_SERVICES );
+		}
 		return array_map( 'intval', $ids ?: [] );
 	}
 
@@ -83,7 +107,9 @@ class Staff_Repository {
 		if ( ! is_email( $row['email'] ) ) {
 			return new \WP_Error( 'invalid_email', __( 'Valid staff email required.', 'bookingistic' ) );
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert( self::table(), $row );
+		wp_cache_delete( 'last_changed', Cache::STAFF );
 		if ( false === $ok ) {
 			return new \WP_Error( 'staff_insert_failed', __( 'Could not create staff.', 'bookingistic' ) );
 		}
@@ -106,7 +132,9 @@ class Staff_Repository {
 				return new \WP_Error( 'invalid_email', __( 'Valid staff email required.', 'bookingistic' ) );
 			}
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->update( self::table(), $update, [ 'id' => $id ] );
+		wp_cache_delete( 'last_changed', Cache::STAFF );
 		if ( array_key_exists( 'service_ids', $data ) ) {
 			self::set_services( $id, $data['service_ids'] );
 		}
@@ -115,16 +143,25 @@ class Staff_Repository {
 
 	public static function delete( int $id ): bool {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->delete( Tables::staff_services_table(), [ 'staff_id' => $id ], [ '%d' ] );
-		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::STAFF_SERVICES );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
+		$result = (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::STAFF );
+		return $result;
 	}
 
 	public static function set_services( int $staff_id, array $service_ids ): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->delete( Tables::staff_services_table(), [ 'staff_id' => $staff_id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::STAFF_SERVICES );
 		foreach ( array_unique( array_map( 'intval', $service_ids ) ) as $sid ) {
 			if ( $sid > 0 ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 				$wpdb->insert( Tables::staff_services_table(), [ 'staff_id' => $staff_id, 'service_id' => $sid ], [ '%d', '%d' ] );
+				wp_cache_delete( 'last_changed', Cache::STAFF_SERVICES );
 			}
 		}
 	}

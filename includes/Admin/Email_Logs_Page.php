@@ -7,6 +7,7 @@
 
 namespace Bookingistic\Admin;
 
+use Bookingistic\Database\Cache;
 use Bookingistic\Database\Email_Automation_Repository;
 use Bookingistic\Database\Tables;
 
@@ -29,30 +30,42 @@ class Email_Logs_Page {
 		$offset        = ( $page - 1 ) * $per_page;
 
 		// Optional filters are value-bound; '' / 0 disables a filter.
-		$total = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(*) FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d )",
-				$table,
-				$status,
-				$status,
-				$automation_id,
-				$automation_id
-			)
-		);
+		$cache_key = Cache::key( 'email_logs_count', [ $status, $automation_id ], [ Cache::EMAIL_LOGS ] );
+		$total = wp_cache_get( $cache_key, Cache::EMAIL_LOGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d )",
+					$table,
+					$status,
+					$status,
+					$automation_id,
+					$automation_id
+				)
+			);
+			wp_cache_set( $cache_key, $total, Cache::EMAIL_LOGS );
+		}
 
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d ) ORDER BY created_at DESC LIMIT %d OFFSET %d",
-				$table,
-				$status,
-				$status,
-				$automation_id,
-				$automation_id,
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		) ?: [];
+		$cache_key = Cache::key( 'email_logs_page', [ $status, $automation_id, $per_page, $offset ], [ Cache::EMAIL_LOGS ] );
+		$rows = wp_cache_get( $cache_key, Cache::EMAIL_LOGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d ) ORDER BY created_at DESC LIMIT %d OFFSET %d",
+					$table,
+					$status,
+					$status,
+					$automation_id,
+					$automation_id,
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			) ?: [];
+			wp_cache_set( $cache_key, $rows, Cache::EMAIL_LOGS );
+		}
 
 		$automations = Email_Automation_Repository::all();
 		$pages       = (int) ceil( $total / $per_page );

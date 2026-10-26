@@ -13,6 +13,7 @@ if ( ! defined( 'BOOKINGISTIC_DELETE_DATA' ) || ! BOOKINGISTIC_DELETE_DATA ) {
 	return;
 }
 
+require_once __DIR__ . '/includes/Database/Cache.php';
 require_once __DIR__ . '/includes/Database/Tables.php';
 \Bookingistic\Database\Tables::drop_all();
 

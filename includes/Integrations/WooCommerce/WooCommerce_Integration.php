@@ -15,6 +15,7 @@
 
 namespace Bookingistic\Integrations\WooCommerce;
 
+use Bookingistic\Database\Cache;
 use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Customer_Repository;
 use Bookingistic\Database\Service_Repository;
@@ -187,6 +188,7 @@ class WooCommerce_Integration extends Integration_Base {
 	private function set_booking_meta( int $booking_id, string $key, string $value ): void {
 		global $wpdb;
 		$table = Tables::booking_meta_table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->insert(
 			$table,
 			// Custom booking_meta table, not WordPress post meta.
@@ -194,13 +196,20 @@ class WooCommerce_Integration extends Integration_Base {
 			[ 'booking_id' => $booking_id, 'meta_key' => $key, 'meta_value' => $value ],
 			[ '%d', '%s', '%s' ]
 		);
+		wp_cache_delete( 'last_changed', Cache::BOOKING_META );
 	}
 
 	private function get_booking_meta( int $booking_id, string $key ): ?string {
 		global $wpdb;
-		$value = $wpdb->get_var(
-			$wpdb->prepare( 'SELECT meta_value FROM %i WHERE booking_id = %d AND meta_key = %s ORDER BY id DESC LIMIT 1', Tables::booking_meta_table(), $booking_id, $key )
-		);
+		$cache_key = Cache::key( 'booking_meta_get', [ $booking_id, $key ], [ Cache::BOOKING_META ] );
+		$value = wp_cache_get( $cache_key, Cache::BOOKING_META, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$value = $wpdb->get_var(
+				$wpdb->prepare( 'SELECT meta_value FROM %i WHERE booking_id = %d AND meta_key = %s ORDER BY id DESC LIMIT 1', Tables::booking_meta_table(), $booking_id, $key )
+			);
+			wp_cache_set( $cache_key, $value, Cache::BOOKING_META );
+		}
 		return $value !== null ? (string) $value : null;
 	}
 }
