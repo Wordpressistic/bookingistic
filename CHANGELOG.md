@@ -2,6 +2,12 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.6 — 2026-10-26
+
+* Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. No phpcs:ignore remains on any SQL-preparation (PreparedSQL / PreparedSQLPlaceholders / InterpolatedNotPrepared) sniff.
+* Performance: reads from the plugin's own tables are now object-cached (wp_cache_get/wp_cache_set, one cache group per table) and invalidated through a per-table last_changed key on every write (create, update, delete, status change, cancel, payment updates, schema install/upgrade, uninstall, and at the end of every booking transaction). Availability, overlap/double-booking, daily-limit, slot-lock, slug-uniqueness and reminder checks always read live data. The remaining Plugin Check DirectQuery notices carry narrow line-level ignores with the reason stated. No functional changes.
+* Fixed: PHP 8.1+ "Passing null to htmlspecialchars()" deprecation notice when editing a staff member with an empty bio (found while testing on MySQL/MariaDB).
+
 ## 2.5.5 — 2026-10-23
 
 * Fixed: REST requests from the booking form and the admin calendar now work on sites using plain permalinks (the WordPress default on a fresh install) — endpoint URLs are built with a proper query-string join instead of plain concatenation, which previously produced "No route was found matching the URL and request method" on every booking-form and calendar request

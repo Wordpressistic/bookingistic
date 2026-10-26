@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Service_Repository {
 
 	public static function table(): string {
@@ -21,31 +17,52 @@ class Service_Repository {
 
 	public static function all( array $args = [] ): array {
 		global $wpdb;
-		$status_clause = '';
-		if ( ! empty( $args['status'] ) ) {
-			$status_clause = $wpdb->prepare( 'WHERE status = %s', $args['status'] );
+		$status = ! empty( $args['status'] ) ? (string) $args['status'] : '';
+		$cache_key = Cache::key( 'service_all', [ $status ], [ Cache::SERVICES ] );
+		$rows = wp_cache_get( $cache_key, Cache::SERVICES, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) ORDER BY sort_order ASC, name ASC",
+					self::table(),
+					$status,
+					$status
+				),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::SERVICES );
 		}
-		$rows = $wpdb->get_results( "SELECT * FROM " . self::table() . " {$status_clause} ORDER BY sort_order ASC, name ASC", ARRAY_A ); // phpcs:ignore
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'service_find', [ $id ], [ Cache::SERVICES ] );
+		$row = wp_cache_get( $cache_key, Cache::SERVICES, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::SERVICES );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
 	public static function find_by_slug( string $slug ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE slug = %s", $slug ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'service_find_by_slug', [ $slug ], [ Cache::SERVICES ] );
+		$row = wp_cache_get( $cache_key, Cache::SERVICES, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE slug = %s', self::table(), $slug ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::SERVICES );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
@@ -72,7 +89,9 @@ class Service_Repository {
 			'created_at'        => $now,
 			'updated_at'        => $now,
 		];
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert( self::table(), $insert );
+		wp_cache_delete( 'last_changed', Cache::SERVICES );
 		if ( false === $ok ) {
 			return new \WP_Error( 'service_insert_failed', __( 'Could not create service.', 'bookingistic' ) );
 		}
@@ -116,13 +135,18 @@ class Service_Repository {
 			$update['slug'] = self::unique_slug( sanitize_title( $data['slug'] ), $id );
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->update( self::table(), $update, [ 'id' => $id ] );
+		wp_cache_delete( 'last_changed', Cache::SERVICES );
 		return self::find( $id );
 	}
 
 	public static function delete( int $id ): bool {
 		global $wpdb;
-		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
+		$result = (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::SERVICES );
+		return $result;
 	}
 
 	private static function unique_slug( string $slug, ?int $ignore_id = null ): string {
@@ -133,9 +157,11 @@ class Service_Repository {
 		$table  = self::table();
 		while ( true ) {
 			if ( $ignore_id ) {
-				$existing = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s AND id <> %d", $slug, $ignore_id ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slug-uniqueness check made right before a write; must read live data so duplicate slugs cannot be created.
+				$existing = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE slug = %s AND id <> %d', $table, $slug, $ignore_id ) );
 			} else {
-				$existing = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE slug = %s", $slug ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Slug-uniqueness check made right before a write; must read live data so duplicate slugs cannot be created.
+				$existing = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE slug = %s', $table, $slug ) );
 			}
 			if ( ! $existing ) {
 				return $slug;

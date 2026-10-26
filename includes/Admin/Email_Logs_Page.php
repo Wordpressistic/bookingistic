@@ -7,15 +7,11 @@
 
 namespace Bookingistic\Admin;
 
+use Bookingistic\Database\Cache;
 use Bookingistic\Database\Email_Automation_Repository;
 use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
-
-// Read-only queries over the plugin's custom email-log table (identifiers from
-// Tables:: class constants, values prepared). DirectQuery/NoCaching disabled
-// by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 class Email_Logs_Page {
 
@@ -33,28 +29,43 @@ class Email_Logs_Page {
 		$per_page      = 50;
 		$offset        = ( $page - 1 ) * $per_page;
 
-		$where = [ '1=1' ];
-		$prep  = [];
-		if ( $status ) {
-			$where[] = 'status = %s';
-			$prep[]  = $status;
+		// Optional filters are value-bound; '' / 0 disables a filter.
+		$cache_key = Cache::key( 'email_logs_count', [ $status, $automation_id ], [ Cache::EMAIL_LOGS ] );
+		$total = wp_cache_get( $cache_key, Cache::EMAIL_LOGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d )",
+					$table,
+					$status,
+					$status,
+					$automation_id,
+					$automation_id
+				)
+			);
+			wp_cache_set( $cache_key, $total, Cache::EMAIL_LOGS );
 		}
-		if ( $automation_id ) {
-			$where[] = 'automation_id = %d';
-			$prep[]  = $automation_id;
+
+		$cache_key = Cache::key( 'email_logs_page', [ $status, $automation_id, $per_page, $offset ], [ Cache::EMAIL_LOGS ] );
+		$rows = wp_cache_get( $cache_key, Cache::EMAIL_LOGS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d ) ORDER BY created_at DESC LIMIT %d OFFSET %d",
+					$table,
+					$status,
+					$status,
+					$automation_id,
+					$automation_id,
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			) ?: [];
+			wp_cache_set( $cache_key, $rows, Cache::EMAIL_LOGS );
 		}
-		$where_sql = implode( ' AND ', $where );
-
-		$total = (int) ( $prep
-			? $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", ...$prep ) ) // phpcs:ignore
-			: $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) ); // phpcs:ignore
-
-		$prep[] = $per_page;
-		$prep[] = $offset;
-		$rows   = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d", ...$prep ), // phpcs:ignore
-			ARRAY_A
-		) ?: [];
 
 		$automations = Email_Automation_Repository::all();
 		$pages       = (int) ceil( $total / $per_page );

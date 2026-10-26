@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Schema installer: dbDelta()/DROP TABLE on the plugin's own custom tables is
-// the entire purpose of this class. Identifiers come from class constants.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.SchemaChange
-
 class Tables {
 
 	public static function services_table(): string {
@@ -278,6 +274,8 @@ class Tables {
 		foreach ( $schemas as $sql ) {
 			dbDelta( $sql );
 		}
+		// Schema may have changed: drop any cached rows.
+		Cache::invalidate_all();
 	}
 
 	public static function drop_all(): void {
@@ -296,7 +294,11 @@ class Tables {
 			self::services_table(),
 		];
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Uninstall only (BOOKINGISTIC_DELETE_DATA): drops the plugin's own tables; cache groups are invalidated below.
+			$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
+		}
+		foreach ( Cache::groups() as $cache_group ) {
+			wp_cache_delete( 'last_changed', $cache_group );
 		}
 	}
 }

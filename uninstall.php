@@ -13,6 +13,7 @@ if ( ! defined( 'BOOKINGISTIC_DELETE_DATA' ) || ! BOOKINGISTIC_DELETE_DATA ) {
 	return;
 }
 
+require_once __DIR__ . '/includes/Database/Cache.php';
 require_once __DIR__ . '/includes/Database/Tables.php';
 \Bookingistic\Database\Tables::drop_all();
 
@@ -25,8 +26,8 @@ wp_clear_scheduled_hook( 'bookingistic_send_reminders' );
 wp_clear_scheduled_hook( 'bookingistic_gcal_sync' );
 
 // Capabilities cleanup.
-$role = get_role( 'administrator' );
-if ( $role ) {
+$bookingistic_role = get_role( 'administrator' );
+if ( $bookingistic_role ) {
 	foreach ( [
 		'manage_bookingistic',
 		'view_bookingistic',
@@ -38,6 +39,6 @@ if ( $role ) {
 		'manage_bookingistic_settings',
 		'manage_bookingistic_email_automations',
 	] as $bookingistic_cap ) {
-		$role->remove_cap( $bookingistic_cap );
+		$bookingistic_role->remove_cap( $bookingistic_cap );
 	}
 }

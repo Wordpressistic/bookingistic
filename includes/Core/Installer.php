@@ -7,14 +7,10 @@
 
 namespace Bookingistic\Core;
 
+use Bookingistic\Database\Cache;
 use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
-
-// Seed/upgrade queries run against the plugin's own custom tables (identifiers
-// from Tables:: class constants, values prepared). DirectQuery/NoCaching are
-// disabled here by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 class Installer {
 
@@ -52,11 +48,13 @@ class Installer {
 	private static function seed_default_service(): void {
 		global $wpdb;
 		$table = Tables::services_table();
-		$exists = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Activation-time existence check before seeding; must read live data so defaults are never seeded twice.
+		$exists = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
 		if ( $exists > 0 ) {
 			return;
 		}
 		$now = current_time( 'mysql', true );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->insert(
 			$table,
 			[
@@ -79,6 +77,7 @@ class Installer {
 			],
 			[ '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%f', '%s', '%s', '%s', '%d', '%s', '%d', '%s', '%s' ]
 		);
+		wp_cache_delete( 'last_changed', Cache::SERVICES );
 	}
 
 	private static function seed_default_settings(): void {
@@ -114,7 +113,8 @@ class Installer {
 	private static function seed_default_email_automations(): void {
 		global $wpdb;
 		$table = Tables::email_automations_table();
-		$exists = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Activation-time existence check before seeding; must read live data so defaults are never seeded twice.
+		$exists = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
 		if ( $exists > 0 ) {
 			return;
 		}
@@ -169,6 +169,7 @@ class Installer {
 		];
 
 		foreach ( $defaults as $row ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 			$wpdb->insert(
 				$table,
 				array_merge(
@@ -181,6 +182,7 @@ class Installer {
 					]
 				)
 			);
+			wp_cache_delete( 'last_changed', Cache::EMAIL_AUTOMATIONS );
 		}
 	}
 }

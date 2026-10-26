@@ -24,6 +24,7 @@
 
 namespace Bookingistic\Integrations\Google_Calendar;
 
+use Bookingistic\Database\Cache;
 use Bookingistic\Database\Calendar_Event_Repository;
 use Bookingistic\Database\Booking_Repository;
 use Bookingistic\Database\Staff_Repository;
@@ -32,11 +33,6 @@ use Bookingistic\Helpers\Date_Time;
 use Bookingistic\Integrations\Integration_Base;
 
 defined( 'ABSPATH' ) || exit;
-
-// Writes booking/sync rows in the plugin's custom tables (identifiers from
-// Tables:: class constants, values prepared). DirectQuery/NoCaching disabled
-// by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 class GCal_Sync {
 
@@ -115,6 +111,7 @@ class GCal_Sync {
 
 	public static function disconnect( int $staff_id ): void {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->update(
 			Staff_Repository::table(),
 			[
@@ -126,6 +123,7 @@ class GCal_Sync {
 			[ '%d', '%s', '%s' ],
 			[ '%d' ]
 		);
+		wp_cache_delete( 'last_changed', Cache::STAFF );
 	}
 
 	public static function is_connected( int $staff_id ): bool {
@@ -142,6 +140,7 @@ class GCal_Sync {
 			'access_token'  => $tokens['access_token'] ?? '',
 			'expires_at'    => time() + (int) ( $tokens['expires_in'] ?? 3600 ),
 		];
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 			$wpdb->update(
 				Staff_Repository::table(),
 				[
@@ -153,6 +152,7 @@ class GCal_Sync {
 				[ '%d', '%s', '%s' ],
 				[ '%d' ]
 			);
+			wp_cache_delete( 'last_changed', Cache::STAFF );
 	}
 
 	private static function load_tokens( int $staff_id ): ?array {

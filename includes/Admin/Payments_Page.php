@@ -17,8 +17,6 @@ class Payments_Page {
 	public const NONCE = 'bookingistic_admin_payments';
 
 	public static function render(): void {
-		global $wpdb;
-
 		// Read-only display filters; state changes are nonce+capability checked in maybe_save()/maybe_act().
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$status   = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';

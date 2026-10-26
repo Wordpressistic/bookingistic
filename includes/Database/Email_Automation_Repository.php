@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Email_Automation_Repository {
 
 	public static function table(): string {
@@ -21,30 +17,52 @@ class Email_Automation_Repository {
 
 	public static function all(): array {
 		global $wpdb;
-		$table = self::table();
-		$rows  = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY trigger_event ASC, name ASC", ARRAY_A );
+		$cache_key = Cache::key( 'automation_all', [], [ Cache::EMAIL_AUTOMATIONS ] );
+		$rows = wp_cache_get( $cache_key, Cache::EMAIL_AUTOMATIONS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i ORDER BY trigger_event ASC, name ASC', self::table() ), ARRAY_A );
+			wp_cache_set( $cache_key, $rows, Cache::EMAIL_AUTOMATIONS );
+		}
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
-			ARRAY_A
-		);
+		$cache_key = Cache::key( 'automation_find', [ $id ], [ Cache::EMAIL_AUTOMATIONS ] );
+		$row = wp_cache_get( $cache_key, Cache::EMAIL_AUTOMATIONS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$row = $wpdb->get_row(
+				$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $row, Cache::EMAIL_AUTOMATIONS );
+		}
 		return $row ? self::normalize( $row ) : null;
 	}
 
 	public static function for_trigger( string $event, int $service_id = 0 ): array {
 		global $wpdb;
-		$table = self::table();
-		$sql   = "SELECT * FROM {$table}
-			WHERE status = 'active'
-			AND trigger_event = %s
-			AND (service_id = 0 OR service_id = %d)
-			ORDER BY service_id DESC";
-		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $event, $service_id ), ARRAY_A ); // phpcs:ignore
+		$cache_key = Cache::key( 'automation_for_trigger', [ $event, $service_id ], [ Cache::EMAIL_AUTOMATIONS ] );
+		$rows = wp_cache_get( $cache_key, Cache::EMAIL_AUTOMATIONS, false, $cache_found );
+		if ( ! $cache_found ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM %i
+					WHERE status = 'active'
+					AND trigger_event = %s
+					AND (service_id = 0 OR service_id = %d)
+					ORDER BY service_id DESC",
+					self::table(),
+					$event,
+					$service_id
+				),
+				ARRAY_A
+			);
+			wp_cache_set( $cache_key, $rows, Cache::EMAIL_AUTOMATIONS );
+		}
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
@@ -65,7 +83,9 @@ class Email_Automation_Repository {
 			'created_at'       => $now,
 			'updated_at'       => $now,
 		];
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$ok = $wpdb->insert( self::table(), $insert );
+		wp_cache_delete( 'last_changed', Cache::EMAIL_AUTOMATIONS );
 		if ( false === $ok ) {
 			return new \WP_Error( 'automation_insert_failed', __( 'Could not create automation.', 'bookingistic' ) );
 		}
@@ -74,7 +94,10 @@ class Email_Automation_Repository {
 
 	public static function delete( int $id ): bool {
 		global $wpdb;
-		return (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
+		$result = (bool) $wpdb->delete( self::table(), [ 'id' => $id ], [ '%d' ] );
+		wp_cache_delete( 'last_changed', Cache::EMAIL_AUTOMATIONS );
+		return $result;
 	}
 
 	public static function update( int $id, array $data ) {
@@ -104,7 +127,9 @@ class Email_Automation_Repository {
 				$update[ $int_field ] = (int) $data[ $int_field ];
 			}
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Write to the plugin's own custom table; its cache group is invalidated right after.
 		$wpdb->update( self::table(), $update, [ 'id' => $id ] );
+		wp_cache_delete( 'last_changed', Cache::EMAIL_AUTOMATIONS );
 		return self::find( $id );
 	}
 
