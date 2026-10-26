@@ -13,10 +13,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Payment_Repository {
 
 	public const STATUSES = [ 'pending', 'paid', 'failed', 'refunded', 'cancelled' ];
@@ -84,8 +80,7 @@ class Payment_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$table = Tables::payment_records_table();
-		$row   = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A ); // phpcs:ignore
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', Tables::payment_records_table(), $id ), ARRAY_A );
 		return $row ?: null;
 	}
 
@@ -94,12 +89,12 @@ class Payment_Repository {
 		$table = Tables::payment_records_table();
 		if ( $provider ) {
 			$row = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$table} WHERE booking_id = %d AND provider = %s ORDER BY id DESC LIMIT 1", $booking_id, $provider ), // phpcs:ignore
+				$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d AND provider = %s ORDER BY id DESC LIMIT 1', $table, $booking_id, $provider ),
 				ARRAY_A
 			);
 		} else {
 			$row = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$table} WHERE booking_id = %d ORDER BY id DESC LIMIT 1", $booking_id ), // phpcs:ignore
+				$wpdb->prepare( 'SELECT * FROM %i WHERE booking_id = %d ORDER BY id DESC LIMIT 1', $table, $booking_id ),
 				ARRAY_A
 			);
 		}
@@ -111,31 +106,27 @@ class Payment_Repository {
 	 */
 	public static function query( array $args = [] ): array {
 		global $wpdb;
-		$table = Tables::payment_records_table();
-
-		$where = [ '1=1' ];
-		$prep  = [];
-		if ( ! empty( $args['status'] ) ) {
-			$where[] = 'status = %s';
-			$prep[]  = (string) $args['status'];
-		}
-		if ( ! empty( $args['provider'] ) ) {
-			$where[] = 'provider = %s';
-			$prep[]  = (string) $args['provider'];
-		}
-		if ( ! empty( $args['booking_id'] ) ) {
-			$where[] = 'booking_id = %d';
-			$prep[]  = (int) $args['booking_id'];
-		}
-		$where_sql = implode( ' AND ', $where );
-
+		$f      = self::filter_values( $args );
 		$limit  = max( 1, min( 200, (int) ( $args['per_page'] ?? 50 ) ) );
 		$offset = max( 0, (int) ( $args['offset'] ?? 0 ) );
-		$prep[] = $limit;
-		$prep[] = $offset;
 
 		$rows = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY id DESC LIMIT %d OFFSET %d", ...$prep ), // phpcs:ignore
+			$wpdb->prepare(
+				"SELECT * FROM %i
+				WHERE ( %s = '' OR status = %s )
+				AND ( %s = '' OR provider = %s )
+				AND ( %d = 0 OR booking_id = %d )
+				ORDER BY id DESC LIMIT %d OFFSET %d",
+				Tables::payment_records_table(),
+				$f['status'],
+				$f['status'],
+				$f['provider'],
+				$f['provider'],
+				$f['booking_id'],
+				$f['booking_id'],
+				$limit,
+				$offset
+			),
 			ARRAY_A
 		);
 		return is_array( $rows ) ? $rows : [];
@@ -143,26 +134,36 @@ class Payment_Repository {
 
 	public static function count( array $args = [] ): int {
 		global $wpdb;
-		$table = Tables::payment_records_table();
+		$f = self::filter_values( $args );
 
-		$where = [ '1=1' ];
-		$prep  = [];
-		if ( ! empty( $args['status'] ) ) {
-			$where[] = 'status = %s';
-			$prep[]  = (string) $args['status'];
-		}
-		if ( ! empty( $args['provider'] ) ) {
-			$where[] = 'provider = %s';
-			$prep[]  = (string) $args['provider'];
-		}
-		if ( ! empty( $args['booking_id'] ) ) {
-			$where[] = 'booking_id = %d';
-			$prep[]  = (int) $args['booking_id'];
-		}
-		$where_sql = implode( ' AND ', $where );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM %i
+				WHERE ( %s = '' OR status = %s )
+				AND ( %s = '' OR provider = %s )
+				AND ( %d = 0 OR booking_id = %d )",
+				Tables::payment_records_table(),
+				$f['status'],
+				$f['status'],
+				$f['provider'],
+				$f['provider'],
+				$f['booking_id'],
+				$f['booking_id']
+			)
+		);
+	}
 
-		return (int) ( $prep
-			? $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", ...$prep ) ) // phpcs:ignore
-			: $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) ); // phpcs:ignore
+	/**
+	 * Normalize optional filters. An empty value ('' / 0) disables that filter
+	 * in the fixed, fully-prepared WHERE clause.
+	 *
+	 * @return array{status:string,provider:string,booking_id:int}
+	 */
+	private static function filter_values( array $args ): array {
+		return [
+			'status'     => ! empty( $args['status'] ) ? (string) $args['status'] : '',
+			'provider'   => ! empty( $args['provider'] ) ? (string) $args['provider'] : '',
+			'booking_id' => ! empty( $args['booking_id'] ) ? (int) $args['booking_id'] : 0,
+		];
 	}
 }

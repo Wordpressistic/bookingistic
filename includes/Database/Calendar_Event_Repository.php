@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Calendar_Event_Repository {
 
 	public static function table(): string {
@@ -21,10 +17,10 @@ class Calendar_Event_Repository {
 
 	public static function find_for_booking( int $booking_id, string $provider ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row(
+		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE booking_id = %d AND provider = %s LIMIT 1",
+				'SELECT * FROM %i WHERE booking_id = %d AND provider = %s LIMIT 1',
+				self::table(),
 				$booking_id,
 				$provider
 			),
@@ -70,8 +66,7 @@ class Calendar_Event_Repository {
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ), ARRAY_A );
 		return $row ? self::normalize( $row ) : null;
 	}
 

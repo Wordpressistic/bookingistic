@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Schema installer: dbDelta()/DROP TABLE on the plugin's own custom tables is
-// the entire purpose of this class. Identifiers come from class constants.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.SchemaChange
-
 class Tables {
 
 	public static function services_table(): string {
@@ -296,7 +292,7 @@ class Tables {
 			self::services_table(),
 		];
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
 		}
 	}
 }

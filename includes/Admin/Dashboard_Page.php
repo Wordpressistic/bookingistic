@@ -13,11 +13,6 @@ use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
 
-// Read-only COUNT queries over the plugin's custom bookings table (identifiers
-// from Tables:: class constants). DirectQuery/NoCaching disabled by design;
-// see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Dashboard_Page {
 
 	public static function render(): void {
@@ -25,11 +20,11 @@ class Dashboard_Page {
 		$bookings_table = Tables::bookings_table();
 		$now            = current_time( 'mysql', true );
 
-		$total     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$bookings_table}" );
-		$upcoming  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$bookings_table} WHERE start_datetime >= %s AND status IN ('pending','confirmed','rescheduled')", $now ) );
-		$pending   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$bookings_table} WHERE status = 'pending'" );
-		$completed = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$bookings_table} WHERE status = 'completed'" );
-		$cancelled = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$bookings_table} WHERE status = 'cancelled'" );
+		$total     = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $bookings_table ) );
+		$upcoming  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE start_datetime >= %s AND status IN ('pending','confirmed','rescheduled')", $bookings_table, $now ) );
+		$pending   = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE status = %s', $bookings_table, 'pending' ) );
+		$completed = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE status = %s', $bookings_table, 'completed' ) );
+		$cancelled = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE status = %s', $bookings_table, 'cancelled' ) );
 		$logs      = Email_Log_Repository::recent( 10 );
 
 		$recent_bookings = Booking_Repository::query( [ 'per_page' => 10 ] );

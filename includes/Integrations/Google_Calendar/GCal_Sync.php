@@ -33,11 +33,6 @@ use Bookingistic\Integrations\Integration_Base;
 
 defined( 'ABSPATH' ) || exit;
 
-// Writes booking/sync rows in the plugin's custom tables (identifiers from
-// Tables:: class constants, values prepared). DirectQuery/NoCaching disabled
-// by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class GCal_Sync {
 
 	const PROVIDER      = 'google_calendar';

@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Email_Automation_Repository {
 
 	public static function table(): string {
@@ -21,16 +17,14 @@ class Email_Automation_Repository {
 
 	public static function all(): array {
 		global $wpdb;
-		$table = self::table();
-		$rows  = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY trigger_event ASC, name ASC", ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i ORDER BY trigger_event ASC, name ASC', self::table() ), ARRAY_A );
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 
 	public static function find( int $id ): ?array {
 		global $wpdb;
-		$table = self::table();
-		$row   = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
+		$row = $wpdb->get_row(
+			$wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), $id ),
 			ARRAY_A
 		);
 		return $row ? self::normalize( $row ) : null;
@@ -38,13 +32,19 @@ class Email_Automation_Repository {
 
 	public static function for_trigger( string $event, int $service_id = 0 ): array {
 		global $wpdb;
-		$table = self::table();
-		$sql   = "SELECT * FROM {$table}
-			WHERE status = 'active'
-			AND trigger_event = %s
-			AND (service_id = 0 OR service_id = %d)
-			ORDER BY service_id DESC";
-		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $event, $service_id ), ARRAY_A ); // phpcs:ignore
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i
+				WHERE status = 'active'
+				AND trigger_event = %s
+				AND (service_id = 0 OR service_id = %d)
+				ORDER BY service_id DESC",
+				self::table(),
+				$event,
+				$service_id
+			),
+			ARRAY_A
+		);
 		return array_map( [ self::class, 'normalize' ], $rows ?: [] );
 	}
 

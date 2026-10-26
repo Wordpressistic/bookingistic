@@ -24,11 +24,6 @@ use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
-// Writes booking meta + lookups in the plugin's custom tables (identifiers
-// from Tables:: class constants, values prepared). DirectQuery/NoCaching
-// disabled by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class WooCommerce_Integration extends Integration_Base {
 
 	public const META_BOOKING_ID = '_bookingistic_booking_id';
@@ -203,9 +198,8 @@ class WooCommerce_Integration extends Integration_Base {
 
 	private function get_booking_meta( int $booking_id, string $key ): ?string {
 		global $wpdb;
-		$table = Tables::booking_meta_table();
 		$value = $wpdb->get_var(
-			$wpdb->prepare( "SELECT meta_value FROM {$table} WHERE booking_id = %d AND meta_key = %s ORDER BY id DESC LIMIT 1", $booking_id, $key ) // phpcs:ignore
+			$wpdb->prepare( 'SELECT meta_value FROM %i WHERE booking_id = %d AND meta_key = %s ORDER BY id DESC LIMIT 1', Tables::booking_meta_table(), $booking_id, $key )
 		);
 		return $value !== null ? (string) $value : null;
 	}

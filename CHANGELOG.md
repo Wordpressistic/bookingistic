@@ -2,6 +2,10 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
+## 2.5.6 — 2026-10-26
+
+* Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. All phpcs:ignore/phpcs:disable comments that suppressed SQL sniffs were removed. No functional changes.
+
 ## 2.5.5 — 2026-10-23
 
 * Fixed: REST requests from the booking form and the admin calendar now work on sites using plain permalinks (the WordPress default on a fresh install) — endpoint URLs are built with a proper query-string join instead of plain concatenation, which previously produced "No route was found matching the URL and request method" on every booking-form and calendar request

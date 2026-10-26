@@ -11,11 +11,6 @@ use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
 
-// Seed/upgrade queries run against the plugin's own custom tables (identifiers
-// from Tables:: class constants, values prepared). DirectQuery/NoCaching are
-// disabled here by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Installer {
 
 	const DB_VERSION_OPTION = 'bookingistic_db_version';
@@ -52,7 +47,7 @@ class Installer {
 	private static function seed_default_service(): void {
 		global $wpdb;
 		$table = Tables::services_table();
-		$exists = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		$exists = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
 		if ( $exists > 0 ) {
 			return;
 		}
@@ -114,7 +109,7 @@ class Installer {
 	private static function seed_default_email_automations(): void {
 		global $wpdb;
 		$table = Tables::email_automations_table();
-		$exists = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		$exists = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
 		if ( $exists > 0 ) {
 			return;
 		}

@@ -9,10 +9,6 @@ namespace Bookingistic\Database;
 
 defined( 'ABSPATH' ) || exit;
 
-// Custom-table repository: identifiers come from Tables:: class constants and
-// every value is prepared. See Booking_Repository for the full rationale.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Email_Log_Repository {
 
 	public static function table(): string {
@@ -41,9 +37,8 @@ class Email_Log_Repository {
 
 	public static function recent( int $limit = 50 ): array {
 		global $wpdb;
-		$table = self::table();
-		$rows  = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d", $limit ),
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( 'SELECT * FROM %i ORDER BY created_at DESC LIMIT %d', self::table(), $limit ),
 			ARRAY_A
 		);
 		return $rows ?: [];

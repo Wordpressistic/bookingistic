@@ -21,11 +21,6 @@ use Bookingistic\Payments\Payment_Manager;
 
 defined( 'ABSPATH' ) || exit;
 
-// Ledger lookups run against the plugin's custom payment_records table
-// (identifiers from Tables:: class constants, values prepared).
-// DirectQuery/NoCaching disabled by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class WooCommerce_Gateway extends Abstract_Gateway {
 
 	protected string $slug = 'woocommerce';
@@ -137,9 +132,8 @@ class WooCommerce_Gateway extends Abstract_Gateway {
 
 	private function order_id_for_booking( int $booking_id ): int {
 		global $wpdb;
-		$table = Tables::booking_meta_table();
 		$value = $wpdb->get_var(
-			$wpdb->prepare( "SELECT meta_value FROM {$table} WHERE booking_id = %d AND meta_key = '_wc_order_id' ORDER BY id DESC LIMIT 1", $booking_id ) // phpcs:ignore
+			$wpdb->prepare( 'SELECT meta_value FROM %i WHERE booking_id = %d AND meta_key = %s ORDER BY id DESC LIMIT 1', Tables::booking_meta_table(), $booking_id, '_wc_order_id' )
 		);
 		return $value ? (int) $value : 0;
 	}

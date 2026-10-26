@@ -12,11 +12,6 @@ use Bookingistic\Database\Tables;
 
 defined( 'ABSPATH' ) || exit;
 
-// Read-only queries over the plugin's custom email-log table (identifiers from
-// Tables:: class constants, values prepared). DirectQuery/NoCaching disabled
-// by design; see includes/Database/Booking_Repository.php.
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-
 class Email_Logs_Page {
 
 	public static function render(): void {
@@ -33,26 +28,29 @@ class Email_Logs_Page {
 		$per_page      = 50;
 		$offset        = ( $page - 1 ) * $per_page;
 
-		$where = [ '1=1' ];
-		$prep  = [];
-		if ( $status ) {
-			$where[] = 'status = %s';
-			$prep[]  = $status;
-		}
-		if ( $automation_id ) {
-			$where[] = 'automation_id = %d';
-			$prep[]  = $automation_id;
-		}
-		$where_sql = implode( ' AND ', $where );
+		// Optional filters are value-bound; '' / 0 disables a filter.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d )",
+				$table,
+				$status,
+				$status,
+				$automation_id,
+				$automation_id
+			)
+		);
 
-		$total = (int) ( $prep
-			? $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", ...$prep ) ) // phpcs:ignore
-			: $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) ); // phpcs:ignore
-
-		$prep[] = $per_page;
-		$prep[] = $offset;
-		$rows   = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE {$where_sql} ORDER BY created_at DESC LIMIT %d OFFSET %d", ...$prep ), // phpcs:ignore
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE ( %s = '' OR status = %s ) AND ( %d = 0 OR automation_id = %d ) ORDER BY created_at DESC LIMIT %d OFFSET %d",
+				$table,
+				$status,
+				$status,
+				$automation_id,
+				$automation_id,
+				$per_page,
+				$offset
+			),
 			ARRAY_A
 		) ?: [];
 

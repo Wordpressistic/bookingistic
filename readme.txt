@@ -4,7 +4,7 @@ Tags: booking, appointment, appointments, calendar, scheduling
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.5
+Stable tag: 2.5.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,9 @@ This plugin can connect to Google Calendar so each staff member can two-way sync
 * Google Privacy Policy: https://policies.google.com/privacy
 
 == Changelog ==
+
+= 2.5.6 =
+* Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. All phpcs:ignore/phpcs:disable comments that suppressed SQL sniffs were removed. No functional changes.
 
 = 2.5.5 =
 * Fixed: REST requests from the booking form and the admin calendar now work on sites using plain permalinks (the WordPress default on a fresh install) — endpoint URLs are built with a proper query-string join instead of plain concatenation, which previously produced "No route was found matching the URL and request method" on every booking-form and calendar request
