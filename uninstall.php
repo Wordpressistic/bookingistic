@@ -22,6 +22,17 @@ delete_option( 'bookingistic_db_version' );
 delete_option( 'bookingistic_appearance' );
 delete_option( 'bookingistic_integrations' );
 
+// Rate-limit transients (bookingistic_rl_*) are short-lived but removed here too.
+global $wpdb;
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off uninstall cleanup of this plugin's own transients; there is no core API to delete transients by prefix.
+$wpdb->query(
+	$wpdb->prepare(
+		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+		$wpdb->esc_like( '_transient_bookingistic_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_bookingistic_' ) . '%'
+	)
+);
+
 wp_clear_scheduled_hook( 'bookingistic_send_reminders' );
 wp_clear_scheduled_hook( 'bookingistic_gcal_sync' );
 
