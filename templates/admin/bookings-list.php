@@ -160,13 +160,15 @@ $bookingistic_payment    = isset( $_GET['payment_status'] ) ? sanitize_key( wp_u
 	<?php if ( ! empty( $result['pages'] ) && $result['pages'] > 1 ) : ?>
 		<div class="tablenav"><div class="tablenav-pages">
 			<?php
-			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses_post(
+				paginate_links(
 				[
 					'base'    => add_query_arg( 'paged', '%#%' ),
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only pagination.
 					'current' => isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : 1,
 					'total'   => (int) $result['pages'],
 				]
+				)
 			);
 				?>
 			</div></div>

@@ -149,10 +149,10 @@ class Email_Template_Renderer {
 			wp_kses_post( $template )
 		);
 
-		return self::wrap_html( $body, $vars );
+		return self::wrap_html( $body );
 	}
 
-	private static function wrap_html( string $body_html, array $vars ): string {
+	private static function wrap_html( string $body_html ): string {
 		$settings  = get_option( 'bookingistic_settings', [] );
 		$brand     = $settings['business_name'] ?? get_bloginfo( 'name' );
 		$logo      = $settings['logo_url'] ?? '';

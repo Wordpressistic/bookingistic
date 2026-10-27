@@ -142,7 +142,7 @@ class Payments_Controller {
 		);
 	}
 
-	public static function gateways( \WP_REST_Request $request ): \WP_REST_Response {
+	public static function gateways(): \WP_REST_Response {
 		$out = [];
 		foreach ( Payment_Manager::gateways() as $slug => $gateway ) {
 			$out[] = [

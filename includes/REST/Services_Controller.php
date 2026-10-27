@@ -62,7 +62,7 @@ class Services_Controller {
 		);
 	}
 
-	public static function index( \WP_REST_Request $req ) {
+	public static function index() {
 		$is_admin = REST_Controller::require_manage();
 		$rows = Service_Repository::all( $is_admin ? [] : [ 'status' => 'active' ] );
 		return rest_ensure_response(

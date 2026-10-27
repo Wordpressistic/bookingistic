@@ -144,7 +144,13 @@ class Google_Calendar_Integration extends Integration_Base {
 		// System temp dir — outside the webroot, so booking data is never
 		// written to a publicly served location. Random name: unguessable.
 		$path = get_temp_dir() . uniqid( 'bookingistic-', true ) . '.ics';
-		if ( false === file_put_contents( $path, $ics ) ) {
+		// WP_Filesystem_Direct: the file lives in the local temp dir and is
+		// only attached to an outgoing wp_mail(), so FTP/SSH transports are
+		// never appropriate here.
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+		$filesystem = new \WP_Filesystem_Direct( null );
+		if ( ! $filesystem->put_contents( $path, $ics ) ) {
 			return null;
 		}
 		return $path;

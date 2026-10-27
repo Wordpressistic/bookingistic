@@ -9,13 +9,13 @@
  * --bk-font (set inline by booking-form.js); every other tint is derived
  * from --bk-accent so a custom brand color re-themes the whole form.
  * Templates add layout under .bookingistic-form--{classic|modern|split|minimal}.
- * No web fonts are loaded: Inter is used when the site/OS provides it.
+ * No web fonts are loaded: the system UI font stack is used.
  */
 
 .bookingistic-form {
 	--bk-accent: #1b7257;
 	--bk-radius: 20px;
-	--bk-font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--bk-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	--bk-accent-strong: color-mix(in srgb, var(--bk-accent) 74%, #000);
 	--bk-accent-soft: color-mix(in srgb, var(--bk-accent) 11%, #fff);
 	--bk-accent-ring: color-mix(in srgb, var(--bk-accent) 35%, transparent);

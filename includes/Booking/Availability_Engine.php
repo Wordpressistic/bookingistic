@@ -175,7 +175,7 @@ class Availability_Engine {
 			return $default;
 		}
 
-		// Per-day shape: {"1": {"start":"...", "end":"..."}, ...}
+		// Per-day shape: an object keyed by weekday number, each entry holding start and end times.
 		if ( isset( $wh[ (string) $dow ] ) || isset( $wh[ $dow ] ) ) {
 			$entry = $wh[ (string) $dow ] ?? $wh[ $dow ];
 			if ( empty( $entry ) || empty( $entry['start'] ) || empty( $entry['end'] ) ) {
@@ -184,7 +184,7 @@ class Availability_Engine {
 			return [ 'start' => $entry['start'], 'end' => $entry['end'] ];
 		}
 
-		// Legacy shape: {"start":"09:00","end":"17:00","days":[1,2,3,4,5]}
+		// Legacy shape: a single start/end pair plus a list of working weekday numbers.
 		if ( isset( $wh['start'], $wh['end'] ) ) {
 			$days = ! empty( $wh['days'] ) ? array_map( 'intval', (array) $wh['days'] ) : $work_days;
 			if ( ! in_array( $dow, $days, true ) ) {

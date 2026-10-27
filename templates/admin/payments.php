@@ -172,12 +172,14 @@ $bookingistic_pill = [
 	<?php if ( $pages > 1 ) : ?>
 		<div class="tablenav"><div class="tablenav-pages">
 			<?php
-			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo wp_kses_post(
+				paginate_links(
 				[
 					'base'    => add_query_arg( 'paged', '%#%' ),
 					'current' => $page,
 					'total'   => $pages,
 				]
+				)
 			);
 			?>
 		</div></div>
