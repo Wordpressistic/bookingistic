@@ -149,8 +149,10 @@ class Google_Calendar_Integration extends Integration_Base {
 		// never appropriate here.
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+		// An explicit mode is passed because FS_CHMOD_FILE is only defined
+		// once WP_Filesystem() has run; 0600 keeps the temp file private.
 		$filesystem = new \WP_Filesystem_Direct( null );
-		if ( ! $filesystem->put_contents( $path, $ics ) ) {
+		if ( ! $filesystem->put_contents( $path, $ics, 0600 ) ) {
 			return null;
 		}
 		return $path;
