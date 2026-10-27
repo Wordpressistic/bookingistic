@@ -2,9 +2,12 @@
 
 All notable changes to Bookingistic are documented here (mirroring the WordPress.org `readme.txt` changelog). Releases are tagged `vX.Y.Z` on GitHub with downloadable zips; version snapshots live on the `release/X.Y.Z` branches.
 
-## 2.5.6 — 2026-10-26
+## 2.6.0 — 2026-10-27
 
-
+* New: premium booking-form design language across all four form designs and all three calendar views — elevated card, step progress ("Step 1 of 3"), service summary card with price pill, day tiles, time pills and a live "Continue with Tue at 1:30 PM →" button
+* New: motion — slide/fade step transitions, spring-like day/time selection, skeleton shimmer while availability loads, staggered time pills, crossfading CTA text, animated success checkmark, floating toast cards and hover micro-interactions; pure CSS + vanilla JS, no new libraries or external requests, and fully disabled under prefers-reduced-motion
+* Accessibility: arrow-key / Home / End navigation for days, times and hosts; full-date labels on day buttons; polite live region for loading and availability; focus moves to each new step; visible focus rings; forced-colors support
+* Changed: Modern Card is the default design and #1b7257 the default accent for sites that have never saved Appearance settings; saved settings, shortcode attributes and the Elementor widget are unchanged
 * Security: every custom-table SQL query now goes through $wpdb->prepare() with placeholders; table and column identifiers are bound with %i (whitelisted columns only), optional filters are value-bound instead of concatenated, and ORDER BY uses a strict column whitelist. No phpcs:ignore remains on any SQL-preparation (PreparedSQL / PreparedSQLPlaceholders / InterpolatedNotPrepared) sniff.
 * Performance: reads from the plugin's own tables are now object-cached (wp_cache_get/wp_cache_set, one cache group per table) and invalidated through a per-table last_changed key on every write (create, update, delete, status change, cancel, payment updates, schema install/upgrade, uninstall, and at the end of every booking transaction). Availability, overlap/double-booking, daily-limit, slot-lock, slug-uniqueness and reminder checks always read live data. The remaining Plugin Check DirectQuery notices carry narrow line-level ignores with the reason stated. No functional changes.
 * Fixed: PHP 8.1+ "Passing null to htmlspecialchars()" deprecation notice when editing a staff member with an empty bio (found while testing on MySQL/MariaDB).

@@ -25,8 +25,29 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 	<?php endif; ?>>
 
 	<div class="bookingistic-card">
-		<div class="bookingistic-card__head">
-			<span class="bookingistic-chip bookingistic-chip--duration"><?php echo esc_html( $service['duration_minutes'] . ' ' . __( 'min', 'bookingistic' ) ); ?></span>
+		<div class="bookingistic-card__top">
+			<span class="bookingistic-card__eyebrow">
+				<?php echo $bookingistic_is_reschedule ? esc_html__( 'Reschedule your booking', 'bookingistic' ) : esc_html__( 'Book an appointment', 'bookingistic' ); ?>
+			</span>
+			<?php require __DIR__ . '/partials/progress.php'; ?>
+		</div>
+
+		<div class="bookingistic-service">
+			<span class="bookingistic-service__icon" aria-hidden="true">
+				<svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"></rect><path d="M3.5 10h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+			</span>
+			<div class="bookingistic-service__text">
+				<h2 class="bookingistic-service__name bookingistic-card__title"><?php echo esc_html( $service['name'] ); ?></h2>
+				<p class="bookingistic-service__meta">
+					<?php
+					/* translators: %d: service duration in minutes. */
+					echo esc_html( sprintf( _n( '%d minute', '%d minutes', (int) $service['duration_minutes'], 'bookingistic' ), (int) $service['duration_minutes'] ) );
+					if ( ! empty( $service['short_description'] ) ) {
+						echo ' &middot; ' . esc_html( $service['short_description'] );
+					}
+					?>
+				</p>
+			</div>
 			<span class="bookingistic-chip bookingistic-chip--price">
 				<?php echo $service['price'] > 0
 					? esc_html( number_format_i18n( (float) $service['price'], 2 ) )
@@ -34,17 +55,11 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 			</span>
 		</div>
 
-		<h2 class="bookingistic-card__title"><?php echo esc_html( $service['name'] ); ?></h2>
-		<?php if ( ! empty( $service['short_description'] ) ) : ?>
-			<p class="bookingistic-card__tagline"><?php echo esc_html( $service['short_description'] ); ?></p>
-		<?php endif; ?>
-
 		<div class="bookingistic-form__steps" data-step="1">
 			<!-- Step 1 -->
 			<section class="bookingistic-step" data-step-content="1">
-				<p class="bookingistic-hint" data-bookingistic-tz></p>
-
 				<?php if ( count( $assignable_staff ) > 1 ) : ?>
+					<p class="bookingistic-label"><?php esc_html_e( 'Choose a host', 'bookingistic' ); ?></p>
 					<div class="bookingistic-staff" data-bookingistic-staff-picker>
 						<button type="button" class="bookingistic-staff__option" data-staff-id="0" aria-pressed="true"><?php esc_html_e( 'Any host', 'bookingistic' ); ?></button>
 						<?php foreach ( $assignable_staff as $bookingistic_staff_row ) : ?>
@@ -55,17 +70,24 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 					</div>
 				<?php endif; ?>
 
-				<div class="bookingistic-calendar-zone" data-bookingistic-calendar></div>
+				<p class="bookingistic-label" id="<?php echo esc_attr( $booking_form_id . '-days' ); ?>"><?php esc_html_e( 'Choose a day', 'bookingistic' ); ?></p>
+				<div class="bookingistic-calendar-zone" data-bookingistic-calendar role="group" aria-labelledby="<?php echo esc_attr( $booking_form_id . '-days' ); ?>"></div>
+
+				<div class="bookingistic-label-row">
+					<p class="bookingistic-label" id="<?php echo esc_attr( $booking_form_id . '-times' ); ?>"><?php esc_html_e( 'Available times', 'bookingistic' ); ?></p>
+					<p class="bookingistic-hint" data-bookingistic-tz></p>
+				</div>
 				<div class="bookingistic-slots-zone">
 					<p class="bookingistic-slots-empty"><?php esc_html_e( 'Pick a date to see available times', 'bookingistic' ); ?></p>
-					<ul class="bookingistic-slot-list" data-bookingistic-slots hidden></ul>
+					<ul class="bookingistic-slot-list" data-bookingistic-slots aria-labelledby="<?php echo esc_attr( $booking_form_id . '-times' ); ?>" hidden></ul>
 				</div>
 
-				<div class="bookingistic-actions">
-					<button type="button" class="bookingistic-btn bookingistic-btn--primary" data-action="next" disabled>
+				<div class="bookingistic-actions bookingistic-actions--block">
+					<button type="button" class="bookingistic-btn bookingistic-btn--primary bookingistic-btn--cta" data-action="next" disabled>
 						<?php esc_html_e( 'Continue', 'bookingistic' ); ?>
 					</button>
 				</div>
+				<?php require __DIR__ . '/partials/status.php'; ?>
 			</section>
 
 			<!-- Step 2 -->
@@ -109,14 +131,14 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 			<!-- Step 3 -->
 			<section class="bookingistic-step" data-step-content="3" hidden>
 				<div class="bookingistic-success">
-					<span class="bookingistic-success__icon" aria-hidden="true">✓</span>
+					<?php require __DIR__ . '/partials/success-icon.php'; ?>
 					<h3 data-bookingistic-success-title><?php esc_html_e( 'Booking confirmed', 'bookingistic' ); ?></h3>
 					<p data-bookingistic-success-body><?php esc_html_e( 'Check your inbox for the details.', 'bookingistic' ); ?></p>
 					<div data-bookingistic-pay class="bookingistic-payment-box" hidden></div>
 				</div>
 			</section>
 
-			<div class="bookingistic-error" data-bookingistic-error role="alert" hidden></div>
+			<div class="bookingistic-error" data-bookingistic-error role="alert" aria-live="assertive" hidden></div>
 		</div>
 	</div>
 </div>

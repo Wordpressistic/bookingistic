@@ -29,7 +29,7 @@ class Template_Loader {
 			],
 			'modern'  => [
 				'label'       => __( 'Modern Card', 'bookingistic' ),
-				'description' => __( 'Single elevated card, floating labels, soft shadows. Great for coaches and consultants.', 'bookingistic' ),
+				'description' => __( 'The premium flagship: elevated card with step progress, day tiles, time pills and a live “Continue with…” button. Great for coaches and consultants.', 'bookingistic' ),
 			],
 			'split'   => [
 				'label'       => __( 'Split Hero', 'bookingistic' ),
@@ -140,9 +140,9 @@ class Template_Loader {
 	 */
 	public static function appearance(): array {
 		$defaults = [
-			'template' => 'classic',
+			'template' => 'modern',
 			'calendar' => 'month',
-			'accent'   => '#2563eb',
+			'accent'   => '#1b7257',
 			'radius'   => '14',
 			'font'     => 'inherit',
 		];
