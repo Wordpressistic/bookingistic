@@ -39,7 +39,7 @@ final class Plugin {
 
 	public function boot(): void {
 		// Custom cron interval for calendar sync.
-		add_filter( 'cron_schedules', [ Cron::class, 'register_schedules' ] );
+		Cron::add_schedules_filter();
 
 		// Database upgrade check.
 		add_action( 'init', [ Installer::class, 'maybe_upgrade' ], 1 );

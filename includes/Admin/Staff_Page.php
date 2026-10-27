@@ -54,11 +54,9 @@ class Staff_Page {
 
 			$working_hours = [];
 			foreach ( self::DAYS as $dow => $_label ) {
-				// Values are validated to HH:MM by Sanitizer::hhmm().
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$start = Sanitizer::hhmm( wp_unslash( $_POST['wh'][ $dow ]['start'] ?? '' ) );
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$end   = Sanitizer::hhmm( wp_unslash( $_POST['wh'][ $dow ]['end']   ?? '' ) );
+				// Sanitized, then validated to HH:MM by Sanitizer::hhmm().
+				$start = Sanitizer::hhmm( sanitize_text_field( wp_unslash( $_POST['wh'][ $dow ]['start'] ?? '' ) ) );
+				$end   = Sanitizer::hhmm( sanitize_text_field( wp_unslash( $_POST['wh'][ $dow ]['end'] ?? '' ) ) );
 				$on    = ! empty( $_POST['wh'][ $dow ]['on'] );
 				if ( $on && $start && $end ) {
 					$working_hours[ (string) $dow ] = [ 'start' => $start, 'end' => $end ];
@@ -66,9 +64,12 @@ class Staff_Page {
 			}
 
 			$days_off = [];
-			// Per-entry dates are validated by Sanitizer::iso_date() below.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			foreach ( (array) ( $_POST['days_off'] ?? [] ) as $entry ) {
+			// Every value is sanitized here, then validated by Sanitizer::iso_date().
+			$days_off_raw = isset( $_POST['days_off'] ) ? map_deep( wp_unslash( (array) $_POST['days_off'] ), 'sanitize_text_field' ) : [];
+			foreach ( $days_off_raw as $entry ) {
+				if ( ! is_array( $entry ) ) {
+					continue;
+				}
 				$from = Sanitizer::iso_date( $entry['from'] ?? '' );
 				$to   = Sanitizer::iso_date( $entry['to'] ?? $from );
 				if ( $from ) {
@@ -79,9 +80,7 @@ class Staff_Page {
 			$payload = [
 				'name'                  => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
 				'email'                 => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
-				// Validated by Sanitizer::phone().
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				'phone'                 => Sanitizer::phone( wp_unslash( $_POST['phone'] ?? '' ) ),
+				'phone'                 => Sanitizer::phone( sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ) ),
 				'photo_url'             => esc_url_raw( wp_unslash( $_POST['photo_url'] ?? '' ) ),
 				'bio'                   => sanitize_textarea_field( wp_unslash( $_POST['bio'] ?? '' ) ),
 				'booking_limit_per_day' => absint( wp_unslash( $_POST['booking_limit_per_day'] ?? 0 ) ),

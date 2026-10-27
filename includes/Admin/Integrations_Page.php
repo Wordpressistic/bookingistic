@@ -53,25 +53,18 @@ class Integrations_Page {
 
 		$values = [ '_enabled' => ! empty( $_POST['_enabled'] ) ];
 		foreach ( $integration->fields() as $key => $schema ) {
-			// Sanitization is applied per field type by self::sanitize_field() below.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$raw = wp_unslash( $_POST[ $key ] ?? '' );
-			$values[ $key ] = self::sanitize_field( $raw, $schema['type'] ?? 'text' );
+			$values[ $key ] = match ( $schema['type'] ?? 'text' ) {
+				'checkbox' => ! empty( $_POST[ $key ] ) ? 1 : 0,
+				'url'      => esc_url_raw( wp_unslash( $_POST[ $key ] ?? '' ) ),
+				'email'    => sanitize_email( wp_unslash( $_POST[ $key ] ?? '' ) ),
+				'textarea' => sanitize_textarea_field( wp_unslash( $_POST[ $key ] ?? '' ) ),
+				// text, password (API keys / secrets) and any other type.
+				default    => sanitize_text_field( wp_unslash( $_POST[ $key ] ?? '' ) ),
+			};
 		}
 		$integration->update_settings( $values );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookingistic-integrations&saved=' . $slug ) );
 		exit;
-	}
-
-	private static function sanitize_field( $value, string $type ) {
-		return match ( $type ) {
-			'checkbox' => ! empty( $value ) ? 1 : 0,
-			'url'      => esc_url_raw( (string) $value ),
-			'email'    => sanitize_email( (string) $value ),
-			'password' => (string) $value, // store as-is; never echoed back outside form
-			'textarea' => sanitize_textarea_field( (string) $value ),
-			default    => sanitize_text_field( (string) $value ),
-		};
 	}
 }

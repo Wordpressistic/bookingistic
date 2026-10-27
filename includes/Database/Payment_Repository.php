@@ -99,7 +99,7 @@ class Payment_Repository {
 		global $wpdb;
 		$table = Tables::payment_records_table();
 		if ( $provider ) {
-			$cache_key = Cache::key( 'payment_latest_a', func_get_args(), [ Cache::PAYMENTS ] );
+			$cache_key = Cache::key( 'payment_latest_a', [ $booking_id, $provider ], [ Cache::PAYMENTS ] );
 			$row = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
 			if ( ! $cache_found ) {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.
@@ -110,7 +110,7 @@ class Payment_Repository {
 				wp_cache_set( $cache_key, $row, Cache::PAYMENTS );
 			}
 		} else {
-			$cache_key = Cache::key( 'payment_latest_b', func_get_args(), [ Cache::PAYMENTS ] );
+			$cache_key = Cache::key( 'payment_latest_b', [ $booking_id ], [ Cache::PAYMENTS ] );
 			$row = wp_cache_get( $cache_key, Cache::PAYMENTS, false, $cache_found );
 			if ( ! $cache_found ) {
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Plugin's own custom table; the result is object-cached (wp_cache_set below) and invalidated on every write.

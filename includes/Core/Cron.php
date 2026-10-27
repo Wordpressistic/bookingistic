@@ -19,6 +19,13 @@ class Cron {
 	 * not registered the interval yet and wp_schedule_event() would fail
 	 * silently on the unregistered 'fifteen_minutes' recurrence.
 	 */
+	/**
+	 * Hook register_schedules() into cron_schedules (idempotent).
+	 */
+	public static function add_schedules_filter(): void {
+		add_filter( 'cron_schedules', [ self::class, 'register_schedules' ] );
+	}
+
 	public static function register_schedules( array $schedules ): array {
 		if ( ! isset( $schedules['fifteen_minutes'] ) ) {
 			$schedules['fifteen_minutes'] = [

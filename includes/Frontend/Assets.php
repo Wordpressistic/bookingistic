@@ -70,6 +70,19 @@ class Assets {
 					'checkInbox' => __( 'Check your inbox for the details.', 'bookingistic' ),
 					'payNow'     => __( 'Pay now', 'bookingistic' ),
 					'payLater'   => __( 'Payment is due — we will send you payment instructions.', 'bookingistic' ),
+					'continue'   => __( 'Continue', 'bookingistic' ),
+					/* translators: %s: selected day and time, e.g. "Tue at 1:30 PM". */
+					'continueWith' => __( 'Continue with %s', 'bookingistic' ),
+					/* translators: 1: short weekday name, 2: time of day. */
+					'atTime'     => __( '%1$s at %2$s', 'bookingistic' ),
+					/* translators: 1: current step number, 2: total number of steps. */
+					'stepOf'     => __( 'Step %1$d of %2$d', 'bookingistic' ),
+					/* translators: %d: number of available time slots (always 1). */
+					'timesAvailableOne' => __( '%d time available', 'bookingistic' ),
+					/* translators: %d: number of available time slots. */
+					'timesAvailable' => __( '%d times available', 'bookingistic' ),
+					'followUp'     => __( 'Follow-up, handled', 'bookingistic' ),
+					'followUpBody' => __( 'Confirmation is on its way', 'bookingistic' ),
 				],
 			]
 		);

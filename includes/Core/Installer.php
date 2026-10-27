@@ -27,7 +27,7 @@ class Installer {
 		// Fresh activations run before Plugin::boot() registers the cron
 		// recurrences (plugins_loaded has already fired), so register them
 		// inline first — wp_schedule_event() needs the interval to exist.
-		add_filter( 'cron_schedules', [ Cron::class, 'register_schedules' ] );
+		Cron::add_schedules_filter();
 
 		if ( ! wp_next_scheduled( 'bookingistic_send_reminders' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'bookingistic_send_reminders' );

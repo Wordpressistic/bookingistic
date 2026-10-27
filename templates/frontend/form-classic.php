@@ -63,6 +63,7 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 
 	<div class="bookingistic-form__panel bookingistic-form__panel--booking">
 		<div class="bookingistic-form__steps" data-step="1">
+			<?php require __DIR__ . '/partials/progress.php'; ?>
 
 			<!-- Step 1: date + time -->
 			<section class="bookingistic-step" data-step-content="1">
@@ -83,17 +84,20 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 					</div>
 				<?php endif; ?>
 
-				<div class="bookingistic-calendar-zone" data-bookingistic-calendar></div>
+				<p class="bookingistic-label" id="<?php echo esc_attr( $booking_form_id . '-days' ); ?>"><?php esc_html_e( 'Choose a day', 'bookingistic' ); ?></p>
+				<div class="bookingistic-calendar-zone" data-bookingistic-calendar role="group" aria-labelledby="<?php echo esc_attr( $booking_form_id . '-days' ); ?>"></div>
+				<p class="bookingistic-label" id="<?php echo esc_attr( $booking_form_id . '-times' ); ?>"><?php esc_html_e( 'Available times', 'bookingistic' ); ?></p>
 				<div class="bookingistic-slots-zone">
 					<p class="bookingistic-slots-empty"><?php esc_html_e( 'Pick a date to see available times', 'bookingistic' ); ?></p>
-					<ul class="bookingistic-slot-list" data-bookingistic-slots hidden></ul>
+					<ul class="bookingistic-slot-list" data-bookingistic-slots aria-labelledby="<?php echo esc_attr( $booking_form_id . '-times' ); ?>" hidden></ul>
 				</div>
 
 				<div class="bookingistic-actions">
-					<button type="button" class="bookingistic-btn bookingistic-btn--primary" data-action="next" disabled>
+					<button type="button" class="bookingistic-btn bookingistic-btn--primary bookingistic-btn--cta" data-action="next" disabled>
 						<?php esc_html_e( 'Continue', 'bookingistic' ); ?>
 					</button>
 				</div>
+				<?php require __DIR__ . '/partials/status.php'; ?>
 			</section>
 
 			<!-- Step 2: customer details -->
@@ -144,14 +148,14 @@ $bookingistic_is_reschedule = $reschedule_id > 0 && $reschedule_token !== '';
 			<!-- Step 3: confirmation -->
 			<section class="bookingistic-step" data-step-content="3" hidden>
 				<div class="bookingistic-success">
-					<span class="bookingistic-success__icon" aria-hidden="true">✓</span>
+					<?php require __DIR__ . '/partials/success-icon.php'; ?>
 					<h3 data-bookingistic-success-title><?php esc_html_e( 'Booking confirmed', 'bookingistic' ); ?></h3>
 					<p data-bookingistic-success-body><?php esc_html_e( 'Check your inbox for the details.', 'bookingistic' ); ?></p>
 					<div data-bookingistic-pay class="bookingistic-payment-box" hidden></div>
 				</div>
 			</section>
 
-			<div class="bookingistic-error" data-bookingistic-error role="alert" hidden></div>
+			<div class="bookingistic-error" data-bookingistic-error role="alert" aria-live="assertive" hidden></div>
 		</div>
 	</div>
 </div>
