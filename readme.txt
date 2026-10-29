@@ -14,6 +14,8 @@ Booking, calendar & email automation for WordPress — form designs, calendar vi
 
 Bookingistic turns your WordPress site into a premium booking system — for strategy calls, salons, clinics, tutors, fitness trainers, consultants, and any appointment-based business.
 
+Visit [Bookingistic.com](https://bookingistic.com) for the live product overview, setup guidance, and booking workflow examples.
+
 **Booking form designs (pick per site or per shortcode)**
 
 * **Classic** — two-panel layout with service details
@@ -112,10 +114,11 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 
 == Screenshots ==
 
-1. Booking form — Modern Card template with month calendar
-2. Appearance — one-click industry presets with live preview
-3. Calendar view — pills scroller for mobile-first booking
-4. Admin dashboard — bookings, services, staff, email automations
+1. Admin dashboard — bookings and email activity at a glance
+2. Classic template — two-panel booking form with service details and available times
+3. Modern Card template — compact card layout with calendar and time selection
+4. Split Hero template — full-width branded booking experience
+5. Minimal Inline template — lightweight form that blends into any theme
 
 == External services ==
 
