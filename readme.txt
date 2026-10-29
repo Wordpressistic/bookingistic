@@ -114,11 +114,20 @@ No external CDN calls, no jQuery dependency, one small CSS + one JS file, loaded
 
 == Screenshots ==
 
-1. Admin dashboard — bookings and email activity at a glance
-2. Classic template — two-panel booking form with service details and available times
-3. Modern Card template — compact card layout with calendar and time selection
-4. Split Hero template — full-width branded booking experience
-5. Minimal Inline template — lightweight form that blends into any theme
+1. Calendar — month view with filters and booking events
+2. Calendar — week view for staff planning
+3. Calendar — list view for upcoming bookings
+4. Classic template — two-panel booking form with service details and available times
+5. Modern Card template — compact card layout with calendar and time selection
+6. Split Hero template — full-width branded booking experience
+7. Minimal Inline template — lightweight form that blends into any theme
+8. Services — configure duration, buffers, pricing, deposits, and confirmation rules
+9. Staff — add a staff member and set availability details
+10. Staff availability — working hours and days off
+11. Email automations — confirmation, cancellation, reschedule, and reminder rules
+12. New automation — event triggers, recipients, delays, and template variables
+13. Reports — booking status, service totals, and weekly activity
+14. Integrations — WooCommerce, Google Calendar, Outlook, Messageistic, and CRMistic
 
 == External services ==
 
